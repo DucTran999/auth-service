@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  default: 
+    desc: 'show all available tasks'
+    cmds:
+      - task --list-all
+    silent: true
+  setup:
+    desc: 'run script to create required files and dependencies pkg'
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f scripts/init_project.sh
+    cmds:
+      - scripts/init_project.sh
+  tidy:
+    desc: install pkg listed in go.mod
+    cmds:
+      -  go mod tidy
