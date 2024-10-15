@@ -24,6 +24,7 @@ go.sum
 
 # env file
 .env
+.env.local
 
 # docker
 .docker

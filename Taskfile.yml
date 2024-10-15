@@ -13,6 +13,17 @@ tasks:
       - test -f scripts/init_project.sh
     cmds:
       - scripts/init_project.sh
+  run:
+    desc: 'start the app'
+    cmds:
+      - scripts/build.sh
+  localenv:
+    desc: 'do docker-compose file for setup local env'
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f infra/docker-compose.yml
+    cmds:
+      - scripts/setup_local_env.sh
   tidy:
     desc: install pkg listed in go.mod
     cmds:
