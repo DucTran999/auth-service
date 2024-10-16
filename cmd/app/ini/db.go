@@ -18,7 +18,7 @@ func connectDatabase(config *config.EnvConfiguration) (*gorm.DB, error) {
 		SslMode:               config.DBSslMode,
 		Timezone:              config.DBTimezone,
 		MaxOpenConnections:    config.DBMaxOpenConnections,
-		MaxIdleConnections:    config.DBMaxConnectionIdleTime,
+		MaxIdleConnections:    config.DBMaxIdleConnections,
 		MaxConnectionIdleTime: config.DBMaxConnectionIdleTime,
 	}
 
