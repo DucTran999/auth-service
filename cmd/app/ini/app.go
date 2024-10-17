@@ -22,7 +22,8 @@ func InitApp(config *config.EnvConfiguration) {
 
 	registry := registry.NewRegistry(pg)
 	handler := handler.NewAppHandler(registry)
-	router := gateway.NewRouter(handler)
+	httpServer := NewHttpServer(gateway.NewRouter(handler), config)
+	go startHttpServer(httpServer)
 
-	startServer(router, config, logger)
+	gracefulShutdown(shutdownHttpServer(httpServer))
 }

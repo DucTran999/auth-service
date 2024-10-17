@@ -3,6 +3,7 @@ package ini
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,43 +15,60 @@ import (
 	"go.uber.org/zap"
 )
 
-func startServer(router *gin.Engine, config *config.EnvConfiguration, logger *zap.Logger) {
+func NewHttpServer(router *gin.Engine, config *config.EnvConfiguration) *http.Server {
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
-	srv := &http.Server{
+	server := &http.Server{
 		Addr:    addr,
 		Handler: router,
 	}
 
-	go func() {
-		logger.Info("Starting server", zap.String("address", addr))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatal("Server failed to start", zap.Error(err))
-		}
-	}()
+	return server
+}
 
-	gracefulShutdown(srv, logger)
+func startHttpServer(server *http.Server) {
+	log.Printf("Server listening on: %v", server.Addr)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal("Server failed to start", zap.Error(err))
+	}
 }
 
 // gracefulShutdown handles OS signals and performs a graceful shutdown of the server.
-func gracefulShutdown(srv *http.Server, logger *zap.Logger) {
+func gracefulShutdown(gracefulHandler ...func() error) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	logger.Info("Shutting down server...")
+	log.Println("Shutting down server...")
 
 	// Create a context with a timeout to ensure the server shuts down gracefully
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
-		logger.Fatal("Server forced to shutdown", zap.Error(err))
+	isExitClean := true
+	for _, f := range gracefulHandler {
+		if err := f(); err != nil {
+			if isExitClean {
+				isExitClean = false
+			}
+			log.Println(err)
+		}
 	}
 
-	select {
-	case <-ctx.Done():
-		logger.Info("Server shutdown timed out", zap.Duration("timeout", 5*time.Second))
-
+	<-ctx.Done()
+	log.Println("Server shutdown timed out")
+	if isExitClean {
+		log.Println("Server exited cleanly")
+	} else {
+		log.Println("Server exited. Got some error while shutting down")
 	}
+}
 
-	logger.Info("Server exited cleanly")
+func shutdownHttpServer(server *http.Server) func() error {
+	return func() error {
+		if err := server.Shutdown(context.Background()); err != nil {
+			return fmt.Errorf("graceful shutdown server got err: %v", err)
+		}
+		log.Printf("http server on %v shutdown successfully!", server.Addr)
+
+		return nil
+	}
 }
