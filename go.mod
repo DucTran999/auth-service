@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/DucTran999/shared-pkg v0.0.0-20241017043223-cfaa0b30fccf // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
