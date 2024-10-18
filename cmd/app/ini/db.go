@@ -2,7 +2,7 @@ package ini
 
 import (
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/shared-pkg/database"
+	"github.com/DucTran999/shared-pkg/v2/database"
 	"gorm.io/gorm"
 )
 
