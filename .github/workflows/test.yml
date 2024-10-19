@@ -1,0 +1,23 @@
+name: lint
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.1'
+
+    - name: test
+      uses: go test -v ./...
+  
