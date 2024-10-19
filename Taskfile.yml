@@ -1,5 +1,8 @@
 version: '3'
 
+dotenv:
+  - ".env"
+
 tasks:
   default: 
     desc: 'show all available tasks'
@@ -28,3 +31,7 @@ tasks:
     desc: install pkg listed in go.mod
     cmds:
       -  go mod tidy
+  migrate:
+    desc: migrate database
+    cmds:
+      - scripts/migrate.sh

@@ -10,4 +10,7 @@ if [ ! -e "$DOCKER_COMPOSE_FILE" ]; then
     cp infra/docker-compose-example.yml infra/docker-compose.yml
 fi
 
+# install go migrate tool
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 go mod tidy
