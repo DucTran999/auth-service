@@ -11,13 +11,13 @@ import (
 )
 
 func InitApp(config *config.EnvConfiguration) {
-	pg, err := connectDatabase(config)
+	dbInst, err := connectDatabase(config)
 	if err != nil {
 		log.Fatalf("connect db failed got err: %v", err)
 	}
 	log.Println("DB connect successfully!")
 
-	registry := registry.NewRegistry(pg)
+	registry := registry.NewRegistry(dbInst.GetConn())
 	handler := handler.NewAppHandler(registry)
 	httpServer := server.NewGinHttpServer(gateway.NewRouter(handler), config.Host, config.Port)
 
@@ -27,5 +27,5 @@ func InitApp(config *config.EnvConfiguration) {
 		}
 	}()
 
-	server.GracefulShutdown(httpServer.Stop)
+	server.GracefulShutdown(httpServer.Stop, closeDBConnection(dbInst))
 }
