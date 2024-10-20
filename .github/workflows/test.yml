@@ -1,23 +1,26 @@
-name: lint
+name: Test
 
 on:
   push:
     branches: [ "dev" ]
   pull_request:
     branches: [ "dev" ]
-
+  
 jobs:
 
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup go
+    - name: Pull code
+      uses: actions/checkout@v4
+    
+    - name: Set up go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23.1'
+        go-version-file: go.mod
 
-    - name: test
-      uses: go test -v ./...
-  
+    - name: Install modules
+      run: go mod tidy
+
+    - name: run test
+      run: go test -v ./...
