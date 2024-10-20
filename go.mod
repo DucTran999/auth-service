@@ -3,7 +3,7 @@ module github.com/DucTran999/auth-service
 go 1.23.1
 
 require (
-	github.com/DucTran999/shared-pkg/v2 v2.0.2
+	github.com/DucTran999/shared-pkg/v2 v2.0.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.4.0
 	github.com/spf13/viper v1.19.0
