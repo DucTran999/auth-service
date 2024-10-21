@@ -35,3 +35,11 @@ tasks:
     desc: migrate database
     cmds:
       - scripts/migrate.sh
+  utest:
+    desc: run unit test
+    cmds: 
+      - ./scripts/unit_test.sh
+  coverage: 
+    desc: run unit test and force coverage > 80%
+    cmds:
+      - ./scripts/coverage.sh
