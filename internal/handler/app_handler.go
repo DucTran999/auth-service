@@ -11,7 +11,6 @@ type AppHandler struct {
 }
 
 func NewAppHandler(reg *registry.Registry) AppHandler {
-
 	userRepo := repository.NewUserRepo(reg.PostgresDB)
 	userBiz := service.NewUserBiz(userRepo)
 
