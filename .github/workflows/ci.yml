@@ -39,7 +39,7 @@ jobs:
     - name: Install modules
       run: task tidy
     - name: Unit test
-      run: task test
+      run: task utest
   
   Coverage:
     runs-on: ubuntu-latest
