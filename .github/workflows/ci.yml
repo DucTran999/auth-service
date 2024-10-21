@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
+    - name: Install Task
+      uses: arduino/setup-task@v2
     - name: Install modules
       run: task tidy
     - name: Check lint
@@ -32,6 +34,8 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version-file: go.mod
+    - name: Install Task
+      uses: arduino/setup-task@v2
     - name: Install modules
       run: task tidy
     - name: Unit test
@@ -46,6 +50,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Install Task
+        uses: arduino/setup-task@v2
       - name: Install module
         run: task tidy
       - name: Code coverage
