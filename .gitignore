@@ -29,6 +29,7 @@ go.sum
 # docker
 .docker
 infra/docker-compose.yml
+coverage
 
 # ide
 .vscode
