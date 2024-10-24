@@ -55,6 +55,6 @@ func (h *userHandler) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  0,
 		"message": "new user created",
-		"data":    result.ID,
+		"data":    dto.CreateUserResp{ID: result.ID},
 	})
 }
