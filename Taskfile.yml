@@ -43,3 +43,8 @@ tasks:
     desc: run unit test and force coverage > 80%
     cmds:
       - ./scripts/coverage.sh
+  mock:
+    desc: auto generate mock for all interface found in project
+    cmds:
+      - mockery --all --quiet --with-expecter=true
+      - go mod tidy
