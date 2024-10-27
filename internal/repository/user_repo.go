@@ -35,10 +35,11 @@ func (r *userRepo) GetUserByEmail(ctx context.Context, email string) (*model.Use
 	var user model.User
 
 	err := r.db.WithContext(ctx).Table(user.TableName()).First(&user, "email = ?", email).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
