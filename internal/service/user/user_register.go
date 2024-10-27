@@ -8,12 +8,13 @@ import (
 )
 
 func (b *userBiz) RegisterUser(ctx context.Context, userInfo model.User) (*model.User, error) {
-	if foundUser, err := b.userRepo.GetUserByEmail(ctx, userInfo.Email); err != nil {
-		if foundUser != nil {
-			return nil, common.ErrEmailExisted
-		}
-
+	foundUser, err := b.userRepo.GetUserByEmail(ctx, userInfo.Email)
+	if err != nil {
 		return nil, err
+	}
+
+	if foundUser != nil {
+		return nil, common.ErrEmailExisted
 	}
 
 	user, err := b.userRepo.CreateUser(ctx, userInfo)
