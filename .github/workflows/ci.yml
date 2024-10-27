@@ -19,6 +19,10 @@ jobs:
         go-version-file: go.mod
     - name: Install Task
       uses: arduino/setup-task@v2
+    - name: Install dependencies
+      run: task deps
+    - name: Gen mock
+      run: task mock
     - name: Install modules
       run: task tidy
     - name: Check lint
@@ -38,10 +42,10 @@ jobs:
       uses: arduino/setup-task@v2
     - name: Install dependencies
       run: task deps
-    - name: Install modules
-      run: task tidy
     - name: Gen mock
       run: task mock
+    - name: Install modules
+      run: task tidy
     - name: Unit test
       run: task utest
   
@@ -58,9 +62,9 @@ jobs:
         uses: arduino/setup-task@v2
       - name: Install dependencies
         run: task deps
-      - name: Install module
-        run: task tidy
       - name: Gen mock
         run: task mock
+      - name: Install module
+        run: task tidy
       - name: Code coverage
         run: task coverage
