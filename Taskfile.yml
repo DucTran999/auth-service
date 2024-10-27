@@ -48,3 +48,7 @@ tasks:
     cmds:
       - mockery --all --quiet --with-expecter=true
       - go mod tidy
+  deps:
+    desc: install dependencies
+    cmds:
+      - go install github.com/vektra/mockery/v2@v2.46.3
