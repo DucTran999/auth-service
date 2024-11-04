@@ -46,7 +46,7 @@ tasks:
   mock:
     desc: auto generate mock for all interface found in project
     cmds:
-      - mockery --all --quiet --with-expecter=true
+      - mockery --all --quiet --with-expecter=true --output test/mocks
       - go mod tidy
   deps:
     desc: install dependencies
