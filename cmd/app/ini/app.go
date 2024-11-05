@@ -7,22 +7,25 @@ import (
 	"github.com/DucTran999/auth-service/internal/gateway"
 	"github.com/DucTran999/auth-service/internal/handler"
 	"github.com/DucTran999/auth-service/internal/registry"
-	"github.com/DucTran999/auth-service/pkg/logger"
+	"github.com/DucTran999/shared-pkg/v2/server"
 )
 
 func InitApp(config *config.EnvConfiguration) {
-	logger := logger.NewLogger()
-	defer logger.Sync()
-
-	pg, err := connectDatabase(config)
+	dbInst, err := connectDatabase(config)
 	if err != nil {
 		log.Fatalf("connect db failed got err: %v", err)
 	}
 	log.Println("DB connect successfully!")
 
-	registry := registry.NewRegistry(pg)
+	registry := registry.NewRegistry(dbInst.GetConn())
 	handler := handler.NewAppHandler(registry)
-	router := gateway.NewRouter(handler)
+	httpServer := server.NewGinHttpServer(gateway.NewRouter(handler), config.Host, config.Port)
 
-	startServer(router, config, logger)
+	go func() {
+		if err := httpServer.Start(); err != nil {
+			log.Fatalf("start http server got err: %v", err)
+		}
+	}()
+
+	server.GracefulShutdown(httpServer.Stop, closeDBConnection(dbInst))
 }

@@ -1,12 +1,14 @@
 package ini
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/pkg/database"
-	"gorm.io/gorm"
+	"github.com/DucTran999/shared-pkg/v2/database"
 )
 
-func connectDatabase(config *config.EnvConfiguration) (*gorm.DB, error) {
+func connectDatabase(config *config.EnvConfiguration) (database.IDBConnector, error) {
 	dbConf := database.DBConfig{
 		Driver:                config.DBDriver,
 		Env:                   config.Environment,
@@ -18,7 +20,7 @@ func connectDatabase(config *config.EnvConfiguration) (*gorm.DB, error) {
 		SslMode:               config.DBSslMode,
 		Timezone:              config.DBTimezone,
 		MaxOpenConnections:    config.DBMaxOpenConnections,
-		MaxIdleConnections:    config.DBMaxConnectionIdleTime,
+		MaxIdleConnections:    config.DBMaxIdleConnections,
 		MaxConnectionIdleTime: config.DBMaxConnectionIdleTime,
 	}
 
@@ -28,4 +30,16 @@ func connectDatabase(config *config.EnvConfiguration) (*gorm.DB, error) {
 	}
 
 	return db, nil
+}
+
+func closeDBConnection(dbInst database.IDBConnector) func() error {
+	return func() error {
+		log.Println("Stop db connection...")
+		if err := dbInst.Stop(); err != nil {
+			return fmt.Errorf("stop db connection got err: %v", err)
+		}
+
+		log.Println("Stop db connection successfully!")
+		return nil
+	}
 }
