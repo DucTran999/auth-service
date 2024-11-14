@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/dto"
@@ -16,7 +15,7 @@ type IUserHandler interface {
 }
 
 type userHandler struct {
-	baseHandler
+	BaseHandler
 	service service.IUserService
 }
 
@@ -29,7 +28,7 @@ func newUserHandler(us service.IUserService) *userHandler {
 func (h *userHandler) CreateUser(ctx *gin.Context) {
 	payload := new(dto.CreateUserRequest)
 	if err := ctx.Bind(payload); err != nil {
-		h.JsonResponse(ctx, http.StatusBadRequest, nil, err.Error())
+		h.BadRequestResponse(ctx, common.ApiVersion1, err)
 		return
 	}
 
@@ -43,14 +42,14 @@ func (h *userHandler) CreateUser(ctx *gin.Context) {
 	}
 	result, err := h.service.RegisterUser(ctx.Request.Context(), userInfo)
 	if errors.Is(err, common.ErrEmailExisted) {
-		h.JsonResponse(ctx, http.StatusConflict, nil, "email exited")
+		h.ResourceConflictResponse(ctx, common.ApiVersion1)
 		return
 	}
 
 	if err != nil {
-		h.JsonResponse(ctx, http.StatusInternalServerError, nil, common.MessageInternalErr)
+		h.ServerInternalErrResponse(ctx, common.ApiVersion1)
 		return
 	}
 
-	h.JsonResponse(ctx, http.StatusOK, dto.CreateUserResp{ID: result.ID}, "")
+	h.SuccessResponse(ctx, common.ApiVersion1, dto.CreateUserResp{ID: result.ID})
 }

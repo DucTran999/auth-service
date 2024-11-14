@@ -1,5 +1,5 @@
 package common
 
 const (
-	MessageInternalErr = "Internal Server Error"
+	ApiVersion1 = "v1.0"
 )
