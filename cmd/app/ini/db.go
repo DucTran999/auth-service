@@ -11,7 +11,7 @@ import (
 func connectDatabase(config *config.EnvConfiguration) (database.IDBConnector, error) {
 	dbConf := database.DBConfig{
 		Driver:                config.DBDriver,
-		Env:                   config.Environment,
+		Env:                   config.ServiceEnv,
 		Host:                  config.Host,
 		Port:                  config.DBPort,
 		Username:              config.DBUsername,
