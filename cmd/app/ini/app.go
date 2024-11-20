@@ -7,10 +7,11 @@ import (
 	"github.com/DucTran999/auth-service/internal/gateway"
 	"github.com/DucTran999/auth-service/internal/handler"
 	"github.com/DucTran999/auth-service/internal/registry"
-	"github.com/DucTran999/shared-pkg/v2/server"
+	"github.com/DucTran999/shared-pkg/server"
 )
 
 func InitApp(config *config.EnvConfiguration) {
+
 	dbInst, err := connectDatabase(config)
 	if err != nil {
 		log.Fatalf("connect db failed got err: %v", err)

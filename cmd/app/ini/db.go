@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/shared-pkg/v2/database"
+	gormdb "github.com/DucTran999/shared-pkg/database"
 )
 
-func connectDatabase(config *config.EnvConfiguration) (database.IDBConnector, error) {
-	dbConf := database.DBConfig{
+func connectDatabase(config *config.EnvConfiguration) (gormdb.IDBConnector, error) {
+	dbConf := gormdb.DBConfig{
 		Driver:                config.DBDriver,
 		Env:                   config.ServiceEnv,
 		Host:                  config.Host,
@@ -24,7 +24,7 @@ func connectDatabase(config *config.EnvConfiguration) (database.IDBConnector, er
 		MaxConnectionIdleTime: config.DBMaxConnectionIdleTime,
 	}
 
-	db, err := database.NewDBConnector(dbConf).Connect()
+	db, err := gormdb.NewDBConnector(dbConf).Connect()
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func connectDatabase(config *config.EnvConfiguration) (database.IDBConnector, er
 	return db, nil
 }
 
-func closeDBConnection(dbInst database.IDBConnector) func() error {
+func closeDBConnection(dbInst gormdb.IDBConnector) func() error {
 	return func() error {
 		log.Println("Stop db connection...")
 		if err := dbInst.Stop(); err != nil {
