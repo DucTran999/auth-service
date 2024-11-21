@@ -2,10 +2,10 @@ package ini
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/DucTran999/auth-service/config"
 	gormdb "github.com/DucTran999/shared-pkg/database"
+	"github.com/DucTran999/shared-pkg/logger"
 )
 
 func connectDatabase(config *config.EnvConfiguration) (gormdb.IDBConnector, error) {
@@ -32,14 +32,14 @@ func connectDatabase(config *config.EnvConfiguration) (gormdb.IDBConnector, erro
 	return db, nil
 }
 
-func closeDBConnection(dbInst gormdb.IDBConnector) func() error {
+func closeDBConnection(log logger.ILogger, dbInst gormdb.IDBConnector) func() error {
 	return func() error {
-		log.Println("Stop db connection...")
+		log.Info("Stop db connection...")
 		if err := dbInst.Stop(); err != nil {
 			return fmt.Errorf("stop db connection got err: %v", err)
 		}
 
-		log.Println("Stop db connection successfully!")
+		log.Info("Stop db connection successfully!")
 		return nil
 	}
 }
