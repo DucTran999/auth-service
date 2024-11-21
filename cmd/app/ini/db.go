@@ -12,7 +12,7 @@ func connectDatabase(config *config.EnvConfiguration) (gormdb.IDBConnector, erro
 	dbConf := gormdb.DBConfig{
 		Driver:                config.DBDriver,
 		Env:                   config.ServiceEnv,
-		Host:                  config.Host,
+		Host:                  config.DBHost,
 		Port:                  config.DBPort,
 		Username:              config.DBUsername,
 		Password:              config.DBPasswd,
