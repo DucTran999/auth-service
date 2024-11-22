@@ -32,7 +32,7 @@ func InitApp(config *config.EnvConfiguration) {
 		}
 	}()
 
-	server.GracefulShutdown(httpServer.Stop, closeDBConnection(logInst, dbInst), logInst.Sync)
+	server.GracefulShutdown(httpServer.Stop, closeDBConnection(logInst, dbInst))
 }
 
 func initLogger(appConf *config.EnvConfiguration) logger.ILogger {
