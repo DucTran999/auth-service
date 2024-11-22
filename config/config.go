@@ -7,10 +7,14 @@ import (
 )
 
 type EnvConfiguration struct {
-	Environment string `mapstructure:"ENVIRONMENT"`
+	ServiceEnv  string `mapstructure:"SERVICE_ENV"`
+	ServiceName string `mapstructure:"SERVICE_NAME"`
+	ServiceID   string `mapstructure:"SERVICE_ID"`
 
 	Host string `mapstructure:"HOST"`
 	Port int    `mapstructure:"PORT"`
+
+	LogToFile bool `mapstructure:"LOG_TO_FILE"`
 
 	DBDriver                string `mapstructure:"DB_DRIVER"`
 	DBHost                  string `mapstructure:"DB_HOST"`
@@ -42,7 +46,7 @@ func LoadConfig(configPath, configFile, configType string) (*EnvConfiguration, e
 
 	var conf EnvConfiguration
 	if err := viper.Unmarshal(&conf); err != nil {
-		return nil, fmt.Errorf("error unmarshalling config: %w", err)
+		return nil, fmt.Errorf("error unmarshal config: %w", err)
 	}
 
 	return &conf, nil
