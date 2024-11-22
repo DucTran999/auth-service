@@ -15,7 +15,6 @@ import (
 func InitApp(config *config.EnvConfiguration) {
 	logInst := initLogger(config)
 	logInst.Info("Logger instance initialize successfully!")
-	defer logInst.Sync()
 
 	dbInst, err := connectDatabase(config)
 	if err != nil {
@@ -33,7 +32,7 @@ func InitApp(config *config.EnvConfiguration) {
 		}
 	}()
 
-	server.GracefulShutdown(httpServer.Stop, closeDBConnection(logInst, dbInst))
+	server.GracefulShutdown(httpServer.Stop, closeDBConnection(logInst, dbInst), logInst.Sync)
 }
 
 func initLogger(appConf *config.EnvConfiguration) logger.ILogger {
