@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/DucTran999/auth-service.git
+    targetRevision: HEAD
+    path: devops
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: auth-service
+  
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+  
+    # auto sync file
+    # automated:
+    # config for undo or overwrite any manual do in cluster
+      # selfHeal: true
+      # prune: true
+
+    
