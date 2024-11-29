@@ -20,6 +20,7 @@ tasks:
     desc: 'start the app'
     cmds:
       - scripts/build.sh
+    silent: true
   testenv:
     desc: 'do docker-compose file for setup test env'
     dir: '{{.USER_WORKING_DIR}}'
