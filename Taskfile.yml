@@ -20,9 +20,9 @@ tasks:
     desc: 'do docker-compose file for setup test env'
     dir: '{{.USER_WORKING_DIR}}'
     preconditions:
-      - test -f infra/docker-compose.yml
+      - test -f test/dependencies/docker-compose.yml
     cmds:
-      - scripts/setup_test_env.sh
+      - scripts/testenv.sh
 
   tidy:
     desc: install pkg listed in go.mod
