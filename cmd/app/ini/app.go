@@ -12,6 +12,7 @@ import (
 	"github.com/DucTran999/shared-pkg/server"
 )
 
+// InitApp initializes the application, setting up logging, database connection, HTTP server, and graceful shutdown handling.
 func InitApp(config *config.EnvConfiguration) {
 	logInst := initLogger(config)
 	logInst.Info("Logger instance initialize successfully!")
@@ -35,6 +36,8 @@ func InitApp(config *config.EnvConfiguration) {
 	server.GracefulShutdown(httpServer.Stop, closeDBConnection(logInst, dbInst))
 }
 
+// initLogger initializes and returns a logger instance based on the provided application configuration.
+// The function terminates the application if logger creation fails.
 func initLogger(appConf *config.EnvConfiguration) logger.ILogger {
 	conf := logger.Config{
 		Environment: appConf.ServiceEnv,
