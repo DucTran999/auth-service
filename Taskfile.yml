@@ -9,11 +9,13 @@ tasks:
     cmds:
       - task --list-all
     silent: true
+
   run:
     desc: 'start the app'
     cmds:
       - go run cmd/app/main.go
     silent: true
+
   testenv:
     desc: 'do docker-compose file for setup test env'
     dir: '{{.USER_WORKING_DIR}}'
@@ -21,23 +23,28 @@ tasks:
       - test -f infra/docker-compose.yml
     cmds:
       - scripts/setup_test_env.sh
+
   tidy:
     desc: install pkg listed in go.mod
     cmds:
       -  go mod tidy
+
   migrate:
     desc: migrate database
     cmds:
       - scripts/migrate.sh
+
   coverage: 
     desc: run unit test and force coverage > 80%
     cmds:
       - ./scripts/coverage.sh
+
   mock:
     desc: auto generate mock for all interface found in project
     cmds:
       - mockery --all --quiet --with-expecter=true --output test/mocks
       - go mod tidy
+
   deps:
     desc: install dependencies
     cmds:
