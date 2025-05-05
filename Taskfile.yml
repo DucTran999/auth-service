@@ -9,45 +9,42 @@ tasks:
     cmds:
       - task --list-all
     silent: true
-  setup:
-    desc: 'run script to create required files and dependencies pkg'
-    dir: '{{.USER_WORKING_DIR}}'
-    preconditions:
-      - test -f scripts/init_project.sh
-    cmds:
-      - scripts/init_project.sh
+
   run:
     desc: 'start the app'
     cmds:
-      - scripts/build.sh
+      - go run cmd/app/main.go
+    silent: true
+
   testenv:
     desc: 'do docker-compose file for setup test env'
     dir: '{{.USER_WORKING_DIR}}'
     preconditions:
-      - test -f infra/docker-compose.yml
+      - test -f test/dependencies/docker-compose.yml
     cmds:
-      - scripts/setup_test_env.sh
+      - scripts/testenv.sh
+
   tidy:
     desc: install pkg listed in go.mod
     cmds:
       -  go mod tidy
+
   migrate:
     desc: migrate database
     cmds:
       - scripts/migrate.sh
-  utest:
-    desc: run unit test
-    cmds: 
-      - ./scripts/unit_test.sh
+
   coverage: 
     desc: run unit test and force coverage > 80%
     cmds:
       - ./scripts/coverage.sh
+
   mock:
     desc: auto generate mock for all interface found in project
     cmds:
       - mockery --all --quiet --with-expecter=true --output test/mocks
       - go mod tidy
+
   deps:
     desc: install dependencies
     cmds:

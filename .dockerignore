@@ -1,0 +1,53 @@
+# Go build cache & binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.env.example
+.env
+
+# Go vendor directory (if you're not using it in image)
+vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Editor / IDE settings
+*.swp
+*.swo
+*.bak
+*.tmp
+*.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Build output
+bin/
+build/
+dist/
+
+# Docker itself
+.github
+.docker
+.dockerignore
+Dockerfile
+
+# test
+test
+*_test.go
+
+# scripts
+scripts
+
+# docs
+README.md
