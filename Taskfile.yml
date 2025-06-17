@@ -1,40 +1,40 @@
-version: '3'
+version: "3"
 
 dotenv:
   - ".env"
 
 tasks:
-  default: 
-    desc: 'show all available tasks'
+  default:
+    desc: "show all available tasks"
     cmds:
       - task --list-all
     silent: true
 
   run:
-    desc: 'start the app'
+    desc: "start the app"
     cmds:
-      - go run cmd/app/main.go
+      - go run cmd/auth-service/main.go
     silent: true
 
   testenv:
-    desc: 'do docker-compose file for setup test env'
-    dir: '{{.USER_WORKING_DIR}}'
+    desc: "do docker-compose file for setup test env"
+    dir: "{{.USER_WORKING_DIR}}"
     preconditions:
-      - test -f test/dependencies/docker-compose.yml
+      - test -f docker/docker-compose.yml
     cmds:
       - scripts/testenv.sh
 
   tidy:
     desc: install pkg listed in go.mod
     cmds:
-      -  go mod tidy
+      - go mod tidy
 
   migrate:
     desc: migrate database
     cmds:
       - scripts/migrate.sh
 
-  coverage: 
+  coverage:
     desc: run unit test and force coverage > 80%
     cmds:
       - ./scripts/coverage.sh
