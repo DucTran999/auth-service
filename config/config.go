@@ -7,9 +7,10 @@ import (
 )
 
 type EnvConfiguration struct {
-	ServiceEnv  string `mapstructure:"SERVICE_ENV"`
-	ServiceName string `mapstructure:"SERVICE_NAME"`
-	ServiceID   string `mapstructure:"SERVICE_ID"`
+	ServiceEnv   string `mapstructure:"SERVICE_ENV"`
+	ServiceName  string `mapstructure:"SERVICE_NAME"`
+	ServiceID    string `mapstructure:"SERVICE_ID"`
+	ShutdownTime int    `mapstructure:"SHUTDOWN_TIME"`
 
 	Host string `mapstructure:"HOST"`
 	Port int    `mapstructure:"PORT"`
