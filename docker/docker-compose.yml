@@ -15,7 +15,6 @@ services:
       - localnet
     restart: unless-stopped
 
-
 networks:
   localnet:
     driver: bridge
