@@ -29,3 +29,5 @@ coverage
 
 # ide
 .vscode
+
+logs
