@@ -199,8 +199,8 @@ linters:
 
   exclusions:
     rules:
-    - path: _test\.go
-      linters:
-        - errcheck
-        - gocyclo
-        - dupl
+      - path: _test\.go
+        linters:
+          - errcheck
+          - gocyclo
+          - dupl
