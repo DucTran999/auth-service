@@ -37,7 +37,8 @@ type HealthResponse struct {
 	Timestamp time.Time            `json:"timestamp"`
 
 	// Uptime Service uptime in seconds
-	Uptime *int `json:"uptime,omitempty"`
+	Uptime  *int64  `json:"uptime,omitempty"`
+	Version *string `json:"version,omitempty"`
 }
 
 // HealthResponseStatus defines model for HealthResponse.Status.

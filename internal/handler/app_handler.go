@@ -7,8 +7,8 @@ import (
 )
 
 type AppHandler struct {
-	IUserHandler
 	HealthHandler
+	UserHandler
 }
 
 func NewAppHandler(reg *registry.Registry) AppHandler {
@@ -16,6 +16,7 @@ func NewAppHandler(reg *registry.Registry) AppHandler {
 	userBiz := service.NewUserBiz(userRepo)
 
 	return AppHandler{
-		IUserHandler: newUserHandler(userBiz),
+		HealthHandler: NewHealthHandler(reg.AppConfig.ServiceVersion),
+		UserHandler:   newUserHandler(userBiz),
 	}
 }
