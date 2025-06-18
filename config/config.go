@@ -2,15 +2,18 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
 
 type EnvConfiguration struct {
-	ServiceEnv   string `mapstructure:"SERVICE_ENV"`
-	ServiceName  string `mapstructure:"SERVICE_NAME"`
-	ServiceID    string `mapstructure:"SERVICE_ID"`
-	ShutdownTime int    `mapstructure:"SHUTDOWN_TIME"`
+	ServiceEnv     string `mapstructure:"SERVICE_ENV"`
+	ServiceName    string `mapstructure:"SERVICE_NAME"`
+	ServiceID      string `mapstructure:"SERVICE_ID"`
+	ServiceVersion string `mapstructure:"SERVICE_VERSION"`
+	ShutdownTime   int    `mapstructure:"SHUTDOWN_TIME"`
 
 	Host string `mapstructure:"HOST"`
 	Port int    `mapstructure:"PORT"`
@@ -35,20 +38,55 @@ type EnvConfiguration struct {
 	RedisDB     int    `mapstructure:"REDIS_DATABASE"`
 }
 
-func LoadConfig(configPath, configFile, configType string) (*EnvConfiguration, error) {
-	viper.AddConfigPath(configPath)
-	viper.SetConfigFile(configFile)
-	viper.SetConfigType(configType)
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("error reading config file: %w", err)
+func LoadConfig(configFile string) (*EnvConfiguration, error) {
+	// Locate the directory containing go.mod
+	goModDir, err := findGoModDir()
+	if err != nil {
+		return nil, fmt.Errorf("go.mod not found: %w", err)
 	}
 
+	// Build the full path to the config file (e.g., .env)
+	configPath := filepath.Join(goModDir, configFile)
+
+	// Load the config file using Viper
+	viper.SetConfigFile(configPath)
+	viper.AutomaticEnv() // override with environment variables if present
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
+	}
+
+	// Unmarshal into custom config struct
 	var conf EnvConfiguration
 	if err := viper.Unmarshal(&conf); err != nil {
-		return nil, fmt.Errorf("error unmarshal config: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	return &conf, nil
+}
+
+// FindGoModDir returns the directory containing the nearest go.mod file
+func findGoModDir() (string, error) {
+	// cwd
+	startPath := "."
+
+	dir := startPath
+	if fi, err := os.Stat(startPath); err == nil && !fi.IsDir() {
+		dir = filepath.Dir(startPath)
+	}
+
+	for {
+		goMod := filepath.Join(dir, "go.mod")
+		if _, err := os.Stat(goMod); err == nil {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break // root reached
+		}
+		dir = parent
+	}
+
+	return "", fmt.Errorf("go.mod not found from path: %s", startPath)
 }

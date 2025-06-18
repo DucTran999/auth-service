@@ -10,22 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type IUserHandler interface {
+type UserHandler interface {
 	CreateUser(ctx *gin.Context)
 }
 
-type userHandler struct {
+type userHandlerImpl struct {
 	BaseHandler
 	service service.IUserService
 }
 
-func newUserHandler(us service.IUserService) *userHandler {
-	return &userHandler{
+func newUserHandler(us service.IUserService) *userHandlerImpl {
+	return &userHandlerImpl{
 		service: us,
 	}
 }
 
-func (h *userHandler) CreateUser(ctx *gin.Context) {
+func (h *userHandlerImpl) CreateUser(ctx *gin.Context) {
 	payload := new(dto.CreateUserRequest)
 	if err := ctx.Bind(payload); err != nil {
 		h.BadRequestResponse(ctx, common.ApiVersion1, err)

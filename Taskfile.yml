@@ -44,3 +44,11 @@ tasks:
     desc: install dependencies
     cmds:
       - go install github.com/vektra/mockery/v2@v2.46.3
+
+  generate:
+    desc: generate API code from OpenAPI specification
+    cmds:
+      - ./scripts/gen-api.sh
+    deps: [deps]
+    preconditions:
+      - test -f api.spec.yml

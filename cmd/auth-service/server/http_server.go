@@ -11,7 +11,7 @@ import (
 
 // NewHTTPServer creates a new HTTP server with injected dependencies
 func NewHTTPServer(cfg *config.EnvConfiguration, deps container.Container) (server.HttpServer, error) {
-	registry := registry.NewRegistry(deps.AuthDB())
+	registry := registry.NewRegistry(cfg, deps.AuthDB())
 	serverConf := server.ServerConfig{
 		Host: cfg.Host,
 		Port: cfg.Port,

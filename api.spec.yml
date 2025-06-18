@@ -1,0 +1,99 @@
+openapi: "3.0.0"
+
+info:
+  version: 1.0.0
+  title: Auth Service API
+  description: |
+    Authentication and user management service providing secure user registration, 
+    authentication, and profile management capabilities.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.authservice.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /livez:
+    get:
+      summary: Liveness probe endpoint
+      description: |
+        Kubernetes liveness probe endpoint. Checks if the service is running and healthy.
+        If this endpoint fails, Kubernetes will restart the pod.
+      tags:
+        - Health
+      operationId: checkLiveness
+      security: [] # No auth required for health check
+      responses:
+        "200":
+          description: Service is alive and healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service is not healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthErrorResponse"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        version:
+          type: string
+          example: "v1.0.0"
+        uptime:
+          type: integer
+          format: int64
+          description: Service uptime in seconds
+          example: 3600
+
+    HealthErrorResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - error
+      properties:
+        status:
+          type: string
+          enum: [unhealthy, not_ready, error]
+          example: unhealthy
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        error:
+          type: string
+          example: "Database connection failed"
+        details:
+          type: object
+          additionalProperties: true
