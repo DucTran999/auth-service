@@ -43,7 +43,7 @@ fi
 
 # Generate server
 echo -e "${YELLOW}🔧 Generating Go server code...${NC}"
-oapi-codegen -generate "server" -package gen -o ${PKG_GEN_PATH}/server.gen.go ${OPENAPI_SPEC}
+oapi-codegen -generate "gin" -package gen -o ${PKG_GEN_PATH}/server.gen.go ${OPENAPI_SPEC}
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Go server code generated${NC}"

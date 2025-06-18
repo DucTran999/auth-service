@@ -67,8 +67,12 @@ components:
           type: string
           format: date-time
           example: "2024-01-15T10:30:00Z"
+        version:
+          type: string
+          example: "v1.0.0"
         uptime:
           type: integer
+          format: int64
           description: Service uptime in seconds
           example: 3600
 
