@@ -1,3 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f environment/docker-compose.yml --env-file .env up -d db
+
+docker compose -f environment/docker-compose.yml --env-file .env run --rm migrate
