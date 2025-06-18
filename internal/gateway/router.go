@@ -10,6 +10,8 @@ func NewRouter(h handler.AppHandler) *gin.Engine {
 
 	v1 := router.Group("/api/v1")
 	{
+		v1.GET("/livez", h.CheckHealth)
+
 		v1.POST("/users", h.CreateUser)
 	}
 

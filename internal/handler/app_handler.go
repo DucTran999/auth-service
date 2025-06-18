@@ -8,6 +8,7 @@ import (
 
 type AppHandler struct {
 	IUserHandler
+	HealthHandler
 }
 
 func NewAppHandler(reg *registry.Registry) AppHandler {
