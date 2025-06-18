@@ -8,14 +8,8 @@ import (
 )
 
 func main() {
-	const (
-		configPath = "."
-		configFile = ".env"
-		configType = "env"
-	)
-
 	// Load application configuration
-	appConf, err := config.LoadConfig(configPath, configFile, configType)
+	appConf, err := config.LoadConfig(".env")
 	if err != nil {
 		log.Fatalf("[FATAL] failed to load configuration: %v", err)
 	}
