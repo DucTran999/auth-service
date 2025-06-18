@@ -1,6 +1,5 @@
-#!/bin/sh
-set -euo pipefail
+#!/usr/bin/env bash
 
 docker compose -f environment/docker-compose.yml --env-file .env up -d db
 
-docker compose -f environment/docker-compose.yml run --rm migrate
+docker compose -f environment/docker-compose.yml --env-file .env run --rm migrate
