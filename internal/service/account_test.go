@@ -7,7 +7,7 @@ import (
 
 	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
-	service "github.com/DucTran999/auth-service/internal/service/user"
+	"github.com/DucTran999/auth-service/internal/service"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
