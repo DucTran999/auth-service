@@ -26,7 +26,7 @@ func NewApp(appConf *config.EnvConfiguration) (*App, error) {
 		return nil, err
 	}
 
-	httpServer, err := server.NewHTTPServer(appConf, c)
+	httpServer, err := server.NewHTTPServer(c)
 	if err != nil {
 		return nil, err
 	}

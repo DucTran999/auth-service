@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/handler"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/internal/service"
@@ -14,14 +15,15 @@ import (
 )
 
 type Container interface {
+	AppConfig() *config.EnvConfiguration
+
 	AuthDB() *gorm.DB
 	Logger() logger.ILogger
 	Close()
 
-	AppHandler() AppHandler
+	AppHandler() gen.ServerInterface
 }
-
-type AppHandler struct {
+type appHandler struct {
 	handler.HealthHandler
 	handler.AccountHandler
 }
@@ -31,7 +33,7 @@ type container struct {
 	logger     logger.ILogger
 	appConfig  *config.EnvConfiguration
 
-	appHandler AppHandler
+	appHandler *appHandler
 }
 
 func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
@@ -74,15 +76,19 @@ func (c *container) Close() {
 	c.logger.Info("db connection closed gracefully")
 }
 
-func (c *container) AppHandler() AppHandler {
+func (c *container) AppHandler() gen.ServerInterface {
 	return c.appHandler
+}
+
+func (c *container) AppConfig() *config.EnvConfiguration {
+	return c.appConfig
 }
 
 func (c *container) initAppHandler() {
 	userRepo := repository.NewUserRepo(c.authDBConn.DB())
 	userBiz := service.NewUserBiz(userRepo)
 
-	c.appHandler = AppHandler{
+	c.appHandler = &appHandler{
 		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),
 		AccountHandler: handler.NewAccountHandler(userBiz),
 	}
