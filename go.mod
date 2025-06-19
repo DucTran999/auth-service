@@ -7,6 +7,7 @@ require (
 	github.com/DucTran999/shared-pkg v0.0.0-20250614134905-4006d1bfa270
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
+	github.com/oapi-codegen/runtime v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0

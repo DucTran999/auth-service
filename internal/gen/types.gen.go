@@ -5,6 +5,8 @@ package gen
 
 import (
 	"time"
+
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for HealthErrorResponseStatus.
@@ -19,6 +21,36 @@ const (
 	HealthResponseStatusHealthy   HealthResponseStatus = "healthy"
 	HealthResponseStatusUnhealthy HealthResponseStatus = "unhealthy"
 )
+
+// Account defines model for Account.
+type Account struct {
+	CreatedAt time.Time           `json:"created_at"`
+	Email     openapi_types.Email `json:"email"`
+	Id        openapi_types.UUID  `json:"id"`
+	UpdatedAt time.Time           `json:"updated_at"`
+}
+
+// AccountResponse defines model for AccountResponse.
+type AccountResponse struct {
+	Data      Account `json:"data"`
+	ErrorCode int     `json:"errorCode"`
+	Message   string  `json:"message"`
+	Version   string  `json:"version"`
+}
+
+// CreateAccountRequest defines model for CreateAccountRequest.
+type CreateAccountRequest struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Data      *map[string]interface{} `json:"data"`
+	ErrorCode int                     `json:"errorCode"`
+	Message   string                  `json:"message"`
+	Version   string                  `json:"version"`
+}
 
 // HealthErrorResponse defines model for HealthErrorResponse.
 type HealthErrorResponse struct {
@@ -43,3 +75,15 @@ type HealthResponse struct {
 
 // HealthResponseStatus defines model for HealthResponse.Status.
 type HealthResponseStatus string
+
+// BadRequest defines model for BadRequest.
+type BadRequest = ErrorResponse
+
+// Conflict defines model for Conflict.
+type Conflict = ErrorResponse
+
+// InternalServerError defines model for InternalServerError.
+type InternalServerError = ErrorResponse
+
+// CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
+type CreateAccountJSONRequestBody = CreateAccountRequest
