@@ -13,119 +13,124 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type userBizUT struct {
-	ut    service.IUserService
-	uRepo *mocks.IUserRepo
+type accountSvcUT struct {
+	ut          service.AccountService
+	accountRepo *mocks.AccountRepo
 }
 
-func NewUserBizUT() *userBizUT {
-	uRepo := new(mocks.IUserRepo)
+func NewAccountSvcUT() *accountSvcUT {
+	accountRepo := new(mocks.AccountRepo)
 
-	return &userBizUT{
-		ut:    service.NewUserBiz(uRepo),
-		uRepo: uRepo,
+	return &accountSvcUT{
+		ut:          service.NewAccountService(accountRepo),
+		accountRepo: accountRepo,
 	}
 }
 
-func (sut *userBizUT) mockGetUserByEmailFailed() {
-	sut.uRepo.EXPECT().
-		GetUserByEmail(mock.Anything, mock.Anything).
-		Return(nil, errors.New("get user by email unexpected error"))
+func (sut *accountSvcUT) mockFindByEmailFailed() {
+	sut.accountRepo.EXPECT().
+		FindByEmail(mock.Anything, mock.Anything).
+		Return(nil, errors.New("find user by email: unexpected error"))
 }
 
-func (sut *userBizUT) mockGetUserByEmailHasResult() {
-	sut.uRepo.EXPECT().
-		GetUserByEmail(mock.Anything, mock.Anything).
-		Return(&model.User{Username: "daniel", Email: "daniel@example.com"}, nil)
+func (sut *accountSvcUT) mockFindByEmailHasResult() {
+	sut.accountRepo.EXPECT().
+		FindByEmail(mock.Anything, mock.Anything).
+		Return(&model.Account{Email: "daniel@example.com"}, nil)
 }
 
-func (sut *userBizUT) mockGetUserByEmailNoResult() {
-	sut.uRepo.EXPECT().
-		GetUserByEmail(mock.Anything, mock.Anything).
+func (sut *accountSvcUT) mockFindByEmailNoResult() {
+	sut.accountRepo.EXPECT().
+		FindByEmail(mock.Anything, mock.Anything).
 		Return(nil, nil)
 }
 
-func (sut *userBizUT) mockCreateUserErr() {
-	sut.uRepo.EXPECT().
-		CreateUser(mock.Anything, mock.Anything).
-		Return(nil, errors.New("create user unexpected err"))
+func (sut *accountSvcUT) mockCreateError() {
+	sut.accountRepo.EXPECT().
+		Create(mock.Anything, mock.Anything).
+		Return(nil, errors.New("create user: unexpected error"))
 }
 
-func (sut *userBizUT) mockCreateUserSuccess() {
-	sut.uRepo.EXPECT().
-		CreateUser(mock.Anything, mock.Anything).
-		Return(&model.User{Username: "daniel", Email: "daniel@example.com"}, nil)
+func (sut *accountSvcUT) mockCreateSuccess() {
+	sut.accountRepo.EXPECT().
+		Create(mock.Anything, mock.Anything).
+		Return(&model.Account{Email: "daniel@example.com"}, nil)
 }
 
-func TestRegisterUser(t *testing.T) {
+func TestRegisterAccount(t *testing.T) {
 	type testCase struct {
 		name        string
-		sut         *userBizUT
-		userInfo    model.User
+		sut         *accountSvcUT
+		accountInfo model.Account
 		expectedErr error
-		expected    *model.User
+		expected    *model.Account
 	}
 
-	userSample := model.User{
-		Username: "daniel",
-		Email:    "daniel@example.com",
+	userSample := model.Account{
+		Email: "daniel@example.com",
 	}
 
 	testTable := []testCase{
 		{
-			name: "WhenGetUserByEmailGotErr_ThenReturnErr",
-			sut: func() *userBizUT {
-				sut := NewUserBizUT()
-				sut.mockGetUserByEmailFailed()
+			name: "WhenFindByEmailGotErr_ThenReturnErr",
+			sut: func() *accountSvcUT {
+				sut := NewAccountSvcUT()
+				sut.mockFindByEmailFailed()
 				return sut
 			}(),
-			userInfo:    userSample,
-			expectedErr: errors.New("get user by email unexpected error"),
+			accountInfo: userSample,
+			expectedErr: errors.New("find user by email: unexpected error"),
 			expected:    nil,
 		},
 		{
 			name: "WhenEmailUsed_ThenReturnExistedErr",
-			sut: func() *userBizUT {
-				sut := NewUserBizUT()
-				sut.mockGetUserByEmailHasResult()
+			sut: func() *accountSvcUT {
+				sut := NewAccountSvcUT()
+				sut.mockFindByEmailHasResult()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: common.ErrEmailExisted,
 			expected:    nil,
 		},
 		{
-			name: "WhenCreateUserGotErr_ThenReturnErr",
-			sut: func() *userBizUT {
-				sut := NewUserBizUT()
-				sut.mockGetUserByEmailNoResult()
-				sut.mockCreateUserErr()
+			name: "WhenCreateGotErr_ThenReturnErr",
+			sut: func() *accountSvcUT {
+				sut := NewAccountSvcUT()
+				sut.mockFindByEmailNoResult()
+				sut.mockCreateError()
 				return sut
 			}(),
-			userInfo:    userSample,
-			expectedErr: errors.New("create user unexpected err"),
+			accountInfo: userSample,
+			expectedErr: errors.New("create user: unexpected error"),
 			expected:    nil,
 		},
 		{
 			name: "RegisterSuccess",
-			sut: func() *userBizUT {
-				sut := NewUserBizUT()
-				sut.mockGetUserByEmailNoResult()
-				sut.mockCreateUserSuccess()
+			sut: func() *accountSvcUT {
+				sut := NewAccountSvcUT()
+				sut.mockFindByEmailNoResult()
+				sut.mockCreateSuccess()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: nil,
-			expected:    &userSample,
+			expected: &model.Account{
+				Email: "daniel@example.com",
+			},
 		},
 	}
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
-			user, err := tc.sut.ut.RegisterUser(context.Background(), tc.userInfo)
+			user, err := tc.sut.ut.Register(context.Background(), tc.accountInfo)
 
-			assert.Equal(t, tc.expected, user)
 			assert.Equal(t, tc.expectedErr, err)
+			if tc.expected != nil {
+				assert.Equal(t, tc.expected.Email, user.Email)
+			} else {
+				assert.Nil(t, user)
+			}
 		})
 	}
 }
