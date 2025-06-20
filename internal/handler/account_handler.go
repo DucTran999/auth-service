@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+
 	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/model"
@@ -23,30 +25,38 @@ func NewAccountHandler(accountSvc service.AccountService) *accountHandlerImpl {
 	}
 }
 
+// CreateAccount handles the HTTP request to register a new account.
 func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
-	payload := new(gen.CreateAccountJSONRequestBody)
-	if err := ctx.Bind(payload); err != nil {
+	// Parse request body
+	var payload gen.CreateAccountJSONRequestBody
+	if err := ctx.Bind(&payload); err != nil {
 		h.BadRequestResponse(ctx, common.ApiVersion1, err)
 		return
 	}
 
-	// Convert request to model
+	// Convert request to domain model
 	userInfo := model.Account{
 		Email:    payload.Email,
 		Password: payload.Password,
 	}
 
-	// Register user
-	user, err := h.service.Register(ctx, userInfo)
+	// Attempt registration
+	account, err := h.service.Register(ctx, userInfo)
+	if errors.Is(err, common.ErrEmailExisted) {
+		h.ResourceConflictResponse(ctx, common.ApiVersion1)
+		return
+	}
 	if err != nil {
 		h.ServerInternalErrResponse(ctx, common.ApiVersion1)
 		return
 	}
 
-	data := gen.Account{
-		Id:    user.ID,
-		Email: user.Email,
+	// Prepare response
+	respData := gen.Account{
+		Id:        account.ID,
+		Email:     account.Email,
+		CreatedAt: account.CreatedAt,
+		UpdatedAt: account.UpdatedAt,
 	}
-
-	h.SuccessResponse(ctx, common.ApiVersion1, data)
+	h.SuccessResponse(ctx, common.ApiVersion1, respData)
 }
