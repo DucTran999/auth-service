@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/gen"
@@ -43,7 +44,7 @@ func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	// Attempt registration
 	account, err := h.service.Register(ctx, accountInfo)
 	if errors.Is(err, common.ErrEmailExisted) {
-		h.ResourceConflictResponse(ctx, common.ApiVersion1)
+		h.ResourceConflictResponse(ctx, common.ApiVersion1, err)
 		return
 	}
 	if err != nil {
@@ -52,11 +53,15 @@ func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	}
 
 	// Prepare response
-	respData := gen.Account{
-		Id:        account.ID,
-		Email:     account.Email,
-		CreatedAt: account.CreatedAt,
-		UpdatedAt: account.UpdatedAt,
+	respData := gen.AccountResponse{
+		Version: common.ApiVersion1,
+		Success: true,
+		Data: gen.Account{
+			Id:        account.ID,
+			Email:     account.Email,
+			CreatedAt: account.CreatedAt,
+			UpdatedAt: account.UpdatedAt,
+		},
 	}
-	h.SuccessResponse(ctx, common.ApiVersion1, respData)
+	ctx.JSON(http.StatusOK, respData)
 }

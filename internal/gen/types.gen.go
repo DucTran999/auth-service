@@ -32,10 +32,9 @@ type Account struct {
 
 // AccountResponse defines model for AccountResponse.
 type AccountResponse struct {
-	Data      Account `json:"data"`
-	ErrorCode int     `json:"errorCode"`
-	Message   string  `json:"message"`
-	Version   string  `json:"version"`
+	Data    Account `json:"data"`
+	Success bool    `json:"success"`
+	Version string  `json:"version"`
 }
 
 // CreateAccountRequest defines model for CreateAccountRequest.
@@ -44,12 +43,20 @@ type CreateAccountRequest struct {
 	Password string `json:"password"`
 }
 
+// ErrorDetail defines model for ErrorDetail.
+type ErrorDetail struct {
+	// Code Application-specific error code
+	Code string `json:"code"`
+
+	// Message Human-readable error message
+	Message string `json:"message"`
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
-	Data      *map[string]interface{} `json:"data"`
-	ErrorCode int                     `json:"errorCode"`
-	Message   string                  `json:"message"`
-	Version   string                  `json:"version"`
+	Error   ErrorDetail `json:"error"`
+	Success bool        `json:"success"`
+	Version string      `json:"version"`
 }
 
 // HealthErrorResponse defines model for HealthErrorResponse.
