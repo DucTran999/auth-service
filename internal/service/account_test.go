@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/service"
 	"github.com/DucTran999/auth-service/test/mocks"
@@ -90,7 +89,7 @@ func TestRegisterAccount(t *testing.T) {
 				return sut
 			}(),
 			accountInfo: userSample,
-			expectedErr: common.ErrEmailExisted,
+			expectedErr: service.ErrEmailExisted,
 			expected:    nil,
 		},
 		{

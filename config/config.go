@@ -18,7 +18,8 @@ type EnvConfiguration struct {
 	Host string `mapstructure:"HOST"`
 	Port int    `mapstructure:"PORT"`
 
-	LogToFile bool `mapstructure:"LOG_TO_FILE"`
+	LogToFile   bool   `mapstructure:"LOG_TO_FILE"`
+	LogFilePath string `mapstructure:"LOG_FILE_PATH"`
 
 	DBDriver                string `mapstructure:"DB_DRIVER"`
 	DBHost                  string `mapstructure:"DB_HOST"`

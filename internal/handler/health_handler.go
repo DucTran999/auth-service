@@ -13,7 +13,6 @@ type HealthHandler interface {
 }
 
 type healthHandlerImpl struct {
-	BaseHandler
 	serviceVersion string // version release
 	startTime      time.Time
 }

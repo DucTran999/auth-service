@@ -134,12 +134,16 @@ components:
       properties:
         email:
           type: string
-          format: string
+          format: email
           example: "john.doe@example.com"
+          x-oapi-codegen-extra-tags:
+            binding: "required,email"
         password:
           type: string
           minLength: 8
           example: "SecurePass123!"
+          x-oapi-codegen-extra-tags:
+            binding: "required,password"
 
     Account:
       type: object
@@ -166,43 +170,50 @@ components:
           format: date-time
           example: "2024-01-15T10:30:00Z"
 
+    ErrorDetail:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Application-specific error code
+          example: EMAIL_EXISTS
+        message:
+          type: string
+          description: Human-readable error message
+          example: Email already registered
+
     ErrorResponse:
       type: object
       required:
         - version
-        - errorCode
-        - message
+        - success
+        - error
       properties:
         version:
           type: string
-          example: "v1.0"
-        errorCode:
-          type: integer
-          example: 1
-        message:
-          type: string
-          example: "Error description"
-        data:
-          type: object
-          nullable: true
+          example: v1
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
 
     AccountResponse:
       type: object
       required:
         - version
-        - errorCode
-        - message
+        - success
         - data
       properties:
         version:
           type: string
           example: "v1.0"
-        errorCode:
-          type: integer
-          example: 0
-        message:
-          type: string
-          example: "OK"
+        success:
+          type: boolean
+          example: true
         data:
           $ref: "#/components/schemas/Account"
 
@@ -215,9 +226,10 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
           example:
             version: "v1.0"
-            errorCode: 1
-            message: "Invalid input parameters"
-            data: null
+            success: false
+            error:
+              code: BAD_REQUEST
+              message: "Invalid input parameters"
 
     Unauthorized:
       description: Unauthorized - authentication required
@@ -227,9 +239,10 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
           example:
             version: "v1.0"
-            errorCode: 1
-            message: "Authentication required"
-            data: null
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: "Authentication required"
 
     Conflict:
       description: Conflict - resource already exists
@@ -239,9 +252,10 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
           example:
             version: "v1.0"
-            errorCode: 1
-            message: "The resource already exists"
-            data: null
+            success: false
+            error:
+              code: RESOURCE_EXISTS
+              message: "The resource already exists"
 
     InternalServerError:
       description: Internal server error
@@ -251,6 +265,7 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
           example:
             version: "v1.0"
-            errorCode: 1
-            message: "Server Internal Error"
-            data: null
+            success: false
+            error:
+              code: INTERNAL_ERROR
+              message: "Server Internal Error"

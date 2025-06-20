@@ -2,12 +2,13 @@ package handler
 
 import (
 	"errors"
+	"net/http"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type AccountHandler interface {
@@ -29,34 +30,46 @@ func NewAccountHandler(accountSvc service.AccountService) *accountHandlerImpl {
 func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	// Parse request body
 	var payload gen.CreateAccountJSONRequestBody
-	if err := ctx.Bind(&payload); err != nil {
-		h.BadRequestResponse(ctx, common.ApiVersion1, err)
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		var ve validator.ValidationErrors
+		// Get the first validation error
+		if errors.As(err, &ve) && len(ve) > 0 {
+			h.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
+			return
+		}
+
+		// Fallback for other types of errors
+		h.BadRequestResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 
 	// Convert request to domain model
 	accountInfo := model.Account{
-		Email:    payload.Email,
+		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
 
 	// Attempt registration
 	account, err := h.service.Register(ctx, accountInfo)
-	if errors.Is(err, common.ErrEmailExisted) {
-		h.ResourceConflictResponse(ctx, common.ApiVersion1)
+	if errors.Is(err, service.ErrEmailExisted) {
+		h.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 	if err != nil {
-		h.ServerInternalErrResponse(ctx, common.ApiVersion1)
+		h.ServerInternalErrResponse(ctx, ApiVersion1)
 		return
 	}
 
 	// Prepare response
-	respData := gen.Account{
-		Id:        account.ID,
-		Email:     account.Email,
-		CreatedAt: account.CreatedAt,
-		UpdatedAt: account.UpdatedAt,
+	respData := gen.AccountResponse{
+		Version: ApiVersion1,
+		Success: true,
+		Data: gen.Account{
+			Id:        account.ID,
+			Email:     account.Email,
+			CreatedAt: account.CreatedAt,
+			UpdatedAt: account.UpdatedAt,
+		},
 	}
-	h.SuccessResponse(ctx, common.ApiVersion1, respData)
+	ctx.JSON(http.StatusOK, respData)
 }

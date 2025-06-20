@@ -3,58 +3,71 @@ package handler
 import (
 	"net/http"
 
+	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	respSuccessCode        = 0
-	respErrorCode          = 1
-	successMsg             = "OK"
-	serverInternalErrMsg   = "Server Internal Error"
-	resourceConflictErrMsg = "The resource already exists"
+	ApiVersion1 = "v1.0"
+
+	// General Errors
+	InternalErrorCode      = "INTERNAL_ERROR"
+	ValidateErrorCode      = "VALIDATE_ERROR"
+	BadRequestErrorCode    = "BAD_REQUEST"
+	UnauthorizedErrorCode  = "UNAUTHORIZED"
+	ForbiddenErrorCode     = "FORBIDDEN"
+	NotFoundErrorCode      = "NOT_FOUND"
+	MethodNotAllowedCode   = "METHOD_NOT_ALLOWED"
+	ConflictErrorCode      = "CONFLICT"
+	TooManyRequestsCode    = "TOO_MANY_REQUESTS"
+	ServiceUnavailableCode = "SERVICE_UNAVAILABLE"
 )
 
 type BaseHandler struct{}
 
-func (BaseHandler) SuccessResponse(ctx *gin.Context, version string, data any) {
-	respBody := gin.H{
-		"version":   version,
-		"errorCode": respSuccessCode,
-		"message":   successMsg,
-		"data":      data,
-	}
-
-	ctx.JSON(http.StatusOK, respBody)
-}
-
-func (BaseHandler) BadRequestResponse(ctx *gin.Context, version string, err error) {
-	respBody := gin.H{
-		"version":   version,
-		"errorCode": respErrorCode,
-		"message":   err.Error(),
-		"data":      nil,
+func (BaseHandler) ValidateErrorResponse(ctx *gin.Context, version string, err string) {
+	respBody := gen.BadRequest{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    ValidateErrorCode,
+			Message: err,
+		},
 	}
 
 	ctx.JSON(http.StatusBadRequest, respBody)
 }
 
-func (BaseHandler) ResourceConflictResponse(ctx *gin.Context, version string) {
-	respBody := gin.H{
-		"version":   version,
-		"errorCode": respErrorCode,
-		"message":   resourceConflictErrMsg,
-		"data":      nil,
+func (BaseHandler) BadRequestResponse(ctx *gin.Context, version, errMsg string) {
+	respBody := gen.BadRequest{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    BadRequestErrorCode,
+			Message: errMsg,
+		},
+	}
+
+	ctx.JSON(http.StatusBadRequest, respBody)
+}
+
+func (BaseHandler) ResourceConflictResponse(ctx *gin.Context, version, errMsg string) {
+	respBody := gen.Conflict{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    ConflictErrorCode,
+			Message: errMsg,
+		},
 	}
 
 	ctx.JSON(http.StatusConflict, respBody)
 }
 
 func (BaseHandler) ServerInternalErrResponse(ctx *gin.Context, version string) {
-	respBody := gin.H{
-		"version":   version,
-		"errorCode": respErrorCode,
-		"message":   serverInternalErrMsg,
-		"data":      nil,
+	respBody := gen.InternalServerError{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    InternalErrorCode,
+			Message: http.StatusText(http.StatusInternalServerError),
+		},
 	}
 
 	ctx.JSON(http.StatusInternalServerError, respBody)

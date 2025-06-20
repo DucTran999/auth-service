@@ -5,7 +5,6 @@ import (
 
 	"github.com/alexedwards/argon2id"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
 )
@@ -38,7 +37,7 @@ func (svc *accountServiceImpl) Register(ctx context.Context, accountInfo model.A
 		return nil, err
 	}
 	if foundAccount != nil {
-		return nil, common.ErrEmailExisted
+		return nil, ErrEmailExisted
 	}
 
 	// Step 2: Hash the user's password before saving
