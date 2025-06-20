@@ -1,12 +1,11 @@
-package gateway
+package server
 
 import (
 	"github.com/DucTran999/auth-service/internal/gen"
-	"github.com/DucTran999/auth-service/internal/handler"
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(h handler.AppHandler) *gin.Engine {
+func NewRouter(h gen.ServerInterface) *gin.Engine {
 	router := gin.Default()
 
 	gen.RegisterHandlers(router, h)

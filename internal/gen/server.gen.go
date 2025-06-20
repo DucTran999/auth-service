@@ -9,6 +9,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Create a new account
+	// (POST /api/v1/accounts)
+	CreateAccount(c *gin.Context)
 	// Liveness probe endpoint
 	// (GET /livez)
 	CheckLiveness(c *gin.Context)
@@ -22,6 +25,19 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
+
+// CreateAccount operation middleware
+func (siw *ServerInterfaceWrapper) CreateAccount(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.CreateAccount(c)
+}
 
 // CheckLiveness operation middleware
 func (siw *ServerInterfaceWrapper) CheckLiveness(c *gin.Context) {
@@ -63,5 +79,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
+	router.POST(options.BaseURL+"/api/v1/accounts", wrapper.CreateAccount)
 	router.GET(options.BaseURL+"/livez", wrapper.CheckLiveness)
 }
