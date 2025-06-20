@@ -12,18 +12,18 @@ type AccountHandler interface {
 	CreateAccount(ctx *gin.Context)
 }
 
-type userHandlerImpl struct {
+type accountHandlerImpl struct {
 	BaseHandler
-	service service.IUserService
+	service service.AccountService
 }
 
-func NewAccountHandler(us service.IUserService) *userHandlerImpl {
-	return &userHandlerImpl{
-		service: us,
+func NewAccountHandler(accountSvc service.AccountService) *accountHandlerImpl {
+	return &accountHandlerImpl{
+		service: accountSvc,
 	}
 }
 
-func (h *userHandlerImpl) CreateAccount(ctx *gin.Context) {
+func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	payload := new(gen.CreateAccountJSONRequestBody)
 	if err := ctx.Bind(payload); err != nil {
 		h.BadRequestResponse(ctx, common.ApiVersion1, err)
@@ -31,13 +31,13 @@ func (h *userHandlerImpl) CreateAccount(ctx *gin.Context) {
 	}
 
 	// Convert request to model
-	userInfo := model.User{
+	userInfo := model.Account{
 		Email:    payload.Email,
 		Password: payload.Password,
 	}
 
 	// Register user
-	user, err := h.service.RegisterUser(ctx, userInfo)
+	user, err := h.service.Register(ctx, userInfo)
 	if err != nil {
 		h.ServerInternalErrResponse(ctx, common.ApiVersion1)
 		return

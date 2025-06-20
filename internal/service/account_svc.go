@@ -8,31 +8,34 @@ import (
 	"github.com/DucTran999/auth-service/internal/repository"
 )
 
-type IUserService interface {
-	RegisterUser(ctx context.Context, userInfo model.User) (*model.User, error)
+// AccountService defines the business logic for managing user accounts.
+type AccountService interface {
+	// Register creates a new user account with the provided information.
+	// It typically includes validation, password hashing, and persistence logic.
+	Register(ctx context.Context, info model.Account) (*model.Account, error)
 }
 
-type userBiz struct {
-	userRepo repository.IUserRepo
+type accountServiceImpl struct {
+	accountRepo repository.AccountRepo
 }
 
-func NewUserBiz(ur repository.IUserRepo) *userBiz {
-	return &userBiz{
-		userRepo: ur,
+func NewAccountService(accountRepo repository.AccountRepo) *accountServiceImpl {
+	return &accountServiceImpl{
+		accountRepo: accountRepo,
 	}
 }
 
-func (b *userBiz) RegisterUser(ctx context.Context, userInfo model.User) (*model.User, error) {
-	foundUser, err := b.userRepo.GetUserByEmail(ctx, userInfo.Email)
+func (svc *accountServiceImpl) Register(ctx context.Context, userInfo model.Account) (*model.Account, error) {
+	foundAccount, err := svc.accountRepo.FindByEmail(ctx, userInfo.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	if foundUser != nil {
+	if foundAccount != nil {
 		return nil, common.ErrEmailExisted
 	}
 
-	user, err := b.userRepo.CreateUser(ctx, userInfo)
+	user, err := svc.accountRepo.Create(ctx, userInfo)
 	if err != nil {
 		return nil, err
 	}
