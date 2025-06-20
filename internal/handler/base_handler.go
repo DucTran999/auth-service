@@ -25,12 +25,12 @@ const (
 
 type BaseHandler struct{}
 
-func (BaseHandler) ValidateErrorResponse(ctx *gin.Context, version string, err error) {
+func (BaseHandler) ValidateErrorResponse(ctx *gin.Context, version string, err string) {
 	respBody := gen.BadRequest{
 		Version: version,
 		Error: gen.ErrorDetail{
 			Code:    ValidateErrorCode,
-			Message: err.Error(),
+			Message: err,
 		},
 	}
 

@@ -34,7 +34,7 @@ func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 		var ve validator.ValidationErrors
 		// Get the first validation error
 		if errors.As(err, &ve) && len(ve) > 0 {
-			h.BadRequestResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
+			h.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
 			return
 		}
 
