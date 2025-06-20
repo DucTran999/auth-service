@@ -134,7 +134,7 @@ components:
       properties:
         email:
           type: string
-          format: email
+          format: string
           example: "john.doe@example.com"
         password:
           type: string
@@ -155,7 +155,7 @@ components:
           example: "123e4567-e89b-12d3-a456-426614174000"
         email:
           type: string
-          format: email
+          format: string
           example: "john.doe@example.com"
         created_at:
           type: string

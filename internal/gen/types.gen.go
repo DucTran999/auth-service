@@ -24,10 +24,10 @@ const (
 
 // Account defines model for Account.
 type Account struct {
-	CreatedAt time.Time           `json:"created_at"`
-	Email     openapi_types.Email `json:"email"`
-	Id        openapi_types.UUID  `json:"id"`
-	UpdatedAt time.Time           `json:"updated_at"`
+	CreatedAt time.Time          `json:"created_at"`
+	Email     string             `json:"email"`
+	Id        openapi_types.UUID `json:"id"`
+	UpdatedAt time.Time          `json:"updated_at"`
 }
 
 // AccountResponse defines model for AccountResponse.
@@ -40,8 +40,8 @@ type AccountResponse struct {
 
 // CreateAccountRequest defines model for CreateAccountRequest.
 type CreateAccountRequest struct {
-	Email    openapi_types.Email `json:"email"`
-	Password string              `json:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // ErrorResponse defines model for ErrorResponse.

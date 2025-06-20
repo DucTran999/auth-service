@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/gen"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/service"
 	"github.com/gin-gonic/gin"
 )
@@ -29,5 +30,23 @@ func (h *userHandlerImpl) CreateAccount(ctx *gin.Context) {
 		return
 	}
 
-	h.SuccessResponse(ctx, common.ApiVersion1, gen.AccountResponse{})
+	// Convert request to model
+	userInfo := model.User{
+		Email:    payload.Email,
+		Password: payload.Password,
+	}
+
+	// Register user
+	user, err := h.service.RegisterUser(ctx, userInfo)
+	if err != nil {
+		h.ServerInternalErrResponse(ctx, common.ApiVersion1)
+		return
+	}
+
+	data := gen.Account{
+		Id:    user.ID,
+		Email: user.Email,
+	}
+
+	h.SuccessResponse(ctx, common.ApiVersion1, data)
 }
