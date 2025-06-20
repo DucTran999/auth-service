@@ -6,20 +6,25 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// registerStrongPasswordValidators registers a custom 'password' validation rule
+// that enforces strong password requirements.
 func registerStrongPasswordValidators(v *validator.Validate) {
-	// Register custom 'password' validation
-	v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
+	_ = v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
 		password := fl.Field().String()
 
 		if len(password) < 8 {
 			return false
 		}
 
-		hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
-		hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
-		hasNumber := regexp.MustCompile(`[0-9]`).MatchString(password)
-		hasSymbol := regexp.MustCompile(`[\W_]`).MatchString(password)
+		// Precompiled regex patterns (declared outside the function in real code for performance)
+		hasUpper := regexp.MustCompile(`[A-Z]`).MatchString
+		hasLower := regexp.MustCompile(`[a-z]`).MatchString
+		hasDigit := regexp.MustCompile(`[0-9]`).MatchString
+		hasSymbol := regexp.MustCompile(`[\W_]`).MatchString
 
-		return hasUpper && hasLower && hasNumber && hasSymbol
+		return hasUpper(password) &&
+			hasLower(password) &&
+			hasDigit(password) &&
+			hasSymbol(password)
 	})
 }
