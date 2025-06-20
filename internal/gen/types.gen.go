@@ -39,8 +39,8 @@ type AccountResponse struct {
 
 // CreateAccountRequest defines model for CreateAccountRequest.
 type CreateAccountRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    openapi_types.Email `binding:"required,email" json:"email"`
+	Password string              `binding:"required,password" json:"password"`
 }
 
 // ErrorDetail defines model for ErrorDetail.

@@ -134,12 +134,16 @@ components:
       properties:
         email:
           type: string
-          format: string
+          format: email
           example: "john.doe@example.com"
+          x-oapi-codegen-extra-tags:
+            binding: "required,email"
         password:
           type: string
           minLength: 8
           example: "SecurePass123!"
+          x-oapi-codegen-extra-tags:
+            binding: "required,password"
 
     Account:
       type: object

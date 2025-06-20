@@ -14,7 +14,7 @@ func NewHTTPServer(deps container.Container) (server.HttpServer, error) {
 		Port: cfg.Port,
 	}
 
-	router := NewRouter(deps.AppHandler())
+	router := NewRouter(deps.AppConfig().ServiceEnv, deps.AppHandler())
 	httpServer, err := server.NewGinHttpServer(router, serverConf)
 	if err != nil {
 		return nil, err

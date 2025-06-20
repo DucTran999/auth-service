@@ -24,7 +24,7 @@ const (
 
 type BaseHandler struct{}
 
-func (BaseHandler) BadRequestResponse(ctx *gin.Context, version string, err error) {
+func (BaseHandler) ValidateErrorResponse(ctx *gin.Context, version string, err error) {
 	respBody := gen.BadRequest{
 		Version: version,
 		Error: gen.ErrorDetail{
@@ -36,12 +36,24 @@ func (BaseHandler) BadRequestResponse(ctx *gin.Context, version string, err erro
 	ctx.JSON(http.StatusBadRequest, respBody)
 }
 
-func (BaseHandler) ResourceConflictResponse(ctx *gin.Context, version string, err error) {
+func (BaseHandler) BadRequestResponse(ctx *gin.Context, version, errMsg string) {
+	respBody := gen.BadRequest{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    BadRequestErrorCode,
+			Message: errMsg,
+		},
+	}
+
+	ctx.JSON(http.StatusBadRequest, respBody)
+}
+
+func (BaseHandler) ResourceConflictResponse(ctx *gin.Context, version, errMsg string) {
 	respBody := gen.Conflict{
 		Version: version,
 		Error: gen.ErrorDetail{
 			Code:    ConflictErrorCode,
-			Message: err.Error(),
+			Message: errMsg,
 		},
 	}
 
