@@ -11,7 +11,7 @@ type Account struct {
 	ID uuid.UUID `json:"id" gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()"`
 
 	Email    string `json:"email" gorm:"column:email;type:text;unique;not null"`
-	Password string `json:"password_hash" gorm:"column:password_hash;type:text;not null"`
+	Password string `json:"-" gorm:"column:password_hash;type:text;not null"`
 
 	IsVerified bool   `json:"is_verified" gorm:"column:is_verified;type:boolean;default:false"`
 	IsActive   bool   `json:"is_active" gorm:"column:is_active;type:boolean;default:true"`

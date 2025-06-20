@@ -31,9 +31,9 @@ func NewAccountService(accountRepo repository.AccountRepo) *accountServiceImpl {
 //  1. Checks for existing email
 //  2. Hashes password securely
 //  3. Creates the account in the repository
-func (svc *accountServiceImpl) Register(ctx context.Context, userInfo model.Account) (*model.Account, error) {
+func (svc *accountServiceImpl) Register(ctx context.Context, accountInfo model.Account) (*model.Account, error) {
 	// Step 1: Check if the email already exists
-	foundAccount, err := svc.accountRepo.FindByEmail(ctx, userInfo.Email)
+	foundAccount, err := svc.accountRepo.FindByEmail(ctx, accountInfo.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -42,14 +42,14 @@ func (svc *accountServiceImpl) Register(ctx context.Context, userInfo model.Acco
 	}
 
 	// Step 2: Hash the user's password before saving
-	hashedPassword, err := svc.hashPassword(userInfo.Password)
+	hashedPassword, err := svc.hashPassword(accountInfo.Password)
 	if err != nil {
 		return nil, err
 	}
-	userInfo.Password = hashedPassword
+	accountInfo.Password = hashedPassword
 
 	// Step 3: Persist the account
-	createdAccount, err := svc.accountRepo.Create(ctx, userInfo)
+	createdAccount, err := svc.accountRepo.Create(ctx, accountInfo)
 	if err != nil {
 		return nil, err
 	}

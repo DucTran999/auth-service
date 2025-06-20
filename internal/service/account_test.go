@@ -61,7 +61,7 @@ func TestRegisterAccount(t *testing.T) {
 	type testCase struct {
 		name        string
 		sut         *accountSvcUT
-		userInfo    model.Account
+		accountInfo model.Account
 		expectedErr error
 		expected    *model.Account
 	}
@@ -78,7 +78,7 @@ func TestRegisterAccount(t *testing.T) {
 				sut.mockFindByEmailFailed()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: errors.New("find user by email: unexpected error"),
 			expected:    nil,
 		},
@@ -89,7 +89,7 @@ func TestRegisterAccount(t *testing.T) {
 				sut.mockFindByEmailHasResult()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: common.ErrEmailExisted,
 			expected:    nil,
 		},
@@ -101,7 +101,7 @@ func TestRegisterAccount(t *testing.T) {
 				sut.mockCreateError()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: errors.New("create user: unexpected error"),
 			expected:    nil,
 		},
@@ -113,7 +113,7 @@ func TestRegisterAccount(t *testing.T) {
 				sut.mockCreateSuccess()
 				return sut
 			}(),
-			userInfo:    userSample,
+			accountInfo: userSample,
 			expectedErr: nil,
 			expected: &model.Account{
 				Email: "daniel@example.com",
@@ -123,7 +123,7 @@ func TestRegisterAccount(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
-			user, err := tc.sut.ut.Register(context.Background(), tc.userInfo)
+			user, err := tc.sut.ut.Register(context.Background(), tc.accountInfo)
 
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {

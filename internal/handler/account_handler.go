@@ -35,13 +35,13 @@ func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	}
 
 	// Convert request to domain model
-	userInfo := model.Account{
+	accountInfo := model.Account{
 		Email:    payload.Email,
 		Password: payload.Password,
 	}
 
 	// Attempt registration
-	account, err := h.service.Register(ctx, userInfo)
+	account, err := h.service.Register(ctx, accountInfo)
 	if errors.Is(err, common.ErrEmailExisted) {
 		h.ResourceConflictResponse(ctx, common.ApiVersion1)
 		return
