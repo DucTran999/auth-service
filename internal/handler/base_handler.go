@@ -37,6 +37,18 @@ func (BaseHandler) ValidateErrorResponse(ctx *gin.Context, version string, err s
 	ctx.JSON(http.StatusBadRequest, respBody)
 }
 
+func (BaseHandler) UnauthorizeErrorResponse(ctx *gin.Context, version string, err string) {
+	respBody := gen.Unauthorized{
+		Version: version,
+		Error: gen.ErrorDetail{
+			Code:    UnauthorizedErrorCode,
+			Message: err,
+		},
+	}
+
+	ctx.JSON(http.StatusUnauthorized, respBody)
+}
+
 func (BaseHandler) BadRequestResponse(ctx *gin.Context, version, errMsg string) {
 	respBody := gen.BadRequest{
 		Version: version,

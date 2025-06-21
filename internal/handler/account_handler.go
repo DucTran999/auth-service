@@ -77,7 +77,7 @@ func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *mo
 		Version: ApiVersion1,
 		Success: true,
 		Data: gen.Account{
-			Id:        account.Id,
+			Id:        account.ID,
 			Email:     account.Email,
 			Role:      account.Role,
 			CreatedAt: &account.CreatedAt,

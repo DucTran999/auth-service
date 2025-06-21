@@ -88,11 +88,15 @@ func (c *container) AppConfig() *config.EnvConfiguration {
 func (c *container) initAppHandler() {
 	// Account module
 	accountRepo := repository.NewAccountRepo(c.authDBConn.DB())
-	accountSvc := usecase.NewAccountUseCase(accountRepo)
+	accountUC := usecase.NewAccountUseCase(accountRepo)
+
+	// Auth module
+	sessionRepo := repository.NewSessionRepository(c.authDBConn.DB())
+	authUC := usecase.NewAuthUseCase(accountRepo, sessionRepo)
 
 	c.appHandler = &appHandler{
 		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),
-		AccountHandler: handler.NewAccountHandler(accountSvc),
-		// AuthHandler:    handler.NewAuthHandler(),
+		AccountHandler: handler.NewAccountHandler(accountUC),
+		AuthHandler:    handler.NewAuthHandler(authUC),
 	}
 }

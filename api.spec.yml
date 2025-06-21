@@ -205,10 +205,14 @@ components:
         email:
           type: string
           format: email
+          x-oapi-codegen-extra-tags:
+            binding: "required"
           example: admin@example.com
         password:
           type: string
           format: password
+          x-oapi-codegen-extra-tags:
+            binding: "required"
           example: secret123
 
     ErrorDetail:
