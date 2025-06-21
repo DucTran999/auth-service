@@ -74,12 +74,15 @@ func (hdl *authHandlerImpl) parseAndValidateLoginCredentials(ctx *gin.Context,
 }
 
 func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
+	// Determine environment is secure or not
+	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
+
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:     "session_id",
 		Value:    session.ID.String(),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   secure,
 		SameSite: http.SameSiteStrictMode,
 	})
 
@@ -92,5 +95,5 @@ func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *mode
 			Role:  session.Account.Role,
 		},
 	}
-	ctx.JSON(http.StatusCreated, resp)
+	ctx.JSON(http.StatusOK, resp)
 }
