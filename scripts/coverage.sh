@@ -14,7 +14,7 @@ cyan() {
 cyan "🔍 Code coverage analyzing..."
 echo "----------------------------------------------------------------------------------"
 mkdir -p test/coverage
-go test -cover ./internal/service/... -coverprofile=test/coverage/coverage.out
+go test -cover ./internal/usecase/... -coverprofile=test/coverage/coverage.out
 go tool cover -html=test/coverage/coverage.out -o test/coverage/coverage.html
 echo "----------------------------------------------------------------------------------"
 
