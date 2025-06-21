@@ -5,8 +5,7 @@ import (
 	"net/http"
 
 	"github.com/DucTran999/auth-service/internal/gen"
-	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/service"
+	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -17,46 +16,45 @@ type AccountHandler interface {
 
 type accountHandlerImpl struct {
 	BaseHandler
-	service service.AccountService
+	accountUC usecase.AccountUseCase
 }
 
-func NewAccountHandler(accountSvc service.AccountService) *accountHandlerImpl {
+func NewAccountHandler(accountUC usecase.AccountUseCase) *accountHandlerImpl {
 	return &accountHandlerImpl{
-		service: accountSvc,
+		accountUC: accountUC,
 	}
 }
 
 // CreateAccount handles the HTTP request to register a new account.
-func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
+func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	// Parse request body
 	var payload gen.CreateAccountJSONRequestBody
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		var ve validator.ValidationErrors
 		// Get the first validation error
 		if errors.As(err, &ve) && len(ve) > 0 {
-			h.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
+			hdl.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
 			return
 		}
 
 		// Fallback for other types of errors
-		h.BadRequestResponse(ctx, ApiVersion1, err.Error())
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 
-	// Convert request to domain model
-	accountInfo := model.Account{
+	registerInfo := usecase.RegisterInput{
 		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
 
 	// Attempt registration
-	account, err := h.service.Register(ctx, accountInfo)
-	if errors.Is(err, service.ErrEmailExisted) {
-		h.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
+	account, err := hdl.accountUC.Register(ctx, registerInfo)
+	if errors.Is(err, usecase.ErrEmailExisted) {
+		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 	if err != nil {
-		h.ServerInternalErrResponse(ctx, ApiVersion1)
+		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 		return
 	}
 

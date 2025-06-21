@@ -1,4 +1,4 @@
-package service_test
+package usecase_test
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/service"
+	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 type accountSvcUT struct {
-	ut          service.AccountService
+	ut          usecase.AccountUseCase
 	accountRepo *mocks.AccountRepo
 }
 
@@ -21,7 +21,7 @@ func NewAccountSvcUT() *accountSvcUT {
 	accountRepo := new(mocks.AccountRepo)
 
 	return &accountSvcUT{
-		ut:          service.NewAccountService(accountRepo),
+		ut:          usecase.NewAccountUseCase(accountRepo),
 		accountRepo: accountRepo,
 	}
 }
@@ -60,13 +60,14 @@ func TestRegisterAccount(t *testing.T) {
 	type testCase struct {
 		name        string
 		sut         *accountSvcUT
-		accountInfo model.Account
+		accountInfo usecase.RegisterInput
 		expectedErr error
 		expected    *model.Account
 	}
 
-	userSample := model.Account{
-		Email: "daniel@example.com",
+	userSample := usecase.RegisterInput{
+		Email:    "daniel@example.com",
+		Password: "abc1234!",
 	}
 
 	testTable := []testCase{
@@ -89,7 +90,7 @@ func TestRegisterAccount(t *testing.T) {
 				return sut
 			}(),
 			accountInfo: userSample,
-			expectedErr: service.ErrEmailExisted,
+			expectedErr: usecase.ErrEmailExisted,
 			expected:    nil,
 		},
 		{
