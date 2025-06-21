@@ -19,7 +19,7 @@ type Session struct {
 	ExpiresAt *time.Time `gorm:"type:timestamptz" json:"expires_at,omitempty"`
 }
 
-func (Session) TableName() string { return "sessions" }
+func (s *Session) TableName() string { return "sessions" }
 
 // IsExpired checks whether the session has expired based on the ExpiresAt field.
 // Returns false if ExpiresAt is nil (no expiration).
