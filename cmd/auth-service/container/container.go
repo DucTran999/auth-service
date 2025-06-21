@@ -26,6 +26,7 @@ type Container interface {
 type appHandler struct {
 	handler.HealthHandler
 	handler.AccountHandler
+	handler.AuthHandler
 }
 
 type container struct {
@@ -92,5 +93,6 @@ func (c *container) initAppHandler() {
 	c.appHandler = &appHandler{
 		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),
 		AccountHandler: handler.NewAccountHandler(accountSvc),
+		// AuthHandler:    handler.NewAuthHandler(),
 	}
 }

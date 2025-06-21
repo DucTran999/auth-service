@@ -9,6 +9,10 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
 // Defines values for HealthErrorResponseStatus.
 const (
 	HealthErrorResponseStatusError     HealthErrorResponseStatus = "error"
@@ -24,17 +28,11 @@ const (
 
 // Account defines model for Account.
 type Account struct {
-	CreatedAt time.Time          `json:"created_at"`
-	Email     string             `json:"email"`
 	Id        openapi_types.UUID `json:"id"`
-	UpdatedAt time.Time          `json:"updated_at"`
-}
-
-// AccountResponse defines model for AccountResponse.
-type AccountResponse struct {
-	Data    Account `json:"data"`
-	Success bool    `json:"success"`
-	Version string  `json:"version"`
+	Email     string             `json:"email"`
+	Role      string             `json:"role"`
+	CreatedAt *time.Time         `json:"created_at,omitempty"`
+	UpdatedAt *time.Time         `json:"updated_at,omitempty"`
 }
 
 // CreateAccountRequest defines model for CreateAccountRequest.
@@ -54,9 +52,9 @@ type ErrorDetail struct {
 
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
-	Error   ErrorDetail `json:"error"`
-	Success bool        `json:"success"`
 	Version string      `json:"version"`
+	Success bool        `json:"success"`
+	Error   ErrorDetail `json:"error"`
 }
 
 // HealthErrorResponse defines model for HealthErrorResponse.
@@ -83,6 +81,19 @@ type HealthResponse struct {
 // HealthResponseStatus defines model for HealthResponse.Status.
 type HealthResponseStatus string
 
+// LoginRequest defines model for LoginRequest.
+type LoginRequest struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
+// SuccessResponse defines model for SuccessResponse.
+type SuccessResponse struct {
+	Version string                 `json:"version"`
+	Success bool                   `json:"success"`
+	Data    map[string]interface{} `json:"data"`
+}
+
 // BadRequest defines model for BadRequest.
 type BadRequest = ErrorResponse
 
@@ -91,6 +102,26 @@ type Conflict = ErrorResponse
 
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = ErrorResponse
+
+// LoginResponse defines model for LoginResponse.
+type LoginResponse struct {
+	Version string  `json:"version"`
+	Success bool    `json:"success"`
+	Data    Account `json:"data"`
+}
+
+// RegisterResponse defines model for RegisterResponse.
+type RegisterResponse struct {
+	Version string  `json:"version"`
+	Success bool    `json:"success"`
+	Data    Account `json:"data"`
+}
+
+// Unauthorized defines model for Unauthorized.
+type Unauthorized = ErrorResponse
+
+// LoginAccountJSONRequestBody defines body for LoginAccount for application/json ContentType.
+type LoginAccountJSONRequestBody = LoginRequest
 
 // CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
 type CreateAccountJSONRequestBody = CreateAccountRequest

@@ -8,7 +8,7 @@ import (
 
 // Account represents a user account in the system.
 type Account struct {
-	ID uuid.UUID `json:"id" gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()"`
+	Id uuid.UUID `json:"id" gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()"`
 
 	Email    string `json:"email" gorm:"column:email;type:text;unique;not null"`
 	Password string `json:"-" gorm:"column:password_hash;type:text;not null"`

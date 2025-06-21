@@ -61,15 +61,16 @@ func (h *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	}
 
 	// Prepare response
-	respData := gen.AccountResponse{
+	respData := gen.RegisterResponse{
 		Version: ApiVersion1,
 		Success: true,
 		Data: gen.Account{
-			Id:        account.ID,
+			Id:        account.Id,
 			Email:     account.Email,
-			CreatedAt: account.CreatedAt,
-			UpdatedAt: account.UpdatedAt,
+			Role:      account.Role,
+			CreatedAt: &account.CreatedAt,
+			UpdatedAt: &account.UpdatedAt,
 		},
 	}
-	ctx.JSON(http.StatusOK, respData)
+	ctx.JSON(http.StatusCreated, respData)
 }

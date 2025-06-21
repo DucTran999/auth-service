@@ -44,7 +44,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthErrorResponse"
 
-  /api/v1/accounts:
+  /api/v1/register:
     post:
       summary: Create a new account
       description: Register a new user account
@@ -60,17 +60,34 @@ paths:
               $ref: "#/components/schemas/CreateAccountRequest"
       responses:
         "201":
-          description: Account created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AccountResponse"
+          $ref: "#/components/responses/RegisterResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
         "409":
           $ref: "#/components/responses/Conflict"
         "500":
           $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/login:
+    post:
+      summary: User login
+      description: Authenticate a user and create a session. Sets a session cookie and returns account info.
+      tags:
+        - Auth
+      operationId: loginAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
 components:
   securitySchemes:
@@ -150,25 +167,49 @@ components:
       required:
         - id
         - email
-        - created_at
-        - updated_at
+        - role
       properties:
         id:
           type: string
           format: uuid
+          x-order: 1
           example: "123e4567-e89b-12d3-a456-426614174000"
         email:
           type: string
           format: string
+          x-order: 2
           example: "john.doe@example.com"
+        role:
+          type: string
+          x-order: 3
+          example: "user"
         created_at:
           type: string
           format: date-time
+          x-order: 4
+          x-omitempty: true
           example: "2024-01-15T10:30:00Z"
         updated_at:
           type: string
           format: date-time
+          x-omitempty: true
+          x-order: 5
           example: "2024-01-15T10:30:00Z"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          format: password
+          example: secret123
 
     ErrorDetail:
       type: object
@@ -178,10 +219,12 @@ components:
       properties:
         code:
           type: string
+          x-order: 1
           description: Application-specific error code
           example: EMAIL_EXISTS
         message:
           type: string
+          x-order: 2
           description: Human-readable error message
           example: Email already registered
 
@@ -195,13 +238,16 @@ components:
         version:
           type: string
           example: v1
+          x-order: 1
         success:
           type: boolean
+          x-order: 2
           example: false
         error:
+          x-order: 3
           $ref: "#/components/schemas/ErrorDetail"
 
-    AccountResponse:
+    SuccessResponse:
       type: object
       required:
         - version
@@ -210,14 +256,47 @@ components:
       properties:
         version:
           type: string
+          x-order: 1
           example: "v1.0"
         success:
           type: boolean
+          x-order: 2
           example: true
         data:
-          $ref: "#/components/schemas/Account"
+          x-order: 3
+          type: object # use oneOf for flexibility or override via allOf
 
   responses:
+    RegisterResponse:
+      description: Account created successfully
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Account"
+
+    LoginResponse:
+      description: Successfully authenticated
+      headers:
+        Set-Cookie:
+          description: Session cookie
+          schema:
+            type: string
+            example: session_id=abc123xyz; HttpOnly; Secure; Path=/; SameSite=Strict
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Account"
+
     BadRequest:
       description: Bad request - invalid input
       content:
