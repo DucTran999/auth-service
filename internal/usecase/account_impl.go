@@ -24,12 +24,11 @@ func NewAccountUseCase(accountRepo repository.AccountRepo) *accountUseCaseImpl {
 // 2. Hashes the password securely.
 // 3. Persists the account to the repository.
 func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput) (*model.Account, error) {
-	// Check if the email is already in use
-	existing, err := uc.accountRepo.FindByEmail(ctx, input.Email)
+	taken, err := uc.isEmailTaken(ctx, input.Email)
 	if err != nil {
 		return nil, err
 	}
-	if existing != nil {
+	if taken {
 		return nil, ErrEmailExisted
 	}
 
@@ -41,8 +40,8 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 
 	// Bind input to domain model
 	account := model.Account{
-		Email:    input.Email,
-		Password: hashedPassword,
+		Email:        input.Email,
+		PasswordHash: hashedPassword,
 	}
 
 	// Persist the account
@@ -52,6 +51,17 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 	}
 
 	return created, nil
+}
+
+// isEmailTaken checks if the provided email already exists in the system.
+// Returns ErrEmailExisted if a duplicate is found, or a repository error if any occurs.
+func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (bool, error) {
+	account, err := uc.accountRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return false, err
+	}
+
+	return account != nil, nil
 }
 
 // hashPassword securely hashes a plain password using Argon2id.

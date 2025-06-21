@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/DucTran999/auth-service/internal/gen"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -27,39 +28,52 @@ func NewAccountHandler(accountUC usecase.AccountUseCase) *accountHandlerImpl {
 
 // CreateAccount handles the HTTP request to register a new account.
 func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
-	// Parse request body
-	var payload gen.CreateAccountJSONRequestBody
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		var ve validator.ValidationErrors
-		// Get the first validation error
-		if errors.As(err, &ve) && len(ve) > 0 {
-			hdl.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
-			return
-		}
-
-		// Fallback for other types of errors
-		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
-		return
+	payload, err := hdl.parseAndValidateCreateAccount(ctx)
+	if err != nil {
+		return // response already handled
 	}
 
-	registerInfo := usecase.RegisterInput{
+	input := usecase.RegisterInput{
 		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
 
-	// Attempt registration
-	account, err := hdl.accountUC.Register(ctx, registerInfo)
+	account, err := hdl.accountUC.Register(ctx.Request.Context(), input)
+	if err != nil {
+		hdl.handleRegisterError(ctx, err)
+		return
+	}
+
+	hdl.sendRegisterSuccess(ctx, account)
+}
+
+func (hdl *accountHandlerImpl) parseAndValidateCreateAccount(ctx *gin.Context,
+) (*gen.CreateAccountJSONRequestBody, error) {
+
+	var payload gen.CreateAccountJSONRequestBody
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) && len(ve) > 0 {
+			hdl.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
+			return nil, err
+		}
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+		return nil, err
+	}
+
+	return &payload, nil
+}
+
+func (hdl *accountHandlerImpl) handleRegisterError(ctx *gin.Context, err error) {
 	if errors.Is(err, usecase.ErrEmailExisted) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
-	if err != nil {
-		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
-		return
-	}
+	hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+}
 
-	// Prepare response
-	respData := gen.RegisterResponse{
+func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *model.Account) {
+	resp := gen.RegisterResponse{
 		Version: ApiVersion1,
 		Success: true,
 		Data: gen.Account{
@@ -70,5 +84,5 @@ func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 			UpdatedAt: &account.UpdatedAt,
 		},
 	}
-	ctx.JSON(http.StatusCreated, respData)
+	ctx.JSON(http.StatusCreated, resp)
 }
