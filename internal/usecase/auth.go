@@ -10,7 +10,7 @@ import (
 type AuthUseCase interface {
 	// Login verifies the provided credentials and returns the authenticated account.
 	// Returns an error if authentication fails.
-	Login(ctx context.Context, input LoginInput) (*model.Account, error)
+	Login(ctx context.Context, input LoginInput) (*model.Session, error)
 }
 
 // LoginInput represents the input required to authenticate a user using email and password.

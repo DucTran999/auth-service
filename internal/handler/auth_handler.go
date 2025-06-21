@@ -42,7 +42,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	}
 
 	// Authenticate user and create session
-	account, err := hdl.authUC.Login(ctx.Request.Context(), loginInput)
+	session, err := hdl.authUC.Login(ctx.Request.Context(), loginInput)
 	if err != nil {
 		if errors.Is(err, usecase.ErrInvalidCredentials) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
@@ -52,7 +52,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 		return
 	}
 
-	hdl.responseLoginSuccess(ctx, account)
+	hdl.responseLoginSuccess(ctx, session)
 }
 
 func (hdl *authHandlerImpl) parseAndValidateLoginCredentials(ctx *gin.Context,
@@ -73,14 +73,23 @@ func (hdl *authHandlerImpl) parseAndValidateLoginCredentials(ctx *gin.Context,
 	return &payload, nil
 }
 
-func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, account *model.Account) {
+func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "session_id",
+		Value:    session.ID.String(),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+
 	resp := gen.LoginResponse{
 		Success: true,
 		Version: ApiVersion1,
 		Data: gen.Account{
-			Id:    account.ID,
-			Email: account.Email,
-			Role:  account.Role,
+			Id:    session.AccountID,
+			Email: session.Account.Email,
+			Role:  session.Account.Role,
 		},
 	}
 	ctx.JSON(http.StatusCreated, resp)

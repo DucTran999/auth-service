@@ -28,7 +28,7 @@ func NewAuthUseCase(
 
 // Login authenticates a user using email and password.
 // It verifies credentials, checks account status, and creates a new session on success.
-func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.Account, error) {
+func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.Session, error) {
 	// Step 1: Retrieve account by email
 	account, err := uc.findAccountByEmail(ctx, input.Email)
 	if err != nil {
@@ -52,6 +52,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 	// Step 4: Create session (session storage, expiry, metadata, etc.)
 	session := &model.Session{
 		AccountID: account.ID,
+		Account:   *account,
 		IPAddress: input.IP,
 		UserAgent: input.UserAgent,
 	}
@@ -59,7 +60,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 		return nil, err
 	}
 
-	return account, nil
+	return session, nil
 }
 
 func (uc *authUseCaseImpl) findAccountByEmail(ctx context.Context, email string) (*model.Account, error) {
