@@ -33,12 +33,19 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 		return
 	}
 
+	// Set to empty when cookie not found
+	currentSessionID, err := ctx.Cookie("session_id")
+	if err != nil {
+		currentSessionID = ""
+	}
+
 	// Convert request to domain model
 	loginInput := usecase.LoginInput{
-		Email:     string(payload.Email),
-		Password:  payload.Password,
-		IP:        ctx.ClientIP(),
-		UserAgent: ctx.Request.UserAgent(),
+		CurrentSessionID: currentSessionID,
+		Email:            string(payload.Email),
+		Password:         payload.Password,
+		IP:               ctx.ClientIP(),
+		UserAgent:        ctx.Request.UserAgent(),
 	}
 
 	// Authenticate user and create session

@@ -20,3 +20,12 @@ type Session struct {
 }
 
 func (Session) TableName() string { return "sessions" }
+
+// IsExpired checks whether the session has expired based on the ExpiresAt field.
+// Returns false if ExpiresAt is nil (no expiration).
+func (s *Session) IsExpired() bool {
+	if s.ExpiresAt == nil {
+		return false
+	}
+	return time.Now().After(*s.ExpiresAt)
+}

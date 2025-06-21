@@ -70,6 +70,7 @@ paths:
 
   /api/v1/login:
     post:
+      security: [] # Registration doesn't require auth
       summary: User login
       description: Authenticate a user and create a session. Sets a session cookie and returns account info.
       tags:
