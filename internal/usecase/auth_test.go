@@ -135,7 +135,7 @@ func TestLogin(t *testing.T) {
 			expected:    nil,
 		},
 		{
-			name: "failed when hash password",
+			name: "account inactive",
 			sut: func() *authUseCaseUT {
 				sut := NewAuthUseCaseUT()
 				sut.mockFindByEmailAccountInactive()
@@ -194,7 +194,9 @@ func TestLogin(t *testing.T) {
 			loginInput:  userSample,
 			expectedErr: nil,
 			expected: &model.Account{
-				ID: uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+				Email:    "daniel@example.com",
+				IsActive: true,
 			},
 		},
 	}
