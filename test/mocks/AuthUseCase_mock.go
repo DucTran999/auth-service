@@ -40,23 +40,23 @@ func (_m *AuthUseCase) EXPECT() *AuthUseCase_Expecter {
 }
 
 // Login provides a mock function for the type AuthUseCase
-func (_mock *AuthUseCase) Login(ctx context.Context, input usecase.LoginInput) (*model.Account, error) {
+func (_mock *AuthUseCase) Login(ctx context.Context, input usecase.LoginInput) (*model.Session, error) {
 	ret := _mock.Called(ctx, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
 	}
 
-	var r0 *model.Account
+	var r0 *model.Session
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) (*model.Account, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) (*model.Session, error)); ok {
 		return returnFunc(ctx, input)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) *model.Account); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) *model.Session); ok {
 		r0 = returnFunc(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Account)
+			r0 = ret.Get(0).(*model.Session)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, usecase.LoginInput) error); ok {
@@ -97,12 +97,12 @@ func (_c *AuthUseCase_Login_Call) Run(run func(ctx context.Context, input usecas
 	return _c
 }
 
-func (_c *AuthUseCase_Login_Call) Return(account *model.Account, err error) *AuthUseCase_Login_Call {
-	_c.Call.Return(account, err)
+func (_c *AuthUseCase_Login_Call) Return(session *model.Session, err error) *AuthUseCase_Login_Call {
+	_c.Call.Return(session, err)
 	return _c
 }
 
-func (_c *AuthUseCase_Login_Call) RunAndReturn(run func(ctx context.Context, input usecase.LoginInput) (*model.Account, error)) *AuthUseCase_Login_Call {
+func (_c *AuthUseCase_Login_Call) RunAndReturn(run func(ctx context.Context, input usecase.LoginInput) (*model.Session, error)) *AuthUseCase_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }

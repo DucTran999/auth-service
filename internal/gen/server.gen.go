@@ -32,8 +32,6 @@ type MiddlewareFunc func(c *gin.Context)
 // LoginAccount operation middleware
 func (siw *ServerInterfaceWrapper) LoginAccount(c *gin.Context) {
 
-	c.Set(BearerAuthScopes, []string{})
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 		if c.IsAborted() {
