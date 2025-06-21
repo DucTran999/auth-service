@@ -52,7 +52,12 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 	// Step 4: Create session (session storage, expiry, metadata, etc.)
 	session := &model.Session{
 		AccountID: account.ID,
-		Account:   *account,
+		Account: model.Account{
+			ID:       account.ID,
+			Email:    account.Email,
+			Role:     account.Role,
+			IsActive: account.IsActive,
+		},
 		IPAddress: input.IP,
 		UserAgent: input.UserAgent,
 	}
