@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
@@ -88,12 +89,47 @@ func (sut *authUseCaseUT) mockCreateSessionFailed() {
 		Return(errors.New("create session failed"))
 }
 
+func (sut *authUseCaseUT) mockFindSessionError() {
+	sut.sessionRepo.EXPECT().
+		FindByID(mock.Anything, mock.Anything).
+		Return(nil, errors.New("failed to find session"))
+}
+
+func (sut *authUseCaseUT) mockSessionNotFound() {
+	sut.sessionRepo.EXPECT().
+		FindByID(mock.Anything, mock.Anything).
+		Return(nil, nil)
+}
+
+func (sut *authUseCaseUT) mockSessionCanReuse() {
+	mockExpires := time.Now().Add(time.Minute)
+	sut.sessionRepo.EXPECT().
+		FindByID(mock.Anything, mock.Anything).
+		Return(&model.Session{
+			ID:        uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+			AccountID: uuid.MustParse("123e4567-e89b-12d3-a456-426614174001"),
+			ExpiresAt: &mockExpires,
+		}, nil)
+}
+
+func (sut *authUseCaseUT) mockSessionUpdateExpiresAtErr() {
+	sut.sessionRepo.EXPECT().
+		UpdateExpiresAt(mock.Anything, mock.Anything, mock.Anything).
+		Return(errors.New("update expires error"))
+}
+
 func (sut *authUseCaseUT) mockCreateSessionSuccess() {
 	sut.sessionRepo.EXPECT().
 		Create(mock.Anything, mock.AnythingOfType("*model.Session")).
 		Run(func(ctx context.Context, s *model.Session) {
 			s.ID = uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
 		}).
+		Return(nil)
+}
+
+func (sut *authUseCaseUT) mockSessionUpdateExpiresAt() {
+	sut.sessionRepo.EXPECT().
+		UpdateExpiresAt(mock.Anything, mock.Anything, mock.Anything).
 		Return(nil)
 }
 
@@ -168,6 +204,79 @@ func TestLogin(t *testing.T) {
 			loginInput:  userSample,
 			expectedErr: errors.New("compare password unexpected error"),
 			expected:    nil,
+		},
+		{
+			name: "failed to find session",
+			sut: func() *authUseCaseUT {
+				sut := NewAuthUseCaseUT()
+				sut.mockFindSessionError()
+				return sut
+			}(),
+			loginInput: usecase.LoginInput{
+				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
+				Email:            userSample.Email,
+				Password:         userSample.Password,
+			},
+			expectedErr: errors.New("failed to find session"),
+			expected:    nil,
+		},
+		{
+			name: "session not found allow create new one",
+			sut: func() *authUseCaseUT {
+				sut := NewAuthUseCaseUT()
+				sut.mockSessionNotFound()
+				sut.mockFindByEmailHasResult()
+				sut.mockHashPasswordMatch()
+				sut.mockCreateSessionSuccess()
+				return sut
+			}(),
+			loginInput: usecase.LoginInput{
+				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
+				Email:            userSample.Email,
+				Password:         userSample.Password,
+			},
+			expectedErr: nil,
+			expected: &model.Account{
+				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+				Email:    "daniel@example.com",
+				IsActive: true,
+			},
+		},
+		{
+			name: "failed when update expires",
+			sut: func() *authUseCaseUT {
+				sut := NewAuthUseCaseUT()
+				sut.mockSessionCanReuse()
+				sut.mockSessionUpdateExpiresAtErr()
+				return sut
+			}(),
+			loginInput: usecase.LoginInput{
+				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
+				Email:            userSample.Email,
+				Password:         userSample.Password,
+			},
+			expectedErr: errors.New("update expires error"),
+			expected:    nil,
+		},
+		{
+			name: "reuse session",
+			sut: func() *authUseCaseUT {
+				sut := NewAuthUseCaseUT()
+				sut.mockSessionCanReuse()
+				sut.mockSessionUpdateExpiresAt()
+				return sut
+			}(),
+			loginInput: usecase.LoginInput{
+				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
+				Email:            userSample.Email,
+				Password:         userSample.Password,
+			},
+			expectedErr: nil,
+			expected: &model.Account{
+				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+				Email:    "daniel@example.com",
+				IsActive: true,
+			},
 		},
 		{
 			name: "failed to create session",
