@@ -2,14 +2,16 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/DucTran999/auth-service/cmd/auth-service/container"
-	"github.com/DucTran999/auth-service/cmd/auth-service/server"
 	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/server"
 	pkgServer "github.com/DucTran999/shared-pkg/server"
 )
 
@@ -47,7 +49,7 @@ func (a *App) Run() error {
 
 	// Start HTTP server in a goroutine
 	go func() {
-		if err := a.httpServer.Start(); err != nil {
+		if err := a.httpServer.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			a.deps.Logger().Fatalf("start http server got err: %v", err)
 		}
 	}()
