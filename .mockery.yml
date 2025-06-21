@@ -17,3 +17,6 @@ packages:
   github.com/DucTran999/auth-service/internal:
     config:
       all: true
+  github.com/DucTran999/auth-service/pkg:
+    config:
+      all: true

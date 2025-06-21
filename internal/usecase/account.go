@@ -14,6 +14,6 @@ type AccountUseCase interface {
 }
 
 type RegisterInput struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

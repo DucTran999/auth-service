@@ -9,6 +9,25 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type RunningEnvironment int
+
+const (
+	ProductionEnv RunningEnvironment = iota
+	DevelopmentEnv
+)
+
+func (r RunningEnvironment) String() string {
+	switch r {
+	case DevelopmentEnv:
+		return "dev"
+	case ProductionEnv:
+		return "prod"
+	// Set to default value dev if env invalid
+	default:
+		return "dev"
+	}
+}
+
 func NewRouter(serviceEnv string, h gen.ServerInterface) (*gin.Engine, error) {
 	if serviceEnv == ProductionEnv.String() {
 		gin.SetMode(gin.ReleaseMode)
