@@ -211,6 +211,7 @@ components:
         password:
           type: string
           format: password
+          minLength: 1
           x-oapi-codegen-extra-tags:
             binding: "required"
           example: secret123
