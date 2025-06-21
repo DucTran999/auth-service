@@ -9,6 +9,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/handler"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/pkg"
 	"github.com/DucTran999/dbkit"
 	"github.com/DucTran999/shared-pkg/logger"
 	"gorm.io/gorm"
@@ -86,13 +87,15 @@ func (c *container) AppConfig() *config.EnvConfiguration {
 }
 
 func (c *container) initAppHandler() {
+	hasher := pkg.NewHasher()
+
 	// Account module
 	accountRepo := repository.NewAccountRepo(c.authDBConn.DB())
-	accountUC := usecase.NewAccountUseCase(accountRepo)
+	accountUC := usecase.NewAccountUseCase(hasher, accountRepo)
 
 	// Auth module
 	sessionRepo := repository.NewSessionRepository(c.authDBConn.DB())
-	authUC := usecase.NewAuthUseCase(accountRepo, sessionRepo)
+	authUC := usecase.NewAuthUseCase(hasher, accountRepo, sessionRepo)
 
 	c.appHandler = &appHandler{
 		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),

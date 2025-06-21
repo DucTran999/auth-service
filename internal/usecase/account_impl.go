@@ -3,18 +3,19 @@ package usecase
 import (
 	"context"
 
-	"github.com/alexedwards/argon2id"
-
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
+	"github.com/DucTran999/auth-service/pkg"
 )
 
 type accountUseCaseImpl struct {
+	hasher      pkg.Hasher
 	accountRepo repository.AccountRepo
 }
 
-func NewAccountUseCase(accountRepo repository.AccountRepo) *accountUseCaseImpl {
+func NewAccountUseCase(hasher pkg.Hasher, accountRepo repository.AccountRepo) *accountUseCaseImpl {
 	return &accountUseCaseImpl{
+		hasher:      hasher,
 		accountRepo: accountRepo,
 	}
 }
@@ -33,7 +34,7 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 	}
 
 	// Hash the password
-	hashedPassword, err := uc.hashPassword(input.Password)
+	hashedPassword, err := uc.hasher.HashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -62,9 +63,4 @@ func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (b
 	}
 
 	return account != nil, nil
-}
-
-// hashPassword securely hashes a plain password using Argon2id.
-func (uc *accountUseCaseImpl) hashPassword(password string) (string, error) {
-	return argon2id.CreateHash(password, argon2id.DefaultParams)
 }

@@ -5,18 +5,22 @@ import (
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/alexedwards/argon2id"
+	"github.com/DucTran999/auth-service/pkg"
 )
 
 type authUseCaseImpl struct {
+	hasher      pkg.Hasher
 	accountRepo repository.AccountRepo
 	sessionRepo repository.SessionRepository
 }
 
 func NewAuthUseCase(
-	accountRepo repository.AccountRepo, sessionRepo repository.SessionRepository,
+	hasher pkg.Hasher,
+	accountRepo repository.AccountRepo,
+	sessionRepo repository.SessionRepository,
 ) *authUseCaseImpl {
 	return &authUseCaseImpl{
+		hasher:      hasher,
 		accountRepo: accountRepo,
 		sessionRepo: sessionRepo,
 	}
@@ -37,7 +41,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 	}
 
 	// Step 3: Verify password
-	match, err := argon2id.ComparePasswordAndHash(input.Password, account.PasswordHash)
+	match, err := uc.hasher.ComparePasswordAndHash(input.Password, account.PasswordHash)
 	if err != nil {
 		return nil, err
 	}

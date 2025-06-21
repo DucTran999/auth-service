@@ -12,45 +12,60 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type accountSvcUT struct {
+type accountUseCaseUT struct {
 	ut          usecase.AccountUseCase
+	hasher      *mocks.Hasher
 	accountRepo *mocks.AccountRepo
 }
 
-func NewAccountSvcUT() *accountSvcUT {
+func NewAccountUseCaseUT() *accountUseCaseUT {
+	hasher := new(mocks.Hasher)
 	accountRepo := new(mocks.AccountRepo)
 
-	return &accountSvcUT{
-		ut:          usecase.NewAccountUseCase(accountRepo),
+	return &accountUseCaseUT{
+		ut:          usecase.NewAccountUseCase(hasher, accountRepo),
+		hasher:      hasher,
 		accountRepo: accountRepo,
 	}
 }
 
-func (sut *accountSvcUT) mockFindByEmailFailed() {
+func (sut *accountUseCaseUT) mockFindByEmailFailed() {
 	sut.accountRepo.EXPECT().
 		FindByEmail(mock.Anything, mock.Anything).
 		Return(nil, errors.New("find user by email: unexpected error"))
 }
 
-func (sut *accountSvcUT) mockFindByEmailHasResult() {
+func (sut *accountUseCaseUT) mockFindByEmailHasResult() {
 	sut.accountRepo.EXPECT().
 		FindByEmail(mock.Anything, mock.Anything).
 		Return(&model.Account{Email: "daniel@example.com"}, nil)
 }
 
-func (sut *accountSvcUT) mockFindByEmailNoResult() {
+func (sut *accountUseCaseUT) mockFindByEmailNoResult() {
 	sut.accountRepo.EXPECT().
 		FindByEmail(mock.Anything, mock.Anything).
 		Return(nil, nil)
 }
 
-func (sut *accountSvcUT) mockCreateError() {
+func (sut *accountUseCaseUT) mockHashPasswordErr() {
+	sut.hasher.EXPECT().
+		HashPassword(mock.AnythingOfType("string")).
+		Return("", errors.New("hash got err"))
+}
+
+func (sut *accountUseCaseUT) mockHashPasswordSuccess() {
+	sut.hasher.EXPECT().
+		HashPassword(mock.AnythingOfType("string")).
+		Return("hashedPassword", nil)
+}
+
+func (sut *accountUseCaseUT) mockCreateError() {
 	sut.accountRepo.EXPECT().
 		Create(mock.Anything, mock.Anything).
 		Return(nil, errors.New("create user: unexpected error"))
 }
 
-func (sut *accountSvcUT) mockCreateSuccess() {
+func (sut *accountUseCaseUT) mockCreateSuccess() {
 	sut.accountRepo.EXPECT().
 		Create(mock.Anything, mock.Anything).
 		Return(&model.Account{Email: "daniel@example.com"}, nil)
@@ -59,7 +74,7 @@ func (sut *accountSvcUT) mockCreateSuccess() {
 func TestRegisterAccount(t *testing.T) {
 	type testCase struct {
 		name        string
-		sut         *accountSvcUT
+		sut         *accountUseCaseUT
 		accountInfo usecase.RegisterInput
 		expectedErr error
 		expected    *model.Account
@@ -72,9 +87,9 @@ func TestRegisterAccount(t *testing.T) {
 
 	testTable := []testCase{
 		{
-			name: "WhenFindByEmailGotErr_ThenReturnErr",
-			sut: func() *accountSvcUT {
-				sut := NewAccountSvcUT()
+			name: "failed to find email in db",
+			sut: func() *accountUseCaseUT {
+				sut := NewAccountUseCaseUT()
 				sut.mockFindByEmailFailed()
 				return sut
 			}(),
@@ -83,9 +98,9 @@ func TestRegisterAccount(t *testing.T) {
 			expected:    nil,
 		},
 		{
-			name: "WhenEmailUsed_ThenReturnExistedErr",
-			sut: func() *accountSvcUT {
-				sut := NewAccountSvcUT()
+			name: "failed caused email already taken",
+			sut: func() *accountUseCaseUT {
+				sut := NewAccountUseCaseUT()
 				sut.mockFindByEmailHasResult()
 				return sut
 			}(),
@@ -94,10 +109,23 @@ func TestRegisterAccount(t *testing.T) {
 			expected:    nil,
 		},
 		{
-			name: "WhenCreateGotErr_ThenReturnErr",
-			sut: func() *accountSvcUT {
-				sut := NewAccountSvcUT()
+			name: "failed when hash password",
+			sut: func() *accountUseCaseUT {
+				sut := NewAccountUseCaseUT()
 				sut.mockFindByEmailNoResult()
+				sut.mockHashPasswordErr()
+				return sut
+			}(),
+			accountInfo: userSample,
+			expectedErr: errors.New("hash got err"),
+			expected:    nil,
+		},
+		{
+			name: "failed when persist to db",
+			sut: func() *accountUseCaseUT {
+				sut := NewAccountUseCaseUT()
+				sut.mockFindByEmailNoResult()
+				sut.mockHashPasswordSuccess()
 				sut.mockCreateError()
 				return sut
 			}(),
@@ -106,10 +134,11 @@ func TestRegisterAccount(t *testing.T) {
 			expected:    nil,
 		},
 		{
-			name: "RegisterSuccess",
-			sut: func() *accountSvcUT {
-				sut := NewAccountSvcUT()
+			name: "register success",
+			sut: func() *accountUseCaseUT {
+				sut := NewAccountUseCaseUT()
 				sut.mockFindByEmailNoResult()
+				sut.mockHashPasswordSuccess()
 				sut.mockCreateSuccess()
 				return sut
 			}(),
