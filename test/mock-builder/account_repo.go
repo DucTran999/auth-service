@@ -12,6 +12,7 @@ import (
 var (
 	FakeEmail             = "daniel@example.com"
 	ErrFindAccountByEmail = errors.New("find unexpected error")
+	ErrCreateAccount      = errors.New("unexpected error create new account")
 )
 
 type mockAccountRepoBuilder struct {
@@ -26,6 +27,23 @@ func newMockAccountRepoBuilder(t *testing.T) *mockAccountRepoBuilder {
 
 func (b *mockAccountRepoBuilder) GetInstance() *mocks.AccountRepo {
 	return b.inst
+}
+
+func (b *mockAccountRepoBuilder) CreateAccountError() {
+	b.inst.EXPECT().
+		Create(mock.Anything, mock.Anything).
+		Return(nil, ErrCreateAccount)
+}
+
+func (b *mockAccountRepoBuilder) CreateAccountSuccess() {
+	mockAccount := &model.Account{
+		ID:       FakeAccountID,
+		Email:    FakeEmail,
+		IsActive: true,
+	}
+	b.inst.EXPECT().
+		Create(mock.Anything, mock.Anything).
+		Return(mockAccount, nil)
 }
 
 func (b *mockAccountRepoBuilder) FindByEmailError() {

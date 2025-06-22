@@ -2,7 +2,6 @@ package usecase_test
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -91,7 +90,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailHasResult()
-				builders.HasherBuilder.HashPasswordGotError()
+				builders.HasherBuilder.CompareHashPasswordGotError()
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput:  loginInput,
@@ -211,7 +210,6 @@ func TestLogin(t *testing.T) {
 
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {
-				log.Println(tc.expected.ID)
 				assert.Equal(t, tc.expected.ID, session.AccountID)
 			} else {
 				assert.Nil(t, session)

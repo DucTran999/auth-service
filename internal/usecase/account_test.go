@@ -2,146 +2,95 @@ package usecase_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
-	"github.com/DucTran999/auth-service/test/mocks"
+	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-type accountUseCaseUT struct {
-	ut          usecase.AccountUseCase
-	hasher      *mocks.Hasher
-	accountRepo *mocks.AccountRepo
-}
-
-func NewAccountUseCaseUT() *accountUseCaseUT {
-	hasher := new(mocks.Hasher)
-	accountRepo := new(mocks.AccountRepo)
-
-	return &accountUseCaseUT{
-		ut:          usecase.NewAccountUseCase(hasher, accountRepo),
-		hasher:      hasher,
-		accountRepo: accountRepo,
-	}
-}
-
-func (sut *accountUseCaseUT) mockFindByEmailFailed() {
-	sut.accountRepo.EXPECT().
-		FindByEmail(mock.Anything, mock.Anything).
-		Return(nil, errors.New("find user by email: unexpected error"))
-}
-
-func (sut *accountUseCaseUT) mockFindByEmailHasResult() {
-	sut.accountRepo.EXPECT().
-		FindByEmail(mock.Anything, mock.Anything).
-		Return(&model.Account{Email: "daniel@example.com"}, nil)
-}
-
-func (sut *accountUseCaseUT) mockFindByEmailNoResult() {
-	sut.accountRepo.EXPECT().
-		FindByEmail(mock.Anything, mock.Anything).
-		Return(nil, nil)
-}
-
-func (sut *accountUseCaseUT) mockHashPasswordErr() {
-	sut.hasher.EXPECT().
-		HashPassword(mock.AnythingOfType("string")).
-		Return("", errors.New("hash got err"))
-}
-
-func (sut *accountUseCaseUT) mockHashPasswordSuccess() {
-	sut.hasher.EXPECT().
-		HashPassword(mock.AnythingOfType("string")).
-		Return("hashedPassword", nil)
-}
-
-func (sut *accountUseCaseUT) mockCreateError() {
-	sut.accountRepo.EXPECT().
-		Create(mock.Anything, mock.Anything).
-		Return(nil, errors.New("create user: unexpected error"))
-}
-
-func (sut *accountUseCaseUT) mockCreateSuccess() {
-	sut.accountRepo.EXPECT().
-		Create(mock.Anything, mock.Anything).
-		Return(&model.Account{Email: "daniel@example.com"}, nil)
+func NewAccountUseCaseUT(
+	t *testing.T,
+	builders *mockbuilder.BuilderContainer,
+) usecase.AccountUseCase {
+	return usecase.NewAccountUseCase(
+		builders.HasherBuilder.GetInstance(),
+		builders.AccountRepoBuilder.GetInstance(),
+	)
 }
 
 func TestRegisterAccount(t *testing.T) {
 	type testCase struct {
 		name        string
-		sut         *accountUseCaseUT
+		setup       func(t *testing.T) usecase.AccountUseCase
 		accountInfo usecase.RegisterInput
 		expectedErr error
 		expected    *model.Account
 	}
 
 	userSample := usecase.RegisterInput{
-		Email:    "daniel@example.com",
+		Email:    mockbuilder.FakeEmail,
 		Password: "abc1234!",
 	}
 
 	testTable := []testCase{
 		{
 			name: "failed to find email in db",
-			sut: func() *accountUseCaseUT {
-				sut := NewAccountUseCaseUT()
-				sut.mockFindByEmailFailed()
-				return sut
-			}(),
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				b := mockbuilder.NewBuilderContainer(t)
+				b.AccountRepoBuilder.FindByEmailError()
+				return NewAccountUseCaseUT(t, b)
+			},
 			accountInfo: userSample,
-			expectedErr: errors.New("find user by email: unexpected error"),
+			expectedErr: mockbuilder.ErrFindAccountByEmail,
 			expected:    nil,
 		},
 		{
 			name: "failed caused email already taken",
-			sut: func() *accountUseCaseUT {
-				sut := NewAccountUseCaseUT()
-				sut.mockFindByEmailHasResult()
-				return sut
-			}(),
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				b := mockbuilder.NewBuilderContainer(t)
+				b.AccountRepoBuilder.FindByEmailHasResult()
+				return NewAccountUseCaseUT(t, b)
+			},
 			accountInfo: userSample,
 			expectedErr: usecase.ErrEmailExisted,
 			expected:    nil,
 		},
 		{
 			name: "failed when hash password",
-			sut: func() *accountUseCaseUT {
-				sut := NewAccountUseCaseUT()
-				sut.mockFindByEmailNoResult()
-				sut.mockHashPasswordErr()
-				return sut
-			}(),
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				b := mockbuilder.NewBuilderContainer(t)
+				b.AccountRepoBuilder.FindByEmailNoResult()
+				b.HasherBuilder.HashingPasswordFailed()
+				return NewAccountUseCaseUT(t, b)
+			},
 			accountInfo: userSample,
-			expectedErr: errors.New("hash got err"),
+			expectedErr: mockbuilder.ErrHashingPassword,
 			expected:    nil,
 		},
 		{
 			name: "failed when persist to db",
-			sut: func() *accountUseCaseUT {
-				sut := NewAccountUseCaseUT()
-				sut.mockFindByEmailNoResult()
-				sut.mockHashPasswordSuccess()
-				sut.mockCreateError()
-				return sut
-			}(),
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				b := mockbuilder.NewBuilderContainer(t)
+				b.AccountRepoBuilder.FindByEmailNoResult()
+				b.HasherBuilder.HashingPasswordSuccess()
+				b.AccountRepoBuilder.CreateAccountError()
+				return NewAccountUseCaseUT(t, b)
+			},
 			accountInfo: userSample,
-			expectedErr: errors.New("create user: unexpected error"),
+			expectedErr: mockbuilder.ErrCreateAccount,
 			expected:    nil,
 		},
 		{
 			name: "register success",
-			sut: func() *accountUseCaseUT {
-				sut := NewAccountUseCaseUT()
-				sut.mockFindByEmailNoResult()
-				sut.mockHashPasswordSuccess()
-				sut.mockCreateSuccess()
-				return sut
-			}(),
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				b := mockbuilder.NewBuilderContainer(t)
+				b.AccountRepoBuilder.FindByEmailNoResult()
+				b.HasherBuilder.HashingPasswordSuccess()
+				b.AccountRepoBuilder.CreateAccountSuccess()
+				return NewAccountUseCaseUT(t, b)
+			},
 			accountInfo: userSample,
 			expectedErr: nil,
 			expected: &model.Account{
@@ -152,7 +101,8 @@ func TestRegisterAccount(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
-			user, err := tc.sut.ut.Register(context.Background(), tc.accountInfo)
+			sut := tc.setup(t)
+			user, err := sut.Register(context.Background(), tc.accountInfo)
 
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {
