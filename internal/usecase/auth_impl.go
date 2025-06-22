@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -16,17 +17,20 @@ const (
 
 type authUseCaseImpl struct {
 	hasher      pkg.Hasher
+	cache       pkg.Cache
 	accountRepo repository.AccountRepo
 	sessionRepo repository.SessionRepository
 }
 
 func NewAuthUseCase(
 	hasher pkg.Hasher,
+	cache pkg.Cache,
 	accountRepo repository.AccountRepo,
 	sessionRepo repository.SessionRepository,
 ) *authUseCaseImpl {
 	return &authUseCaseImpl{
 		hasher:      hasher,
+		cache:       cache,
 		accountRepo: accountRepo,
 		sessionRepo: sessionRepo,
 	}
@@ -66,6 +70,17 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 		return nil, nil
 	}
 
+	// Try get session from cache
+	sessionKey := uc.getSessionCacheKey(sessionID)
+	cachedSession := uc.getSessionFromCache(ctx, sessionKey)
+	if cachedSession != nil {
+		// Extend ttl for session
+		if err := uc.cache.Set(ctx, sessionKey, cachedSession, sessionDuration); err == nil {
+			return cachedSession, nil
+		}
+	}
+
+	// Cache missing try to retrieve from DB
 	session, err := uc.sessionRepo.FindByID(ctx, sessionID)
 	if err != nil {
 		return nil, err
@@ -74,14 +89,9 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 		return nil, nil
 	}
 
-	newExpiresAt := time.Now().Add(sessionDuration)
-	err = uc.sessionRepo.UpdateExpiresAt(ctx, session.ID.String(), newExpiresAt)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update field locally so caller can use the latest value
-	session.ExpiresAt = &newExpiresAt
+	// Re-cache the session after extend ttl
+	val, _ := json.Marshal(session)
+	_ = uc.cache.Set(ctx, sessionKey, val, sessionDuration)
 	return session, nil
 }
 
@@ -125,7 +135,6 @@ func (uc *authUseCaseImpl) createSession(
 	input LoginInput,
 ) (*model.Session, error) {
 
-	expiredAt := time.Now().Add(sessionDuration)
 	session := &model.Session{
 		AccountID: account.ID,
 		Account: model.Account{
@@ -136,7 +145,6 @@ func (uc *authUseCaseImpl) createSession(
 		},
 		IPAddress: input.IP,
 		UserAgent: input.UserAgent,
-		ExpiresAt: &expiredAt,
 	}
 
 	if err := uc.sessionRepo.Create(ctx, session); err != nil {
@@ -144,4 +152,30 @@ func (uc *authUseCaseImpl) createSession(
 	}
 
 	return session, nil
+}
+
+func (uc *authUseCaseImpl) getSessionCacheKey(sessionId string) string {
+	return "session-" + sessionId
+}
+
+func (uc *authUseCaseImpl) getSessionFromCache(
+	ctx context.Context,
+	sessionKey string,
+) *model.Session {
+
+	val, err := uc.cache.Get(ctx, sessionKey)
+	if err != nil {
+		// If get session from cache got error just pass it.
+		// Already has fallback form DB
+		return nil
+	}
+
+	var session model.Session
+	if marshalErr := json.Unmarshal([]byte(val), &session); marshalErr != nil {
+		// if marshall failed, the session consider to be not found.
+		// The DB fallback will handle the rest.
+		return nil
+	}
+
+	return &session
 }

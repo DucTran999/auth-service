@@ -1,7 +1,7 @@
 github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f h1:vbWKG4lWsFLkbJrkIt42ciB0RsXNWs+ICR2wwuN1DuA=
 github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f/go.mod h1:nFIdXUGHjeXjxfVlMJ088dtxxSP9xOvR4LZZEUIpkXU=
-github.com/DucTran999/shared-pkg v0.0.0-20250614134905-4006d1bfa270 h1:U11pOpm4gkUFgZ1OpNJ7vpHZ6JTTzPBJcvuRDBeoIz0=
-github.com/DucTran999/shared-pkg v0.0.0-20250614134905-4006d1bfa270/go.mod h1:n6W8Q7wbkkAYmhQdc0Y0R/xLOgGUakg8iqa5Hd2n/NY=
+github.com/DucTran999/shared-pkg v0.0.0-20250622065927-f63c6e60e144 h1:ol8b5v0xPP6Fs3Aa2CsI31+oBARhxzvZ9wU3HzezRNg=
+github.com/DucTran999/shared-pkg v0.0.0-20250622065927-f63c6e60e144/go.mod h1:n6W8Q7wbkkAYmhQdc0Y0R/xLOgGUakg8iqa5Hd2n/NY=
 github.com/alexedwards/argon2id v1.0.0 h1:wJzDx66hqWX7siL/SRUmgz3F8YMrd/nfX/xHHcQQP0w=
 github.com/alexedwards/argon2id v1.0.0/go.mod h1:tYKkqIjzXvZdzPvADMWOEZ+l6+BD6CtBXMj5fnJppiw=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=

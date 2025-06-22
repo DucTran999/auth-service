@@ -108,7 +108,7 @@ func (c *container) initAppHandler() {
 
 	// Auth module
 	sessionRepo := repository.NewSessionRepository(c.authDBConn.DB())
-	authUC := usecase.NewAuthUseCase(hasher, accountRepo, sessionRepo)
+	authUC := usecase.NewAuthUseCase(hasher, c.cache, accountRepo, sessionRepo)
 
 	c.appHandler = &appHandler{
 		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),
