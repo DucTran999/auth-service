@@ -33,6 +33,7 @@ type EnvConfiguration struct {
 	DBMaxConnectionIdleTime int    `mapstructure:"DB_MAX_CONNECTION_IDLE_TIME"`
 	DBTimezone              string `mapstructure:"DB_TIMEZONE"`
 
+	CacheInMem  bool   `mapstructure:"CACHE_IN_MEM"`
 	RedisHost   string `mapstructure:"REDIS_HOST"`
 	RedisPort   int    `mapstructure:"REDIS_PORT"`
 	RedisPasswd string `mapstructure:"REDIS_PASSWORD"`

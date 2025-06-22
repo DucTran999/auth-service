@@ -11,6 +11,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/pkg"
 	"github.com/DucTran999/dbkit"
+	"github.com/DucTran999/shared-pkg/cache"
 	"github.com/DucTran999/shared-pkg/logger"
 	"gorm.io/gorm"
 )
@@ -31,9 +32,11 @@ type appHandler struct {
 }
 
 type container struct {
+	logger    logger.ILogger
+	appConfig *config.EnvConfiguration
+
 	authDBConn dbkit.Connection
-	logger     logger.ILogger
-	appConfig  *config.EnvConfiguration
+	cache      cache.Cache
 
 	appHandler *appHandler
 }
@@ -52,8 +55,15 @@ func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
 	}
 	log.Println("[INFO] connection db successfully")
 
+	cache, err := newRedisCache(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect redis cache: %w", err)
+	}
+	log.Println("[INFO] connection redis successfully")
+
 	c := &container{
 		authDBConn: conn,
+		cache:      cache,
 		logger:     logger,
 		appConfig:  cfg,
 	}
@@ -74,6 +84,9 @@ func (c *container) Logger() logger.ILogger {
 func (c *container) Close() {
 	if err := c.authDBConn.Close(); err != nil {
 		c.logger.Warnf("failed to close db connect: %v", err)
+	}
+	if err := c.cache.Close(); err != nil {
+		c.logger.Warnf("failed to close cache connection: %v", err)
 	}
 	c.logger.Info("db connection closed gracefully")
 }
