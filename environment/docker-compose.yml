@@ -22,8 +22,24 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: redis_${SERVICE_NAME}
+    ports:
+      - "6379:6379"
+    networks:
+      - localnet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   migrate:
     image: migrate/migrate
+    container_name: migrate_${SERVICE_NAME}
     depends_on:
       db:
         condition: service_healthy
