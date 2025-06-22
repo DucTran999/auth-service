@@ -28,18 +28,18 @@ func (b *mockHasherBuilder) GetInstance() *mocks.Hasher {
 
 func (b *mockHasherBuilder) HashPasswordMatch() {
 	b.inst.EXPECT().
-		ComparePasswordAndHash(mock.Anything, mock.AnythingOfType("string")).
+		ComparePasswordAndHash(mock.AnythingOfType("string"), mock.AnythingOfType("string")).
 		Return(true, nil)
 }
 
 func (b *mockHasherBuilder) HashPasswordNotMatch() {
 	b.inst.EXPECT().
-		ComparePasswordAndHash(mock.AnythingOfType("string"), mock.Anything).
+		ComparePasswordAndHash(mock.AnythingOfType("string"), mock.AnythingOfType("string")).
 		Return(false, nil)
 }
 
 func (b *mockHasherBuilder) HashPasswordGotError() {
 	b.inst.EXPECT().
-		ComparePasswordAndHash(mock.AnythingOfType("string"), mock.Anything).
+		ComparePasswordAndHash(mock.AnythingOfType("string"), mock.AnythingOfType("string")).
 		Return(false, ErrCompareHashPassword)
 }
