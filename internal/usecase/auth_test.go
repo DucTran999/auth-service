@@ -42,7 +42,7 @@ func TestLogin(t *testing.T) {
 
 	testTable := []testCase{
 		{
-			// 	name: "failed to find email in db",
+			name: "failed to find email in db",
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailError()
@@ -219,103 +219,3 @@ func TestLogin(t *testing.T) {
 		})
 	}
 }
-
-// func TestLogin(t *testing.T) {
-
-// 	userSample := usecase.LoginInput{
-// 		Email:    "daniel@example.com",
-// 		Password: "abc1234!",
-// 	}
-
-// 	testTable := []testCase{
-
-// 		{
-// 			name: "session not found allow create new one",
-// 			sut: func() *authUseCaseUT {
-// 				sut := NewAuthUseCaseUT()
-// 				sut.mockSessionNotFound()
-// 				sut.mockFindByEmailHasResult()
-// 				sut.mockHashPasswordMatch()
-// 				sut.mockCreateSessionSuccess()
-// 				return sut
-// 			}(),
-// 			loginInput: usecase.LoginInput{
-// 				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
-// 				Email:            userSample.Email,
-// 				Password:         userSample.Password,
-// 			},
-// 			expectedErr: nil,
-// 			expected: &model.Account{
-// 				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
-// 				Email:    "daniel@example.com",
-// 				IsActive: true,
-// 			},
-// 		},
-// 		{
-// 			name: "failed when update expires",
-// 			sut: func() *authUseCaseUT {
-// 				sut := NewAuthUseCaseUT()
-// 				sut.mockSessionCanReuse()
-// 				sut.mockSessionUpdateExpiresAtErr()
-// 				return sut
-// 			}(),
-// 			loginInput: usecase.LoginInput{
-// 				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
-// 				Email:            userSample.Email,
-// 				Password:         userSample.Password,
-// 			},
-// 			expectedErr: errors.New("update expires error"),
-// 			expected:    nil,
-// 		},
-// 		{
-// 			name: "reuse session",
-// 			sut: func() *authUseCaseUT {
-// 				sut := NewAuthUseCaseUT()
-// 				sut.mockSessionCanReuse()
-// 				sut.mockSessionUpdateExpiresAt()
-// 				return sut
-// 			}(),
-// 			loginInput: usecase.LoginInput{
-// 				CurrentSessionID: "123e4567-e89b-12d3-a456-426614174000",
-// 				Email:            userSample.Email,
-// 				Password:         userSample.Password,
-// 			},
-// 			expectedErr: nil,
-// 			expected: &model.Account{
-// 				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
-// 				Email:    "daniel@example.com",
-// 				IsActive: true,
-// 			},
-// 		},
-// 		{
-// 			name: "failed to create session",
-// 			sut: func() *authUseCaseUT {
-// 				sut := NewAuthUseCaseUT()
-// 				sut.mockFindByEmailHasResult()
-// 				sut.mockHashPasswordMatch()
-// 				sut.mockCreateSessionFailed()
-// 				return sut
-// 			}(),
-// 			loginInput:  userSample,
-// 			expectedErr: errors.New("create session failed"),
-// 			expected:    nil,
-// 		},
-// 		{
-// 			name: "login success",
-// 			sut: func() *authUseCaseUT {
-// 				sut := NewAuthUseCaseUT()
-// 				sut.mockFindByEmailHasResult()
-// 				sut.mockHashPasswordMatch()
-// 				sut.mockCreateSessionSuccess()
-// 				return sut
-// 			}(),
-// 			loginInput:  userSample,
-// 			expectedErr: nil,
-// 			expected: &model.Account{
-// 				ID:       uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
-// 				Email:    "daniel@example.com",
-// 				IsActive: true,
-// 			},
-// 		},
-// 	}
-// }
