@@ -11,7 +11,6 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/pkg"
 	"github.com/DucTran999/dbkit"
-	"github.com/DucTran999/shared-pkg/cache"
 	"github.com/DucTran999/shared-pkg/logger"
 	"gorm.io/gorm"
 )
@@ -36,7 +35,7 @@ type container struct {
 	appConfig *config.EnvConfiguration
 
 	authDBConn dbkit.Connection
-	cache      cache.Cache
+	cache      pkg.Cache
 
 	appHandler *appHandler
 }
@@ -55,7 +54,7 @@ func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
 	}
 	log.Println("[INFO] connection db successfully")
 
-	cache, err := newRedisCache(cfg)
+	cache, err := newRedisCache(cfg, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect redis cache: %w", err)
 	}

@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f
-	github.com/DucTran999/shared-pkg v0.0.0-20250622065927-f63c6e60e144
+	github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0

@@ -75,9 +75,8 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	cachedSession := uc.getSessionFromCache(ctx, sessionKey)
 	if cachedSession != nil {
 		// Extend ttl for session
-		if err := uc.cache.Set(ctx, sessionKey, cachedSession, sessionDuration); err == nil {
-			return cachedSession, nil
-		}
+		_ = uc.cache.Set(ctx, sessionKey, cachedSession, sessionDuration)
+		return cachedSession, nil
 	}
 
 	// Cache missing try to retrieve from DB
@@ -90,8 +89,7 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	}
 
 	// Re-cache the session after extend ttl
-	val, _ := json.Marshal(session)
-	_ = uc.cache.Set(ctx, sessionKey, val, sessionDuration)
+	_ = uc.cache.Set(ctx, sessionKey, session, sessionDuration)
 	return session, nil
 }
 
