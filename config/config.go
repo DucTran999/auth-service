@@ -38,6 +38,9 @@ type EnvConfiguration struct {
 	RedisPort   int    `mapstructure:"REDIS_PORT"`
 	RedisPasswd string `mapstructure:"REDIS_PASSWORD"`
 	RedisDB     int    `mapstructure:"REDIS_DATABASE"`
+
+	PurgeIntervalInDays  int `mapstructure:"PURGE_INTERVAL_IN_DAYS"`
+	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS"`
 }
 
 func LoadConfig(configFile string) (*EnvConfiguration, error) {
