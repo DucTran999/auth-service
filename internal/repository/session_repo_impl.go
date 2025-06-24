@@ -54,3 +54,23 @@ func (r *sessionRepoImpl) UpdateExpiresAt(
 		Where("id = ?", sessionID).
 		Update("expires_at", expiresAt).Error
 }
+
+func (r *sessionRepoImpl) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
+	query := `DELETE FROM sessions WHERE expires_at < ?`
+	return r.db.WithContext(ctx).Exec(query, cutoff).Error
+}
+
+func (r *sessionRepoImpl) FindAllActiveSession(ctx context.Context) ([]model.Session, error) {
+	var activeSessions []model.Session
+
+	err := r.db.WithContext(ctx).
+		Select("id").
+		Where("expires_at IS NOT NULL").
+		Find(&activeSessions).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return activeSessions, nil
+}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/internal/gen"
+	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/internal/handler/http"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/internal/usecase"
@@ -16,24 +17,30 @@ import (
 
 type Container interface {
 	APIHandler() gen.ServerInterface
+	SessionCleaner() background.SessionCleaner
 	Logger() logger.ILogger
 	Close()
 }
 
 type repositories struct {
-	Account repository.AccountRepo
-	Session repository.SessionRepository
+	account repository.AccountRepo
+	session repository.SessionRepository
 }
 
 type useCases struct {
-	Auth    usecase.AuthUseCase
-	Account usecase.AccountUseCase
+	auth    usecase.AuthUseCase
+	account usecase.AccountUseCase
+	session usecase.SessionUsecase
 }
 
 type handlers struct {
-	Auth    http.AuthHandler
-	Account http.AccountHandler
-	Health  http.HealthHandler
+	auth    http.AuthHandler
+	account http.AccountHandler
+	health  http.HealthHandler
+}
+
+type jobs struct {
+	SessionCleaner background.SessionCleaner
 }
 
 type container struct {
@@ -48,6 +55,7 @@ type container struct {
 	useCases     *useCases
 	repositories *repositories
 	handlers     *handlers
+	jobs         *jobs
 
 	apiHandler gen.ServerInterface
 }
@@ -91,12 +99,17 @@ func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
 	c.initUseCases()     // Application business logic layer (usecases)
 	c.initHandlers()     // HTTP handlers for API endpoints
 	c.initAPIHandler()   // Adapter for generated OpenAPI ServerInterface implementation
+	c.initJobs()
 
 	return c, nil
 }
 
 func (c *container) APIHandler() gen.ServerInterface {
 	return c.apiHandler
+}
+
+func (c *container) SessionCleaner() background.SessionCleaner {
+	return c.jobs.SessionCleaner
 }
 
 func (c *container) Logger() logger.ILogger {
@@ -115,35 +128,38 @@ func (c *container) Close() {
 
 func (c *container) initRepositories() {
 	c.repositories = &repositories{
-		Account: repository.NewAccountRepo(c.authDBConn.DB()),
-		Session: repository.NewSessionRepository(c.authDBConn.DB()),
+		account: repository.NewAccountRepo(c.authDBConn.DB()),
+		session: repository.NewSessionRepository(c.authDBConn.DB()),
 	}
 }
 
 func (c *container) initUseCases() {
 	accountUC := usecase.NewAccountUseCase(
 		c.hasher,
-		c.repositories.Account,
+		c.repositories.account,
 	)
 
 	authUC := usecase.NewAuthUseCase(
 		c.hasher,
 		c.cache,
-		c.repositories.Account,
-		c.repositories.Session,
+		c.repositories.account,
+		c.repositories.session,
 	)
 
+	sessionUC := usecase.NewSessionUC(c.repositories.session)
+
 	c.useCases = &useCases{
-		Account: accountUC,
-		Auth:    authUC,
+		account: accountUC,
+		auth:    authUC,
+		session: sessionUC,
 	}
 }
 
 func (c *container) initHandlers() {
 	c.handlers = &handlers{
-		Auth:    http.NewAuthHandler(c.useCases.Auth),
-		Account: http.NewAccountHandler(c.useCases.Account),
-		Health:  http.NewHealthHandler(c.appConfig.ServiceEnv),
+		auth:    http.NewAuthHandler(c.useCases.auth),
+		account: http.NewAccountHandler(c.useCases.account),
+		health:  http.NewHealthHandler(c.appConfig.ServiceEnv),
 	}
 }
 
@@ -155,8 +171,14 @@ type apiHandler struct {
 
 func (c *container) initAPIHandler() {
 	c.apiHandler = &apiHandler{
-		AuthHandler:    c.handlers.Auth,
-		AccountHandler: c.handlers.Account,
-		HealthHandler:  c.handlers.Health,
+		AuthHandler:    c.handlers.auth,
+		AccountHandler: c.handlers.account,
+		HealthHandler:  c.handlers.health,
+	}
+}
+
+func (c *container) initJobs() {
+	c.jobs = &jobs{
+		SessionCleaner: background.NewSessionCleaner(c.logger, c.useCases.session),
 	}
 }
