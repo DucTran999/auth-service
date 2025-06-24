@@ -20,9 +20,7 @@ func (lc *loggingCache) GetInto(ctx context.Context, key string, dest any) error
 	err := lc.inner.GetInto(ctx, key, dest)
 	if err != nil {
 		lc.logger.Warnf("cache get failed: key=%s err=%v", key, err)
-		return err
 	}
-
 	return err
 }
 
