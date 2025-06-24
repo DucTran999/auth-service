@@ -6,74 +6,97 @@ import (
 
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/internal/gen"
-	"github.com/DucTran999/auth-service/internal/handler"
+	"github.com/DucTran999/auth-service/internal/handler/http"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/pkg"
 	"github.com/DucTran999/dbkit"
 	"github.com/DucTran999/shared-pkg/logger"
-	"gorm.io/gorm"
 )
 
 type Container interface {
-	AppConfig() *config.EnvConfiguration
-
-	AuthDB() *gorm.DB
+	APIHandler() gen.ServerInterface
 	Logger() logger.ILogger
 	Close()
-
-	AppHandler() gen.ServerInterface
 }
-type appHandler struct {
-	handler.HealthHandler
-	handler.AccountHandler
-	handler.AuthHandler
+
+type repositories struct {
+	Account repository.AccountRepo
+	Session repository.SessionRepository
+}
+
+type useCases struct {
+	Auth    usecase.AuthUseCase
+	Account usecase.AccountUseCase
+}
+
+type handlers struct {
+	Auth    http.AuthHandler
+	Account http.AccountHandler
+	Health  http.HealthHandler
 }
 
 type container struct {
-	logger    logger.ILogger
 	appConfig *config.EnvConfiguration
+
+	logger logger.ILogger
+	hasher pkg.Hasher
 
 	authDBConn dbkit.Connection
 	cache      pkg.Cache
 
-	appHandler *appHandler
+	useCases     *useCases
+	repositories *repositories
+	handlers     *handlers
+
+	apiHandler gen.ServerInterface
 }
 
+// NewContainer initializes and wires together all core dependencies of the application,
+// including logger, database, cache, repositories, usecases, and handlers.
+// It returns a fully constructed container instance ready for use in the application.
 func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
+	// Initialize application logger
 	logger, err := newLogger(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
 	log.Println("[INFO] initialize logger successfully")
 
-	// Connection database
+	// Establish database connection for the authentication domain
 	conn, err := newAuthDBConnection(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect auth db: %w", err)
 	}
 	log.Println("[INFO] connection db successfully")
 
+	// Initialize Redis-based cache system
 	cache, err := newRedisCache(cfg, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect redis cache: %w", err)
 	}
 	log.Println("[INFO] connection redis successfully")
 
+	// Construct the container with base-level services
 	c := &container{
 		authDBConn: conn,
 		cache:      cache,
 		logger:     logger,
 		appConfig:  cfg,
+		hasher:     pkg.NewHasher(), // Utility for password hashing and similar needs
 	}
-	c.initAppHandler()
 
-	// Create new dependencies container instance
+	// Initialize layered application components in dependency order
+	c.initRepositories() // Data access layer (repositories)
+	c.initUseCases()     // Application business logic layer (usecases)
+	c.initHandlers()     // HTTP handlers for API endpoints
+	c.initAPIHandler()   // Adapter for generated OpenAPI ServerInterface implementation
+
 	return c, nil
 }
 
-func (c *container) AuthDB() *gorm.DB {
-	return c.authDBConn.DB()
+func (c *container) APIHandler() gen.ServerInterface {
+	return c.apiHandler
 }
 
 func (c *container) Logger() logger.ILogger {
@@ -90,28 +113,50 @@ func (c *container) Close() {
 	c.logger.Info("db connection closed gracefully")
 }
 
-func (c *container) AppHandler() gen.ServerInterface {
-	return c.appHandler
+func (c *container) initRepositories() {
+	c.repositories = &repositories{
+		Account: repository.NewAccountRepo(c.authDBConn.DB()),
+		Session: repository.NewSessionRepository(c.authDBConn.DB()),
+	}
 }
 
-func (c *container) AppConfig() *config.EnvConfiguration {
-	return c.appConfig
+func (c *container) initUseCases() {
+	accountUC := usecase.NewAccountUseCase(
+		c.hasher,
+		c.repositories.Account,
+	)
+
+	authUC := usecase.NewAuthUseCase(
+		c.hasher,
+		c.cache,
+		c.repositories.Account,
+		c.repositories.Session,
+	)
+
+	c.useCases = &useCases{
+		Account: accountUC,
+		Auth:    authUC,
+	}
 }
 
-func (c *container) initAppHandler() {
-	hasher := pkg.NewHasher()
+func (c *container) initHandlers() {
+	c.handlers = &handlers{
+		Auth:    http.NewAuthHandler(c.useCases.Auth),
+		Account: http.NewAccountHandler(c.useCases.Account),
+		Health:  http.NewHealthHandler(c.appConfig.ServiceEnv),
+	}
+}
 
-	// Account module
-	accountRepo := repository.NewAccountRepo(c.authDBConn.DB())
-	accountUC := usecase.NewAccountUseCase(hasher, accountRepo)
+type apiHandler struct {
+	http.AuthHandler
+	http.AccountHandler
+	http.HealthHandler
+}
 
-	// Auth module
-	sessionRepo := repository.NewSessionRepository(c.authDBConn.DB())
-	authUC := usecase.NewAuthUseCase(hasher, c.cache, accountRepo, sessionRepo)
-
-	c.appHandler = &appHandler{
-		HealthHandler:  handler.NewHealthHandler(c.appConfig.ServiceVersion),
-		AccountHandler: handler.NewAccountHandler(accountUC),
-		AuthHandler:    handler.NewAuthHandler(authUC),
+func (c *container) initAPIHandler() {
+	c.apiHandler = &apiHandler{
+		AuthHandler:    c.handlers.Auth,
+		AccountHandler: c.handlers.Account,
+		HealthHandler:  c.handlers.Health,
 	}
 }
