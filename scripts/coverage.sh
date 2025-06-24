@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 green() {
   echo -e "\033[32m$1\033[0m"
 }

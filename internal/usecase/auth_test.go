@@ -2,6 +2,7 @@ package usecase_test
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -190,7 +191,8 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.ValidSessionCached()
-				builders.CacheBuilder.SetCacheSessionSuccess()
+				builders.CacheBuilder.GetTTLSuccess()
+				builders.CacheBuilder.SetExpireSuccess()
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput: usecase.LoginInput{
@@ -203,11 +205,12 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			sut := tc.setup(t)
-			session, err := sut.Login(context.Background(), tc.loginInput)
-
+			session, err := sut.Login(ctx, tc.loginInput)
+			log.Println(session)
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {
 				assert.Equal(t, tc.expected.ID, session.AccountID)

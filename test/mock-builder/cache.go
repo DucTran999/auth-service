@@ -1,10 +1,9 @@
 package mockbuilder
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/test/mocks"
@@ -32,14 +31,12 @@ func newMockCacheBuilder(t *testing.T) *mockCacheBuilder {
 
 func (b *mockCacheBuilder) GetCacheErr() {
 	b.inst.EXPECT().
-		Get(mock.Anything, mock.Anything).
-		Return("", ErrGetCache)
+		GetInto(mock.Anything, mock.Anything, mock.Anything).
+		Return(ErrGetCache)
 }
 
 func (b *mockCacheBuilder) ValidSessionCached() {
-	notExpired := time.Now().Add(time.Hour)
-
-	sessionCached := &model.Session{
+	sessionCached := model.Session{
 		ID:        FakeSessionID,
 		AccountID: FakeAccountID,
 		Account: model.Account{
@@ -47,19 +44,24 @@ func (b *mockCacheBuilder) ValidSessionCached() {
 			Email:    FakeEmail,
 			IsActive: true,
 		},
-		ExpiresAt: &notExpired,
+		ExpiresAt: nil,
 	}
-	bytes, _ := json.Marshal(sessionCached)
 
 	b.inst.EXPECT().
-		Get(mock.Anything, mock.Anything).
-		Return(string(bytes), nil)
+		GetInto(mock.Anything, mock.Anything, mock.Anything).
+		Run(func(ctx context.Context, key string, dest any) {
+			// Type assert to pointer type
+			if ptr, ok := dest.(*model.Session); ok {
+				*ptr = sessionCached // Copy value into the pointed-to object
+			}
+		}).
+		Return(nil)
 }
 
 func (b *mockCacheBuilder) SessionMissCache() {
 	b.inst.EXPECT().
-		Get(mock.Anything, mock.Anything).
-		Return("", nil)
+		GetInto(mock.Anything, mock.Anything, mock.Anything).
+		Return(errors.New("missing key"))
 }
 
 func (b *mockCacheBuilder) SetCacheSessionSuccess() {
@@ -72,4 +74,16 @@ func (b *mockCacheBuilder) SetCacheSessionFailed() {
 	b.inst.EXPECT().
 		Set(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(ErrSetCacheSession)
+}
+
+func (b *mockCacheBuilder) SetExpireSuccess() {
+	b.inst.EXPECT().
+		Expire(mock.Anything, mock.Anything, mock.Anything).
+		Return(nil)
+}
+
+func (b *mockCacheBuilder) GetTTLSuccess() {
+	b.inst.EXPECT().
+		TTL(mock.Anything, mock.Anything).
+		Return(555, nil)
 }
