@@ -3,7 +3,6 @@ package mockbuilder
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -62,10 +61,7 @@ func (b *mockCacheBuilder) ValidSessionCached() {
 func (b *mockCacheBuilder) SessionMissCache() {
 	b.inst.EXPECT().
 		GetInto(mock.Anything, mock.Anything, mock.Anything).
-		Run(func(ctx context.Context, key string, dest any) {
-			dest = nil
-		}).
-		Return(fmt.Errorf("missing key"))
+		Return(errors.New("missing key"))
 }
 
 func (b *mockCacheBuilder) SetCacheSessionSuccess() {
