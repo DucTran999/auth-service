@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -74,8 +73,12 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	sessionKey := uc.getSessionCacheKey(sessionID)
 	cachedSession := uc.getSessionFromCache(ctx, sessionKey)
 	if cachedSession != nil {
-		// Extend ttl for session
-		_ = uc.cache.Set(ctx, sessionKey, cachedSession, sessionDuration)
+		ttl, _ := uc.cache.TTL(ctx, sessionKey)
+
+		// Example: Refresh TTL if less than 30% of sessionDuration remains
+		if ttl < int64(sessionDuration.Seconds())/3 {
+			_ = uc.cache.Expire(ctx, sessionKey, sessionDuration)
+		}
 		return cachedSession, nil
 	}
 
@@ -161,17 +164,10 @@ func (uc *authUseCaseImpl) getSessionFromCache(
 	sessionKey string,
 ) *model.Session {
 
-	val, err := uc.cache.Get(ctx, sessionKey)
-	if err != nil {
+	var session model.Session
+	if err := uc.cache.GetInto(ctx, sessionKey, &session); err != nil {
 		// If get session from cache got error just pass it.
 		// Already has fallback form DB
-		return nil
-	}
-
-	var session model.Session
-	if marshalErr := json.Unmarshal([]byte(val), &session); marshalErr != nil {
-		// if marshall failed, the session consider to be not found.
-		// The DB fallback will handle the rest.
 		return nil
 	}
 

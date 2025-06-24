@@ -82,111 +82,37 @@ func (_c *Cache_Close_Call) RunAndReturn(run func() error) *Cache_Close_Call {
 	return _c
 }
 
-// Del provides a mock function for the type Cache
-func (_mock *Cache) Del(ctx context.Context, keys ...string) error {
-	var tmpRet mock.Arguments
-	if len(keys) > 0 {
-		tmpRet = _mock.Called(ctx, keys)
-	} else {
-		tmpRet = _mock.Called(ctx)
-	}
-	ret := tmpRet
+// Expire provides a mock function for the type Cache
+func (_mock *Cache) Expire(ctx context.Context, key string, expiration time.Duration) error {
+	ret := _mock.Called(ctx, key, expiration)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Del")
+		panic("no return value specified for Expire")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, ...string) error); ok {
-		r0 = returnFunc(ctx, keys...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, time.Duration) error); ok {
+		r0 = returnFunc(ctx, key, expiration)
 	} else {
 		r0 = ret.Error(0)
 	}
 	return r0
 }
 
-// Cache_Del_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Del'
-type Cache_Del_Call struct {
+// Cache_Expire_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Expire'
+type Cache_Expire_Call struct {
 	*mock.Call
 }
 
-// Del is a helper method to define mock.On call
-//   - ctx context.Context
-//   - keys ...string
-func (_e *Cache_Expecter) Del(ctx interface{}, keys ...interface{}) *Cache_Del_Call {
-	return &Cache_Del_Call{Call: _e.mock.On("Del",
-		append([]interface{}{ctx}, keys...)...)}
-}
-
-func (_c *Cache_Del_Call) Run(run func(ctx context.Context, keys ...string)) *Cache_Del_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 []string
-		var variadicArgs []string
-		if len(args) > 1 {
-			variadicArgs = args[1].([]string)
-		}
-		arg1 = variadicArgs
-		run(
-			arg0,
-			arg1...,
-		)
-	})
-	return _c
-}
-
-func (_c *Cache_Del_Call) Return(err error) *Cache_Del_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *Cache_Del_Call) RunAndReturn(run func(ctx context.Context, keys ...string) error) *Cache_Del_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// Get provides a mock function for the type Cache
-func (_mock *Cache) Get(ctx context.Context, key string) (string, error) {
-	ret := _mock.Called(ctx, key)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Get")
-	}
-
-	var r0 string
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (string, error)); ok {
-		return returnFunc(ctx, key)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) string); ok {
-		r0 = returnFunc(ctx, key)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = returnFunc(ctx, key)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// Cache_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
-type Cache_Get_Call struct {
-	*mock.Call
-}
-
-// Get is a helper method to define mock.On call
+// Expire is a helper method to define mock.On call
 //   - ctx context.Context
 //   - key string
-func (_e *Cache_Expecter) Get(ctx interface{}, key interface{}) *Cache_Get_Call {
-	return &Cache_Get_Call{Call: _e.mock.On("Get", ctx, key)}
+//   - expiration time.Duration
+func (_e *Cache_Expecter) Expire(ctx interface{}, key interface{}, expiration interface{}) *Cache_Expire_Call {
+	return &Cache_Expire_Call{Call: _e.mock.On("Expire", ctx, key, expiration)}
 }
 
-func (_c *Cache_Get_Call) Run(run func(ctx context.Context, key string)) *Cache_Get_Call {
+func (_c *Cache_Expire_Call) Run(run func(ctx context.Context, key string, expiration time.Duration)) *Cache_Expire_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -196,71 +122,88 @@ func (_c *Cache_Get_Call) Run(run func(ctx context.Context, key string)) *Cache_
 		if args[1] != nil {
 			arg1 = args[1].(string)
 		}
+		var arg2 time.Duration
+		if args[2] != nil {
+			arg2 = args[2].(time.Duration)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
 }
 
-func (_c *Cache_Get_Call) Return(s string, err error) *Cache_Get_Call {
-	_c.Call.Return(s, err)
+func (_c *Cache_Expire_Call) Return(err error) *Cache_Expire_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *Cache_Get_Call) RunAndReturn(run func(ctx context.Context, key string) (string, error)) *Cache_Get_Call {
+func (_c *Cache_Expire_Call) RunAndReturn(run func(ctx context.Context, key string, expiration time.Duration) error) *Cache_Expire_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// Ping provides a mock function for the type Cache
-func (_mock *Cache) Ping(ctx context.Context) error {
-	ret := _mock.Called(ctx)
+// GetInto provides a mock function for the type Cache
+func (_mock *Cache) GetInto(ctx context.Context, key string, dest any) error {
+	ret := _mock.Called(ctx, key, dest)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Ping")
+		panic("no return value specified for GetInto")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) error); ok {
-		r0 = returnFunc(ctx)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, any) error); ok {
+		r0 = returnFunc(ctx, key, dest)
 	} else {
 		r0 = ret.Error(0)
 	}
 	return r0
 }
 
-// Cache_Ping_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Ping'
-type Cache_Ping_Call struct {
+// Cache_GetInto_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetInto'
+type Cache_GetInto_Call struct {
 	*mock.Call
 }
 
-// Ping is a helper method to define mock.On call
+// GetInto is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *Cache_Expecter) Ping(ctx interface{}) *Cache_Ping_Call {
-	return &Cache_Ping_Call{Call: _e.mock.On("Ping", ctx)}
+//   - key string
+//   - dest any
+func (_e *Cache_Expecter) GetInto(ctx interface{}, key interface{}, dest interface{}) *Cache_GetInto_Call {
+	return &Cache_GetInto_Call{Call: _e.mock.On("GetInto", ctx, key, dest)}
 }
 
-func (_c *Cache_Ping_Call) Run(run func(ctx context.Context)) *Cache_Ping_Call {
+func (_c *Cache_GetInto_Call) Run(run func(ctx context.Context, key string, dest any)) *Cache_GetInto_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 any
+		if args[2] != nil {
+			arg2 = args[2].(any)
+		}
 		run(
 			arg0,
+			arg1,
+			arg2,
 		)
 	})
 	return _c
 }
 
-func (_c *Cache_Ping_Call) Return(err error) *Cache_Ping_Call {
+func (_c *Cache_GetInto_Call) Return(err error) *Cache_GetInto_Call {
 	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *Cache_Ping_Call) RunAndReturn(run func(ctx context.Context) error) *Cache_Ping_Call {
+func (_c *Cache_GetInto_Call) RunAndReturn(run func(ctx context.Context, key string, dest any) error) *Cache_GetInto_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -330,6 +273,72 @@ func (_c *Cache_Set_Call) Return(err error) *Cache_Set_Call {
 }
 
 func (_c *Cache_Set_Call) RunAndReturn(run func(ctx context.Context, key string, value any, expiration time.Duration) error) *Cache_Set_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// TTL provides a mock function for the type Cache
+func (_mock *Cache) TTL(ctx context.Context, key string) (int64, error) {
+	ret := _mock.Called(ctx, key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TTL")
+	}
+
+	var r0 int64
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (int64, error)); ok {
+		return returnFunc(ctx, key)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) int64); ok {
+		r0 = returnFunc(ctx, key)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, key)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// Cache_TTL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TTL'
+type Cache_TTL_Call struct {
+	*mock.Call
+}
+
+// TTL is a helper method to define mock.On call
+//   - ctx context.Context
+//   - key string
+func (_e *Cache_Expecter) TTL(ctx interface{}, key interface{}) *Cache_TTL_Call {
+	return &Cache_TTL_Call{Call: _e.mock.On("TTL", ctx, key)}
+}
+
+func (_c *Cache_TTL_Call) Run(run func(ctx context.Context, key string)) *Cache_TTL_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *Cache_TTL_Call) Return(n int64, err error) *Cache_TTL_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *Cache_TTL_Call) RunAndReturn(run func(ctx context.Context, key string) (int64, error)) *Cache_TTL_Call {
 	_c.Call.Return(run)
 	return _c
 }
