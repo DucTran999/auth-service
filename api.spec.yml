@@ -18,6 +18,7 @@ servers:
 
 security:
   - BearerAuth: []
+  - cookieAuth: []
 
 paths:
   /livez:
@@ -90,6 +91,23 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/logout:
+    post:
+      summary: Logout user
+      description: Terminate the current session by deleting the server-side session and clearing the cookie.
+      tags:
+        - Auth
+      operationId: logoutAccount
+      security:
+        - cookieAuth: []
+      responses:
+        "204":
+          description: Successfully logged out
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   securitySchemes:
     BearerAuth:
@@ -97,6 +115,10 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT token for authentication
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
 
   schemas:
     HealthResponse:

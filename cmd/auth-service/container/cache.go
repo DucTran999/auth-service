@@ -11,7 +11,7 @@ import (
 )
 
 type loggingCache struct {
-	inner  pkg.Cache
+	inner  cachekit.RemoteCache
 	logger logger.ILogger
 }
 
@@ -76,6 +76,14 @@ func (lc *loggingCache) MissingKeys(ctx context.Context, keys ...string) ([]stri
 		lc.logger.Warnf("missing keys check failed: keys=%v err=%v", keys, err)
 	}
 	return missing, err
+}
+
+func (lc *loggingCache) Del(ctx context.Context, key string) error {
+	err := lc.inner.Del(ctx, key)
+	if err != nil {
+		lc.logger.Warnf("cache: failed to delete key=%s err=%v", key, err)
+	}
+	return err
 }
 
 // Close client connection

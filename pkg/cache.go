@@ -20,6 +20,9 @@ type Cache interface {
 	// filter list keys are missing
 	MissingKeys(ctx context.Context, keys ...string) ([]string, error)
 
+	// Delete key
+	Del(ctx context.Context, key string) error
+
 	// Close client connection
 	Close() error
 }

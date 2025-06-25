@@ -7,21 +7,29 @@ import (
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
+const (
+	sessionKey = "session_id"
+)
+
 type AuthHandler interface {
 	LoginAccount(ctx *gin.Context)
+	LogoutAccount(ctx *gin.Context)
 }
 
 type authHandlerImpl struct {
 	BaseHandler
+	logger logger.ILogger
 	authUC usecase.AuthUseCase
 }
 
-func NewAuthHandler(authUC usecase.AuthUseCase) *authHandlerImpl {
+func NewAuthHandler(logger logger.ILogger, authUC usecase.AuthUseCase) *authHandlerImpl {
 	return &authHandlerImpl{
+		logger: logger,
 		authUC: authUC,
 	}
 }
@@ -34,7 +42,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	}
 
 	// Set to empty when cookie not found
-	currentSessionID, err := ctx.Cookie("session_id")
+	currentSessionID, err := ctx.Cookie(sessionKey)
 	if err != nil {
 		currentSessionID = ""
 	}
@@ -55,11 +63,29 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
 			return
 		}
+
+		hdl.logger.Error(err.Error())
 		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 		return
 	}
 
 	hdl.responseLoginSuccess(ctx, session)
+}
+func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
+	// Try to get session ID from cookie
+	sessionID, err := ctx.Cookie(sessionKey)
+	if err == nil {
+		// Best-effort logout
+		if err := hdl.authUC.Logout(ctx, sessionID); err != nil {
+			hdl.logger.Warn(err.Error())
+		}
+	}
+
+	// Always clear the cookie
+	ctx.SetCookie(sessionKey, "", -1, "/", "", true, true)
+
+	// Always respond with 204 No Content
+	hdl.NoContentResponse(ctx)
 }
 
 func (hdl *authHandlerImpl) parseAndValidateLoginCredentials(ctx *gin.Context,
@@ -85,7 +111,7 @@ func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *mode
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 
 	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     "session_id",
+		Name:     sessionKey,
 		Value:    session.ID.String(),
 		Path:     "/",
 		HttpOnly: true,

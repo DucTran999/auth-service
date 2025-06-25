@@ -12,6 +12,9 @@ type ServerInterface interface {
 	// User login
 	// (POST /api/v1/login)
 	LoginAccount(c *gin.Context)
+	// Logout user
+	// (POST /api/v1/logout)
+	LogoutAccount(c *gin.Context)
 	// Create a new account
 	// (POST /api/v1/register)
 	CreateAccount(c *gin.Context)
@@ -40,6 +43,21 @@ func (siw *ServerInterfaceWrapper) LoginAccount(c *gin.Context) {
 	}
 
 	siw.Handler.LoginAccount(c)
+}
+
+// LogoutAccount operation middleware
+func (siw *ServerInterfaceWrapper) LogoutAccount(c *gin.Context) {
+
+	c.Set(CookieAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.LogoutAccount(c)
 }
 
 // CreateAccount operation middleware
@@ -96,6 +114,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.POST(options.BaseURL+"/api/v1/login", wrapper.LoginAccount)
+	router.POST(options.BaseURL+"/api/v1/logout", wrapper.LogoutAccount)
 	router.POST(options.BaseURL+"/api/v1/register", wrapper.CreateAccount)
 	router.GET(options.BaseURL+"/livez", wrapper.CheckLiveness)
 }

@@ -3,6 +3,7 @@ package mockbuilder
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/common"
@@ -103,4 +104,18 @@ func (b *mockCacheBuilder) CallMissingKeysSuccess() {
 	b.inst.EXPECT().
 		MissingKeys(mock.Anything, mock.Anything).
 		Return(missingKeys, nil)
+}
+
+func (b *mockCacheBuilder) NoMissingKeysFound() {
+	b.inst.EXPECT().
+		MissingKeys(mock.Anything, mock.Anything).
+		Return(nil, nil)
+}
+
+func (b *mockCacheBuilder) DelKeySuccess() {
+	b.inst.EXPECT().
+		Del(mock.Anything, mock.MatchedBy(func(key string) bool {
+			return strings.HasPrefix(key, common.SessionKeyPrefix)
+		})).
+		Return(nil)
 }
