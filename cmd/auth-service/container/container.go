@@ -146,7 +146,7 @@ func (c *container) initUseCases() {
 		c.repositories.session,
 	)
 
-	sessionUC := usecase.NewSessionUC(c.repositories.session)
+	sessionUC := usecase.NewSessionUC(c.cache, c.repositories.session)
 
 	c.useCases = &useCases{
 		account: accountUC,

@@ -95,12 +95,12 @@ func (_c *SessionUsecase_DeleteExpiredBefore_Call) RunAndReturn(run func(ctx con
 	return _c
 }
 
-// SetExpirationIfNotCached provides a mock function for the type SessionUsecase
-func (_mock *SessionUsecase) SetExpirationIfNotCached(ctx context.Context) error {
+// MarkExpiredSessions provides a mock function for the type SessionUsecase
+func (_mock *SessionUsecase) MarkExpiredSessions(ctx context.Context) error {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SetExpirationIfNotCached")
+		panic("no return value specified for MarkExpiredSessions")
 	}
 
 	var r0 error
@@ -112,18 +112,18 @@ func (_mock *SessionUsecase) SetExpirationIfNotCached(ctx context.Context) error
 	return r0
 }
 
-// SessionUsecase_SetExpirationIfNotCached_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetExpirationIfNotCached'
-type SessionUsecase_SetExpirationIfNotCached_Call struct {
+// SessionUsecase_MarkExpiredSessions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MarkExpiredSessions'
+type SessionUsecase_MarkExpiredSessions_Call struct {
 	*mock.Call
 }
 
-// SetExpirationIfNotCached is a helper method to define mock.On call
+// MarkExpiredSessions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *SessionUsecase_Expecter) SetExpirationIfNotCached(ctx interface{}) *SessionUsecase_SetExpirationIfNotCached_Call {
-	return &SessionUsecase_SetExpirationIfNotCached_Call{Call: _e.mock.On("SetExpirationIfNotCached", ctx)}
+func (_e *SessionUsecase_Expecter) MarkExpiredSessions(ctx interface{}) *SessionUsecase_MarkExpiredSessions_Call {
+	return &SessionUsecase_MarkExpiredSessions_Call{Call: _e.mock.On("MarkExpiredSessions", ctx)}
 }
 
-func (_c *SessionUsecase_SetExpirationIfNotCached_Call) Run(run func(ctx context.Context)) *SessionUsecase_SetExpirationIfNotCached_Call {
+func (_c *SessionUsecase_MarkExpiredSessions_Call) Run(run func(ctx context.Context)) *SessionUsecase_MarkExpiredSessions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -136,12 +136,12 @@ func (_c *SessionUsecase_SetExpirationIfNotCached_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *SessionUsecase_SetExpirationIfNotCached_Call) Return(err error) *SessionUsecase_SetExpirationIfNotCached_Call {
+func (_c *SessionUsecase_MarkExpiredSessions_Call) Return(err error) *SessionUsecase_MarkExpiredSessions_Call {
 	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *SessionUsecase_SetExpirationIfNotCached_Call) RunAndReturn(run func(ctx context.Context) error) *SessionUsecase_SetExpirationIfNotCached_Call {
+func (_c *SessionUsecase_MarkExpiredSessions_Call) RunAndReturn(run func(ctx context.Context) error) *SessionUsecase_MarkExpiredSessions_Call {
 	_c.Call.Return(run)
 	return _c
 }

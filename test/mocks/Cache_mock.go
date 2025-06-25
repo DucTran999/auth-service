@@ -208,6 +208,83 @@ func (_c *Cache_GetInto_Call) RunAndReturn(run func(ctx context.Context, key str
 	return _c
 }
 
+// MissingKeys provides a mock function for the type Cache
+func (_mock *Cache) MissingKeys(ctx context.Context, keys ...string) ([]string, error) {
+	var tmpRet mock.Arguments
+	if len(keys) > 0 {
+		tmpRet = _mock.Called(ctx, keys)
+	} else {
+		tmpRet = _mock.Called(ctx)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for MissingKeys")
+	}
+
+	var r0 []string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, ...string) ([]string, error)); ok {
+		return returnFunc(ctx, keys...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, ...string) []string); ok {
+		r0 = returnFunc(ctx, keys...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, ...string) error); ok {
+		r1 = returnFunc(ctx, keys...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// Cache_MissingKeys_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MissingKeys'
+type Cache_MissingKeys_Call struct {
+	*mock.Call
+}
+
+// MissingKeys is a helper method to define mock.On call
+//   - ctx context.Context
+//   - keys ...string
+func (_e *Cache_Expecter) MissingKeys(ctx interface{}, keys ...interface{}) *Cache_MissingKeys_Call {
+	return &Cache_MissingKeys_Call{Call: _e.mock.On("MissingKeys",
+		append([]interface{}{ctx}, keys...)...)}
+}
+
+func (_c *Cache_MissingKeys_Call) Run(run func(ctx context.Context, keys ...string)) *Cache_MissingKeys_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
+		var variadicArgs []string
+		if len(args) > 1 {
+			variadicArgs = args[1].([]string)
+		}
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
+	})
+	return _c
+}
+
+func (_c *Cache_MissingKeys_Call) Return(strings []string, err error) *Cache_MissingKeys_Call {
+	_c.Call.Return(strings, err)
+	return _c
+}
+
+func (_c *Cache_MissingKeys_Call) RunAndReturn(run func(ctx context.Context, keys ...string) ([]string, error)) *Cache_MissingKeys_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Set provides a mock function for the type Cache
 func (_mock *Cache) Set(ctx context.Context, key string, value any, expiration time.Duration) error {
 	ret := _mock.Called(ctx, key, value, expiration)

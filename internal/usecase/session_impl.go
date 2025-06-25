@@ -16,14 +16,20 @@ type sessionUC struct {
 	cache       pkg.Cache
 }
 
-func NewSessionUC(sessionRepo repository.SessionRepository) *sessionUC {
+func NewSessionUC(cache pkg.Cache, sessionRepo repository.SessionRepository) *sessionUC {
 	return &sessionUC{
 		sessionRepo: sessionRepo,
+		cache:       cache,
 	}
 }
 
+// DeleteExpiredBefore removes all sessions from the repository that expired before the given cutoff time.
+// Useful for periodic cleanup of stale session data.
 func (uc *sessionUC) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
-	return uc.sessionRepo.DeleteExpiredBefore(ctx, cutoff)
+	if err := uc.sessionRepo.DeleteExpiredBefore(ctx, cutoff); err != nil {
+		return fmt.Errorf("failed to delete sessions expired before %s: %w", cutoff.Format(time.RFC3339), err)
+	}
+	return nil
 }
 
 func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
@@ -58,7 +64,7 @@ func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []mo
 
 	missingKeys, err := uc.cache.MissingKeys(ctx, cacheKeys...)
 	if err != nil {
-		return nil, fmt.Errorf("findSessionTimeout: failed to get missing keys from cache: %w", err)
+		return nil, err
 	}
 
 	timedOutSessionIDs := make([]string, 0, len(missingKeys))
