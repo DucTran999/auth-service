@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/pkg"
@@ -70,7 +71,7 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	}
 
 	// Try get session from cache
-	sessionKey := uc.getSessionCacheKey(sessionID)
+	sessionKey := common.KeyFromSessionID(sessionID)
 	cachedSession := uc.getSessionFromCache(ctx, sessionKey)
 	if cachedSession != nil {
 		ttl, _ := uc.cache.TTL(ctx, sessionKey)
@@ -153,10 +154,6 @@ func (uc *authUseCaseImpl) createSession(
 	}
 
 	return session, nil
-}
-
-func (uc *authUseCaseImpl) getSessionCacheKey(sessionId string) string {
-	return "session-" + sessionId
 }
 
 func (uc *authUseCaseImpl) getSessionFromCache(

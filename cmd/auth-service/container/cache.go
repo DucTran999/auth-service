@@ -51,7 +51,7 @@ func (lc *loggingCache) Set(ctx context.Context, key string, value any, expirati
 	return err
 }
 
-// Set Expire time for key
+// Expire sets the expiration time for a given key.
 func (lc *loggingCache) Expire(ctx context.Context, key string, expiration time.Duration) error {
 	err := lc.inner.Expire(ctx, key, expiration)
 	if err != nil {
@@ -60,12 +60,22 @@ func (lc *loggingCache) Expire(ctx context.Context, key string, expiration time.
 	return err
 }
 
+// TTL returns the remaining time-to-live (in seconds) for a given key.
 func (lc *loggingCache) TTL(ctx context.Context, key string) (int64, error) {
 	ttl, err := lc.inner.TTL(ctx, key)
 	if err != nil {
-		lc.logger.Warnf("get ttl failed: key=%s err=%v", key, err)
+		lc.logger.Warnf("get TTL failed: key=%s err=%v", key, err)
 	}
 	return ttl, err
+}
+
+// MissingKeys returns the subset of keys that are not present in the cache.
+func (lc *loggingCache) MissingKeys(ctx context.Context, keys ...string) ([]string, error) {
+	missing, err := lc.inner.MissingKeys(ctx, keys...)
+	if err != nil {
+		lc.logger.Warnf("missing keys check failed: keys=%v err=%v", keys, err)
+	}
+	return missing, err
 }
 
 // Close client connection

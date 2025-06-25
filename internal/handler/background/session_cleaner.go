@@ -32,7 +32,7 @@ func NewSessionCleaner(logger logger.ILogger, sessionUC usecase.SessionUsecase) 
 }
 
 func (sc *sessionCleaner) ExpireUntrackedSessions(ctx context.Context) error {
-	err := sc.sessionUC.SetExpirationIfNotCached(ctx)
+	err := sc.sessionUC.MarkExpiredSessions(ctx)
 	if err != nil {
 		sc.logger.Errorf("failed to set expiration on untracked sessions: %v", err)
 		return fmt.Errorf("expire untracked sessions failed: %w", err)

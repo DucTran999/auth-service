@@ -12,8 +12,8 @@ type SessionUsecase interface {
 	// Used typically during background purging of old sessions.
 	DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error
 
-	// SetExpirationIfNotCached applies an expiration timestamp to sessions
+	// MarkExpiredSessions applies an expiration timestamp to sessions
 	// that are not currently tracked in the cache (e.g., Redis).
 	// This ensures untracked sessions do not remain active indefinitely.
-	SetExpirationIfNotCached(ctx context.Context) error
+	MarkExpiredSessions(ctx context.Context) error
 }

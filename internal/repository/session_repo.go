@@ -24,4 +24,7 @@ type SessionRepository interface {
 
 	// UpdateExpiresAt updates the expiration timestamp of a session by session ID.
 	UpdateExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error
+
+	// MarkSessionsExpired sets the expiration timestamp for multiple sessions by their IDs.
+	MarkSessionsExpired(ctx context.Context, sessionIDs []string, expiresAt time.Time) error
 }

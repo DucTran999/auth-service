@@ -3,7 +3,7 @@ module github.com/DucTran999/auth-service
 go 1.23.1
 
 require (
-	github.com/DucTran999/cachekit v0.0.0-20250623170328-5f71fae81d39
+	github.com/DucTran999/cachekit v0.1.0
 	github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f
 	github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4
 	github.com/alexedwards/argon2id v1.0.0
@@ -49,7 +49,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/redis/go-redis/v9 v9.10.0 // indirect
+	github.com/redis/go-redis/v9 v9.11.0 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
