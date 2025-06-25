@@ -76,7 +76,7 @@ func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	sessionID, err := ctx.Cookie(sessionKey)
 	if err == nil {
 		// Best-effort logout
-		if err := hdl.authUC.Logout(ctx, sessionID); err != nil {
+		if err := hdl.authUC.Logout(ctx.Request.Context(), sessionID); err != nil {
 			hdl.logger.Warn(err.Error())
 		}
 	}
