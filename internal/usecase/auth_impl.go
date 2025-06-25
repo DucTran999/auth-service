@@ -172,6 +172,8 @@ func (uc *authUseCaseImpl) createSession(
 		return nil, err
 	}
 
+	_ = uc.cache.Set(ctx, common.KeyFromSessionID(session.ID.String()), session, sessionDuration)
+
 	return session, nil
 }
 

@@ -158,6 +158,7 @@ func TestLogin(t *testing.T) {
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.SessionRepoBuilder.CreateSessionSuccess()
+				builders.CacheBuilder.SetCacheSessionSuccess()
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput: usecase.LoginInput{
