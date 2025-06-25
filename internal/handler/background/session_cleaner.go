@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	sessionRetention = 30 // 3o days
+	sessionRetention = 30 // 30 days
 )
 
 type SessionCleaner interface {

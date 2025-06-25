@@ -157,7 +157,7 @@ func (c *container) initUseCases() {
 
 func (c *container) initHandlers() {
 	c.handlers = &handlers{
-		auth:    http.NewAuthHandler(c.useCases.auth),
+		auth:    http.NewAuthHandler(c.logger, c.useCases.auth),
 		account: http.NewAccountHandler(c.useCases.account),
 		health:  http.NewHealthHandler(c.appConfig.ServiceEnv),
 	}

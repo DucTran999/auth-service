@@ -39,10 +39,20 @@ func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 		return fmt.Errorf("mark expired sessions: failed to fetch active sessions: %w", err)
 	}
 
+	// No active session return intermediately
+	if len(activeSessions) == 0 {
+		return nil
+	}
+
 	// Identify sessions missing in cache (timed out)
 	sessionTimeoutIDs, err := uc.findSessionTimeout(ctx, activeSessions)
 	if err != nil {
 		return fmt.Errorf("mark expired sessions: failed to find timed-out sessions: %w", err)
+	}
+
+	//  All session are active return intermediately
+	if len(sessionTimeoutIDs) == 0 {
+		return nil
 	}
 
 	// Update expiration in DB

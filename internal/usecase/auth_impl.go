@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/common"
@@ -61,6 +62,24 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 	}
 
 	return uc.createSession(ctx, account, input)
+}
+
+func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
+	// Fast check sessionID must uuid
+	if _, err := uuid.Parse(sessionID); err != nil {
+		return fmt.Errorf("logout: %w session=%s error=%w", ErrInvalidSessionID, sessionID, err)
+	}
+
+	// Remove session in cache
+	_ = uc.cache.Del(ctx, common.KeyFromSessionID(sessionID))
+
+	// expire the session in db
+	err := uc.sessionRepo.UpdateExpiresAt(ctx, sessionID, time.Now())
+	if err != nil {
+		return fmt.Errorf("logout: failed to update expires_at in DB for session=%s, error=%w", sessionID, err)
+	}
+
+	return nil
 }
 
 // tryReuseSession checks if the current session is valid and updates its expiration.
@@ -152,6 +171,8 @@ func (uc *authUseCaseImpl) createSession(
 	if err := uc.sessionRepo.Create(ctx, session); err != nil {
 		return nil, err
 	}
+
+	_ = uc.cache.Set(ctx, common.KeyFromSessionID(session.ID.String()), session, sessionDuration)
 
 	return session, nil
 }

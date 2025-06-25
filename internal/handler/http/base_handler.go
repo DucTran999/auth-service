@@ -84,3 +84,7 @@ func (BaseHandler) ServerInternalErrResponse(ctx *gin.Context, version string) {
 
 	ctx.JSON(http.StatusInternalServerError, respBody)
 }
+
+func (BaseHandler) NoContentResponse(ctx *gin.Context) {
+	ctx.Status(http.StatusNoContent)
+}

@@ -82,6 +82,63 @@ func (_c *Cache_Close_Call) RunAndReturn(run func() error) *Cache_Close_Call {
 	return _c
 }
 
+// Del provides a mock function for the type Cache
+func (_mock *Cache) Del(ctx context.Context, key string) error {
+	ret := _mock.Called(ctx, key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Del")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = returnFunc(ctx, key)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// Cache_Del_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Del'
+type Cache_Del_Call struct {
+	*mock.Call
+}
+
+// Del is a helper method to define mock.On call
+//   - ctx context.Context
+//   - key string
+func (_e *Cache_Expecter) Del(ctx interface{}, key interface{}) *Cache_Del_Call {
+	return &Cache_Del_Call{Call: _e.mock.On("Del", ctx, key)}
+}
+
+func (_c *Cache_Del_Call) Run(run func(ctx context.Context, key string)) *Cache_Del_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *Cache_Del_Call) Return(err error) *Cache_Del_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *Cache_Del_Call) RunAndReturn(run func(ctx context.Context, key string) error) *Cache_Del_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Expire provides a mock function for the type Cache
 func (_mock *Cache) Expire(ctx context.Context, key string, expiration time.Duration) error {
 	ret := _mock.Called(ctx, key, expiration)

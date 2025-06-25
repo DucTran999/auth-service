@@ -9,6 +9,10 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+const (
+	CookieAuthScopes = "cookieAuth.Scopes"
+)
+
 // Defines values for HealthErrorResponseStatus.
 const (
 	HealthErrorResponseStatusError     HealthErrorResponseStatus = "error"

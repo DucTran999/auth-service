@@ -95,7 +95,7 @@ func (blr *mockSessionRepoBuilder) FindSessionReuse() {
 		}, nil)
 }
 
-func (blr *mockSessionRepoBuilder) UpdateExpiresAtError() {
+func (blr *mockSessionRepoBuilder) UpdateExpiresAtFailed() {
 	blr.inst.EXPECT().
 		UpdateExpiresAt(mock.Anything, mock.Anything, mock.Anything).
 		Return(ErrUpdateSessionExpires)
@@ -152,6 +152,12 @@ func (blr *mockSessionRepoBuilder) FindAllActiveSessionSuccess() {
 	blr.inst.EXPECT().
 		FindAllActiveSession(mock.Anything).
 		Return(activeSessions, nil)
+}
+
+func (blr *mockSessionRepoBuilder) FindNoActiveSession() {
+	blr.inst.EXPECT().
+		FindAllActiveSession(mock.Anything).
+		Return(nil, nil)
 }
 
 func (blr *mockSessionRepoBuilder) MarkSessionsExpiredFailed() {
