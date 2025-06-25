@@ -238,7 +238,7 @@ func TestLogout(t *testing.T) {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewAuthUseCaseUT(t, builders)
 			},
-			expectErr: nil,
+			expectErr: usecase.ErrInvalidSessionID,
 		},
 		{
 			name:      "failed to update session expires at",

@@ -67,7 +67,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return nil
+		return fmt.Errorf("logout: %w session=%s error=%w", ErrInvalidSessionID, sessionID, err)
 	}
 
 	// Remove session in cache
