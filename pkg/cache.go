@@ -17,6 +17,9 @@ type Cache interface {
 	// Check TTL
 	TTL(ctx context.Context, key string) (int64, error)
 
+	// filter list keys are missing
+	MissingKeys(ctx context.Context, keys ...string) ([]string, error)
+
 	// Close client connection
 	Close() error
 }

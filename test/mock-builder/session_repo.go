@@ -19,6 +19,9 @@ var (
 	ErrCreateSession        = errors.New("unexpected create session error")
 	ErrFindSessionByID      = errors.New("unexpected find session error")
 	ErrUpdateSessionExpires = errors.New("unexpected update expires error")
+	ErrDeleteExpiredBefore  = errors.New("unexpected error when delete session from db")
+	ErrFindActiveSession    = errors.New("unexpected error while querying list active session")
+	ErrMarkSessionsExpired  = errors.New("unexpected error while update sessions to expired")
 )
 
 type mockSessionRepoBuilder struct {
@@ -117,4 +120,48 @@ func (blr *mockSessionRepoBuilder) CreateSessionFailed() {
 	blr.inst.EXPECT().
 		Create(mock.Anything, mock.Anything).
 		Return(ErrCreateSession)
+}
+
+func (blr *mockSessionRepoBuilder) DeleteExpiredBeforeFailed() {
+	blr.inst.EXPECT().
+		DeleteExpiredBefore(mock.Anything, mock.Anything).
+		Return(ErrDeleteExpiredBefore)
+}
+
+func (blr *mockSessionRepoBuilder) DeleteExpiredBeforeSuccess() {
+	blr.inst.EXPECT().
+		DeleteExpiredBefore(mock.Anything, mock.Anything).
+		Return(nil)
+}
+
+func (blr *mockSessionRepoBuilder) FindAllActiveSessionFailed() {
+	blr.inst.EXPECT().
+		FindAllActiveSession(mock.Anything).
+		Return(nil, ErrFindActiveSession)
+}
+
+func (blr *mockSessionRepoBuilder) FindAllActiveSessionSuccess() {
+	activeSessions := []model.Session{
+		{
+			ID:        FakeSessionID,
+			AccountID: FakeAccountID,
+			ExpiresAt: nil,
+		},
+	}
+
+	blr.inst.EXPECT().
+		FindAllActiveSession(mock.Anything).
+		Return(activeSessions, nil)
+}
+
+func (blr *mockSessionRepoBuilder) MarkSessionsExpiredFailed() {
+	blr.inst.EXPECT().
+		MarkSessionsExpired(mock.Anything, mock.Anything, mock.Anything).
+		Return(ErrMarkSessionsExpired)
+}
+
+func (blr *mockSessionRepoBuilder) MarkSessionsExpiredSuccess() {
+	blr.inst.EXPECT().
+		MarkSessionsExpired(mock.Anything, mock.Anything, mock.Anything).
+		Return(nil)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/mock"
@@ -13,6 +14,7 @@ import (
 var (
 	ErrGetCache        = errors.New("failed to get cache")
 	ErrSetCacheSession = errors.New("failed to set cache session")
+	ErrMissingKeys     = errors.New("failed to get list missing keys")
 )
 
 type mockCacheBuilder struct {
@@ -86,4 +88,19 @@ func (b *mockCacheBuilder) GetTTLSuccess() {
 	b.inst.EXPECT().
 		TTL(mock.Anything, mock.Anything).
 		Return(555, nil)
+}
+
+func (b *mockCacheBuilder) CallMissingKeysFailed() {
+	b.inst.EXPECT().
+		MissingKeys(mock.Anything, mock.Anything).
+		Return(nil, ErrMissingKeys)
+}
+
+func (b *mockCacheBuilder) CallMissingKeysSuccess() {
+	cachedKey := common.KeyFromSessionID(FakeSessionID.String())
+	missingKeys := []string{cachedKey}
+
+	b.inst.EXPECT().
+		MissingKeys(mock.Anything, mock.Anything).
+		Return(missingKeys, nil)
 }

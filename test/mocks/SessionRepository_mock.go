@@ -96,6 +96,125 @@ func (_c *SessionRepository_Create_Call) RunAndReturn(run func(ctx context.Conte
 	return _c
 }
 
+// DeleteExpiredBefore provides a mock function for the type SessionRepository
+func (_mock *SessionRepository) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
+	ret := _mock.Called(ctx, cutoff)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteExpiredBefore")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, time.Time) error); ok {
+		r0 = returnFunc(ctx, cutoff)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// SessionRepository_DeleteExpiredBefore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteExpiredBefore'
+type SessionRepository_DeleteExpiredBefore_Call struct {
+	*mock.Call
+}
+
+// DeleteExpiredBefore is a helper method to define mock.On call
+//   - ctx context.Context
+//   - cutoff time.Time
+func (_e *SessionRepository_Expecter) DeleteExpiredBefore(ctx interface{}, cutoff interface{}) *SessionRepository_DeleteExpiredBefore_Call {
+	return &SessionRepository_DeleteExpiredBefore_Call{Call: _e.mock.On("DeleteExpiredBefore", ctx, cutoff)}
+}
+
+func (_c *SessionRepository_DeleteExpiredBefore_Call) Run(run func(ctx context.Context, cutoff time.Time)) *SessionRepository_DeleteExpiredBefore_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 time.Time
+		if args[1] != nil {
+			arg1 = args[1].(time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *SessionRepository_DeleteExpiredBefore_Call) Return(err error) *SessionRepository_DeleteExpiredBefore_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *SessionRepository_DeleteExpiredBefore_Call) RunAndReturn(run func(ctx context.Context, cutoff time.Time) error) *SessionRepository_DeleteExpiredBefore_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FindAllActiveSession provides a mock function for the type SessionRepository
+func (_mock *SessionRepository) FindAllActiveSession(ctx context.Context) ([]model.Session, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindAllActiveSession")
+	}
+
+	var r0 []model.Session
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]model.Session, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []model.Session); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Session)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// SessionRepository_FindAllActiveSession_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindAllActiveSession'
+type SessionRepository_FindAllActiveSession_Call struct {
+	*mock.Call
+}
+
+// FindAllActiveSession is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *SessionRepository_Expecter) FindAllActiveSession(ctx interface{}) *SessionRepository_FindAllActiveSession_Call {
+	return &SessionRepository_FindAllActiveSession_Call{Call: _e.mock.On("FindAllActiveSession", ctx)}
+}
+
+func (_c *SessionRepository_FindAllActiveSession_Call) Run(run func(ctx context.Context)) *SessionRepository_FindAllActiveSession_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *SessionRepository_FindAllActiveSession_Call) Return(sessions []model.Session, err error) *SessionRepository_FindAllActiveSession_Call {
+	_c.Call.Return(sessions, err)
+	return _c
+}
+
+func (_c *SessionRepository_FindAllActiveSession_Call) RunAndReturn(run func(ctx context.Context) ([]model.Session, error)) *SessionRepository_FindAllActiveSession_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByID provides a mock function for the type SessionRepository
 func (_mock *SessionRepository) FindByID(ctx context.Context, sessionID string) (*model.Session, error) {
 	ret := _mock.Called(ctx, sessionID)
@@ -160,6 +279,69 @@ func (_c *SessionRepository_FindByID_Call) Return(session *model.Session, err er
 }
 
 func (_c *SessionRepository_FindByID_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionRepository_FindByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// MarkSessionsExpired provides a mock function for the type SessionRepository
+func (_mock *SessionRepository) MarkSessionsExpired(ctx context.Context, sessionIDs []string, expiresAt time.Time) error {
+	ret := _mock.Called(ctx, sessionIDs, expiresAt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MarkSessionsExpired")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []string, time.Time) error); ok {
+		r0 = returnFunc(ctx, sessionIDs, expiresAt)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// SessionRepository_MarkSessionsExpired_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'MarkSessionsExpired'
+type SessionRepository_MarkSessionsExpired_Call struct {
+	*mock.Call
+}
+
+// MarkSessionsExpired is a helper method to define mock.On call
+//   - ctx context.Context
+//   - sessionIDs []string
+//   - expiresAt time.Time
+func (_e *SessionRepository_Expecter) MarkSessionsExpired(ctx interface{}, sessionIDs interface{}, expiresAt interface{}) *SessionRepository_MarkSessionsExpired_Call {
+	return &SessionRepository_MarkSessionsExpired_Call{Call: _e.mock.On("MarkSessionsExpired", ctx, sessionIDs, expiresAt)}
+}
+
+func (_c *SessionRepository_MarkSessionsExpired_Call) Run(run func(ctx context.Context, sessionIDs []string, expiresAt time.Time)) *SessionRepository_MarkSessionsExpired_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		var arg2 time.Time
+		if args[2] != nil {
+			arg2 = args[2].(time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *SessionRepository_MarkSessionsExpired_Call) Return(err error) *SessionRepository_MarkSessionsExpired_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *SessionRepository_MarkSessionsExpired_Call) RunAndReturn(run func(ctx context.Context, sessionIDs []string, expiresAt time.Time) error) *SessionRepository_MarkSessionsExpired_Call {
 	_c.Call.Return(run)
 	return _c
 }
