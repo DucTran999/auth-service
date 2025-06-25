@@ -9,6 +9,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) usecase.AuthUseCase {
@@ -217,6 +218,60 @@ func TestLogin(t *testing.T) {
 			} else {
 				assert.Nil(t, session)
 			}
+		})
+	}
+}
+
+func TestLogout(t *testing.T) {
+	type testcase struct {
+		name      string
+		sessionID string
+		setup     func(t *testing.T) usecase.AuthUseCase
+		expectErr error
+	}
+
+	testTable := []testcase{
+		{
+			name:      "invalid session id",
+			sessionID: "98f0fc0ec6d13b7b9c6b04d62e3de8bd4acdc2e5e7e017fc6fa3a1c8a36c9f4a",
+			setup: func(t *testing.T) usecase.AuthUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				return NewAuthUseCaseUT(t, builders)
+			},
+			expectErr: nil,
+		},
+		{
+			name:      "failed to update session expires at",
+			sessionID: mockbuilder.FakeSessionID.String(),
+			setup: func(t *testing.T) usecase.AuthUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.DelKeySuccess()
+				builders.SessionRepoBuilder.UpdateExpiresAtFailed()
+				return NewAuthUseCaseUT(t, builders)
+			},
+			expectErr: mockbuilder.ErrUpdateSessionExpires,
+		},
+		{
+			name:      "logout success",
+			sessionID: mockbuilder.FakeSessionID.String(),
+			setup: func(t *testing.T) usecase.AuthUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.DelKeySuccess()
+				builders.SessionRepoBuilder.UpdateExpiresAtSuccess()
+				return NewAuthUseCaseUT(t, builders)
+			},
+			expectErr: nil,
+		},
+	}
+
+	for _, tc := range testTable {
+		t.Run(tc.name, func(t *testing.T) {
+			sut := tc.setup(t)
+			ctx := context.Background()
+
+			err := sut.Logout(ctx, tc.sessionID)
+
+			require.ErrorIs(t, err, tc.expectErr)
 		})
 	}
 }

@@ -82,6 +82,25 @@ func TestMarkExpiredSessions(t *testing.T) {
 			expectedErr: mockbuilder.ErrMarkSessionsExpired,
 		},
 		{
+			name: "no session are active",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.SessionRepoBuilder.FindNoActiveSession()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "no session expire yet",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
+				builders.CacheBuilder.NoMissingKeysFound()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			expectedErr: nil,
+		},
+		{
 			name: "mark session expires success",
 			setup: func(t *testing.T) usecase.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
