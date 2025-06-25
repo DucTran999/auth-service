@@ -42,7 +42,7 @@ func (sc *sessionCleaner) ExpireUntrackedSessions(ctx context.Context) error {
 }
 
 func (sc *sessionCleaner) PurgeExpiredSessions(ctx context.Context) error {
-	cutoff := time.Now().Add(-sessionRetention)
+	cutoff := time.Now().AddDate(0, 0, -sessionRetention)
 
 	if err := sc.sessionUC.DeleteExpiredBefore(ctx, cutoff); err != nil {
 		sc.logger.Errorf("failed to purge expired sessions: %v", err)
