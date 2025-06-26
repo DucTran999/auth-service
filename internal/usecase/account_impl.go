@@ -68,7 +68,7 @@ func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input ChangePa
 	}
 
 	if !match {
-		return err
+		return ErrInvalidCredentials
 	}
 
 	// Hash the password
