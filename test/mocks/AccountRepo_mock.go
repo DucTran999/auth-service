@@ -173,3 +173,134 @@ func (_c *AccountRepo_FindByEmail_Call) RunAndReturn(run func(ctx context.Contex
 	_c.Call.Return(run)
 	return _c
 }
+
+// FindByID provides a mock function for the type AccountRepo
+func (_mock *AccountRepo) FindByID(ctx context.Context, accountID string) (*model.Account, error) {
+	ret := _mock.Called(ctx, accountID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByID")
+	}
+
+	var r0 *model.Account
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*model.Account, error)); ok {
+		return returnFunc(ctx, accountID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *model.Account); ok {
+		r0 = returnFunc(ctx, accountID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Account)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, accountID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// AccountRepo_FindByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindByID'
+type AccountRepo_FindByID_Call struct {
+	*mock.Call
+}
+
+// FindByID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - accountID string
+func (_e *AccountRepo_Expecter) FindByID(ctx interface{}, accountID interface{}) *AccountRepo_FindByID_Call {
+	return &AccountRepo_FindByID_Call{Call: _e.mock.On("FindByID", ctx, accountID)}
+}
+
+func (_c *AccountRepo_FindByID_Call) Run(run func(ctx context.Context, accountID string)) *AccountRepo_FindByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *AccountRepo_FindByID_Call) Return(account *model.Account, err error) *AccountRepo_FindByID_Call {
+	_c.Call.Return(account, err)
+	return _c
+}
+
+func (_c *AccountRepo_FindByID_Call) RunAndReturn(run func(ctx context.Context, accountID string) (*model.Account, error)) *AccountRepo_FindByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePasswordHash provides a mock function for the type AccountRepo
+func (_mock *AccountRepo) UpdatePasswordHash(ctx context.Context, accountID string, passwordHash string) error {
+	ret := _mock.Called(ctx, accountID, passwordHash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePasswordHash")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = returnFunc(ctx, accountID, passwordHash)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// AccountRepo_UpdatePasswordHash_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePasswordHash'
+type AccountRepo_UpdatePasswordHash_Call struct {
+	*mock.Call
+}
+
+// UpdatePasswordHash is a helper method to define mock.On call
+//   - ctx context.Context
+//   - accountID string
+//   - passwordHash string
+func (_e *AccountRepo_Expecter) UpdatePasswordHash(ctx interface{}, accountID interface{}, passwordHash interface{}) *AccountRepo_UpdatePasswordHash_Call {
+	return &AccountRepo_UpdatePasswordHash_Call{Call: _e.mock.On("UpdatePasswordHash", ctx, accountID, passwordHash)}
+}
+
+func (_c *AccountRepo_UpdatePasswordHash_Call) Run(run func(ctx context.Context, accountID string, passwordHash string)) *AccountRepo_UpdatePasswordHash_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *AccountRepo_UpdatePasswordHash_Call) Return(err error) *AccountRepo_UpdatePasswordHash_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *AccountRepo_UpdatePasswordHash_Call) RunAndReturn(run func(ctx context.Context, accountID string, passwordHash string) error) *AccountRepo_UpdatePasswordHash_Call {
+	_c.Call.Return(run)
+	return _c
+}

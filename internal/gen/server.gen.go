@@ -9,6 +9,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Change account password
+	// (PATCH /api/v1/account/password)
+	ChangePassword(c *gin.Context)
 	// User login
 	// (POST /api/v1/login)
 	LoginAccount(c *gin.Context)
@@ -31,6 +34,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
+
+// ChangePassword operation middleware
+func (siw *ServerInterfaceWrapper) ChangePassword(c *gin.Context) {
+
+	c.Set(CookieAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.ChangePassword(c)
+}
 
 // LoginAccount operation middleware
 func (siw *ServerInterfaceWrapper) LoginAccount(c *gin.Context) {
@@ -113,6 +131,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
+	router.PATCH(options.BaseURL+"/api/v1/account/password", wrapper.ChangePassword)
 	router.POST(options.BaseURL+"/api/v1/login", wrapper.LoginAccount)
 	router.POST(options.BaseURL+"/api/v1/logout", wrapper.LogoutAccount)
 	router.POST(options.BaseURL+"/api/v1/register", wrapper.CreateAccount)

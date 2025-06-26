@@ -9,7 +9,6 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -36,8 +35,9 @@ func NewAuthHandler(logger logger.ILogger, authUC usecase.AuthUseCase) *authHand
 
 func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	// Parse request body
-	payload, err := hdl.parseAndValidateLoginCredentials(ctx)
+	payload, err := ParseAndValidateJSON[gen.LoginAccountJSONRequestBody](ctx)
 	if err != nil {
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 
@@ -71,6 +71,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 
 	hdl.responseLoginSuccess(ctx, session)
 }
+
 func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	// Try to get session ID from cookie
 	sessionID, err := ctx.Cookie(sessionKey)
@@ -86,24 +87,6 @@ func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
 
 	// Always respond with 204 No Content
 	hdl.NoContentResponse(ctx)
-}
-
-func (hdl *authHandlerImpl) parseAndValidateLoginCredentials(ctx *gin.Context,
-) (*gen.LoginAccountJSONRequestBody, error) {
-
-	var payload gen.LoginAccountJSONRequestBody
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) && len(ve) > 0 {
-			hdl.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
-			return nil, err
-		}
-
-		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
-		return nil, err
-	}
-
-	return &payload, nil
 }
 
 func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *model.Session) {

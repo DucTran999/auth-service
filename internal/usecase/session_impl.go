@@ -9,6 +9,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/pkg"
+	"github.com/google/uuid"
 )
 
 type sessionUC struct {
@@ -64,6 +65,19 @@ func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 	return nil
 }
 
+func (uc *sessionUC) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
+	if _, err := uuid.Parse(sessionID); err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrInvalidSessionID, err)
+	}
+
+	session, err := uc.findSessionByID(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("validate session failed for id=%s: %w", sessionID, err)
+	}
+
+	return session, nil
+}
+
 // findSessionTimeout returns the IDs of sessions that are not found in the cache.
 // These sessions are considered "timed out" and may need to be expired.
 func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []model.Session) ([]string, error) {
@@ -83,4 +97,28 @@ func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []mo
 	}
 
 	return timedOutSessionIDs, nil
+}
+
+func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*model.Session, error) {
+	var session model.Session
+
+	// Try lookup in cache first
+	if err := uc.cache.GetInto(ctx, common.KeyFromSessionID(sessionID), &session); err == nil {
+		return &session, nil
+	}
+
+	// Fallback to DB
+	found, err := uc.sessionRepo.FindByID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Session is expired or not existed
+	if found == nil || found.IsExpired() {
+		return nil, ErrSessionNotFound
+	}
+
+	_ = uc.cache.Set(ctx, common.KeyFromSessionID(sessionID), found, sessionDuration)
+
+	return found, nil
 }

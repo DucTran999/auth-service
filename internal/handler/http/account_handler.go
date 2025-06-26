@@ -7,37 +7,47 @@ import (
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 type AccountHandler interface {
 	CreateAccount(ctx *gin.Context)
+	ChangePassword(ctx *gin.Context)
 }
 
 type accountHandlerImpl struct {
+	logger logger.ILogger
+
 	BaseHandler
 	accountUC usecase.AccountUseCase
+	sessionUC usecase.SessionUsecase
 }
 
-func NewAccountHandler(accountUC usecase.AccountUseCase) *accountHandlerImpl {
+func NewAccountHandler(
+	logger logger.ILogger,
+	accountUC usecase.AccountUseCase,
+	sessionUC usecase.SessionUsecase,
+) *accountHandlerImpl {
 	return &accountHandlerImpl{
+		logger:    logger,
 		accountUC: accountUC,
+		sessionUC: sessionUC,
 	}
 }
 
 // CreateAccount handles the HTTP request to register a new account.
 func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
-	payload, err := hdl.parseAndValidateCreateAccount(ctx)
+	payload, err := ParseAndValidateJSON[gen.CreateAccountJSONRequestBody](ctx)
 	if err != nil {
-		return // response already handled
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+		return
 	}
 
 	input := usecase.RegisterInput{
 		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
-
 	account, err := hdl.accountUC.Register(ctx.Request.Context(), input)
 	if err != nil {
 		hdl.handleRegisterError(ctx, err)
@@ -47,21 +57,29 @@ func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 	hdl.sendRegisterSuccess(ctx, account)
 }
 
-func (hdl *accountHandlerImpl) parseAndValidateCreateAccount(ctx *gin.Context,
-) (*gen.CreateAccountJSONRequestBody, error) {
-
-	var payload gen.CreateAccountJSONRequestBody
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) && len(ve) > 0 {
-			hdl.ValidateErrorResponse(ctx, ApiVersion1, validationErrorMessage(ve[0]))
-			return nil, err
-		}
+func (hdl *accountHandlerImpl) ChangePassword(ctx *gin.Context) {
+	payload, err := ParseAndValidateJSON[gen.ChangePasswordJSONRequestBody](ctx)
+	if err != nil {
 		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
-		return nil, err
+		return
 	}
 
-	return &payload, nil
+	session, ok := hdl.validateSessionFromCookie(ctx)
+	if !ok {
+		return
+	}
+
+	input := usecase.ChangePasswordInput{
+		AccountID:   session.AccountID.String(),
+		OldPassword: payload.OldPassword,
+		NewPassword: payload.NewPassword,
+	}
+	if err := hdl.accountUC.ChangePassword(ctx.Request.Context(), input); err != nil {
+		hdl.handleChangePasswordError(ctx, err)
+		return
+	}
+
+	hdl.NoContentResponse(ctx)
 }
 
 func (hdl *accountHandlerImpl) handleRegisterError(ctx *gin.Context, err error) {
@@ -85,4 +103,37 @@ func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *mo
 		},
 	}
 	ctx.JSON(http.StatusCreated, resp)
+}
+
+func (hdl *accountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
+	sessionID, err := ctx.Cookie("session_id")
+	if err != nil {
+		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
+		return nil, false
+	}
+
+	session, err := hdl.sessionUC.ValidateSession(ctx.Request.Context(), sessionID)
+	if err != nil {
+		if errors.Is(err, usecase.ErrInvalidSessionID) || errors.Is(err, usecase.ErrSessionNotFound) {
+			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
+		} else {
+			hdl.logger.Errorf("failed to validate session: %v", err)
+			hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+		}
+		return nil, false
+	}
+
+	return session, true
+}
+
+func (hdl *accountHandlerImpl) handleChangePasswordError(ctx *gin.Context, err error) {
+	switch {
+	case errors.Is(err, usecase.ErrInvalidCredentials):
+		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
+	case errors.Is(err, usecase.ErrNewPasswordMustChanged):
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+	default:
+		hdl.logger.Errorf("failed to change password: %v", err)
+		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+	}
 }

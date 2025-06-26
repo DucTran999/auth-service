@@ -7,6 +7,7 @@ import (
 
 	"github.com/DucTran999/auth-service/internal/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -120,6 +121,100 @@ func TestMarkExpiredSessions(t *testing.T) {
 
 			err := sut.MarkExpiredSessions(ctx)
 			require.ErrorIs(t, err, tc.expectedErr)
+		})
+	}
+}
+
+func TestValidateSession(t *testing.T) {
+	type testcase struct {
+		name              string
+		setup             func(t *testing.T) usecase.SessionUsecase
+		sessionID         string
+		expectedAccountID uuid.UUID
+		expectedErr       error
+	}
+
+	testTable := []testcase{
+		{
+			name: "invalid session id",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:   "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+			expectedErr: usecase.ErrInvalidSessionID,
+		},
+		{
+			name: "session found in cache",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.ValidSessionCached()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:         mockbuilder.FakeSessionID.String(),
+			expectedErr:       nil,
+			expectedAccountID: mockbuilder.FakeAccountID,
+		},
+		{
+			name: "miss cached but query db failed",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.SessionMissCache()
+				builders.SessionRepoBuilder.FindByIdFailed()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:   mockbuilder.FakeSessionID.String(),
+			expectedErr: mockbuilder.ErrFindSessionByID,
+		},
+		{
+			name: "session not found",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.SessionMissCache()
+				builders.SessionRepoBuilder.FindByIDNotFound()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:   mockbuilder.FakeSessionID.String(),
+			expectedErr: usecase.ErrSessionNotFound,
+		},
+		{
+			name: "session already expired",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.SessionMissCache()
+				builders.SessionRepoBuilder.FindByIDSessionExpired()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:   mockbuilder.FakeSessionID.String(),
+			expectedErr: usecase.ErrSessionNotFound,
+		},
+		{
+			name: "failed when set cache",
+			setup: func(t *testing.T) usecase.SessionUsecase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.CacheBuilder.SessionMissCache()
+				builders.SessionRepoBuilder.FindByIDSuccess()
+				builders.CacheBuilder.SetCacheSessionFailed()
+				return NewSessionUseCaseUT(t, builders)
+			},
+			sessionID:         mockbuilder.FakeSessionID.String(),
+			expectedErr:       nil,
+			expectedAccountID: mockbuilder.FakeAccountID,
+		},
+	}
+
+	for _, tc := range testTable {
+		t.Run(tc.name, func(t *testing.T) {
+			sut := tc.setup(t)
+			ctx := context.Background()
+
+			session, err := sut.ValidateSession(ctx, tc.sessionID)
+
+			if err != nil {
+				require.ErrorIs(t, err, tc.expectedErr)
+			} else {
+				require.Equal(t, tc.expectedAccountID, session.AccountID)
+			}
 		})
 	}
 }

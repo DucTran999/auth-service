@@ -104,7 +104,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.GetCacheErr()
-				builders.SessionRepoBuilder.FindSessionError()
+				builders.SessionRepoBuilder.FindByIdFailed()
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput: usecase.LoginInput{
@@ -120,7 +120,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
-				builders.SessionRepoBuilder.FindSessionSuccess()
+				builders.SessionRepoBuilder.FindByIDSuccess()
 				builders.CacheBuilder.SetCacheSessionSuccess()
 				return NewAuthUseCaseUT(t, builders)
 			},
@@ -137,7 +137,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
-				builders.SessionRepoBuilder.FindSessionSuccess()
+				builders.SessionRepoBuilder.FindByIDSuccess()
 				builders.CacheBuilder.SetCacheSessionFailed()
 				return NewAuthUseCaseUT(t, builders)
 			},
@@ -154,7 +154,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
-				builders.SessionRepoBuilder.FindExpiredSession()
+				builders.SessionRepoBuilder.FindByIDSessionExpired()
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.SessionRepoBuilder.CreateSessionSuccess()
@@ -174,7 +174,7 @@ func TestLogin(t *testing.T) {
 			setup: func(t *testing.T) usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
-				builders.SessionRepoBuilder.FindExpiredSession()
+				builders.SessionRepoBuilder.FindByIDSessionExpired()
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.SessionRepoBuilder.CreateSessionFailed()

@@ -8,6 +8,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func NewAccountUseCaseUT(
@@ -110,6 +111,122 @@ func TestRegisterAccount(t *testing.T) {
 			} else {
 				assert.Nil(t, user)
 			}
+		})
+	}
+}
+
+func TestChangePassword(t *testing.T) {
+	type testCase struct {
+		name        string
+		setup       func(t *testing.T) usecase.AccountUseCase
+		input       usecase.ChangePasswordInput
+		expectedErr error
+	}
+
+	validInput := usecase.ChangePasswordInput{
+		AccountID:   mockbuilder.FakeAccountID.String(),
+		OldPassword: mockbuilder.FakeOldPass,
+		NewPassword: mockbuilder.FakeNewPass,
+	}
+
+	samePassInput := usecase.ChangePasswordInput{
+		AccountID:   mockbuilder.FakeAccountID.String(),
+		OldPassword: mockbuilder.FakeOldPass,
+		NewPassword: mockbuilder.FakeOldPass,
+	}
+
+	testTable := []testCase{
+		{
+			name: "failed find account by id",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDFailed()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: mockbuilder.ErrFindAccountByID,
+		},
+		{
+			name: "failed to compare old password to hash",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.CompareHashPasswordGotError()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: mockbuilder.ErrCompareHashPassword,
+		},
+		{
+			name: "old password not match",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordNotMatch()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: usecase.ErrInvalidCredentials,
+		},
+		{
+			name: "failed to hashing password",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordMatch()
+				builders.HasherBuilder.HashingPasswordFailed()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: mockbuilder.ErrHashingPassword,
+		},
+		{
+			name: "failed to update new password",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordMatch()
+				builders.HasherBuilder.HashingPasswordSuccess()
+				builders.AccountRepoBuilder.UpdatePasswordHashFailed()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: mockbuilder.ErrUpdateHashPassword,
+		},
+		{
+			name: "new password must same ass the old one",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordMatch()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       samePassInput,
+			expectedErr: usecase.ErrNewPasswordMustChanged,
+		},
+		{
+			name: "change password success",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordMatch()
+				builders.HasherBuilder.HashingPasswordSuccess()
+				builders.AccountRepoBuilder.UpdatePasswordHashSuccess()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       validInput,
+			expectedErr: nil,
+		},
+	}
+
+	for _, tc := range testTable {
+		t.Run(tc.name, func(t *testing.T) {
+			sut := tc.setup(t)
+			ctx := context.Background()
+
+			err := sut.ChangePassword(ctx, tc.input)
+
+			require.ErrorIs(t, err, tc.expectedErr)
 		})
 	}
 }

@@ -104,6 +104,35 @@ paths:
         "204":
           description: Successfully logged out
 
+  /api/v1/account/password:
+    patch:
+      summary: Change account password
+      description: >
+        Allows an authenticated user to change their password. 
+        Requires valid session. The old password must be correct.
+      tags:
+        - Account
+      operationId: changePassword
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "204":
+          description: Password changed successfully (no content)
+        "400":
+          description: Bad request (e.g. invalid format or missing fields)
+        "401":
+          description: Unauthorized (not logged in or session expired)
+        "403":
+          description: Forbidden (old password incorrect)
+        "500":
+          description: Internal server error
+
 components:
   securitySchemes:
     BearerAuth:
@@ -230,10 +259,31 @@ components:
         password:
           type: string
           format: password
-          minLength: 1
+          minLength: 8
           x-oapi-codegen-extra-tags:
             binding: "required"
           example: secret123
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+          format: password
+          minLength: 8
+          x-oapi-codegen-extra-tags:
+            binding: "required"
+          example: 0ldP@ssW0rd
+        new_password:
+          type: string
+          format: password
+          minLength: 8
+          x-oapi-codegen-extra-tags:
+            binding: "required,password"
+          example: N3w@ssW0rd
 
     ErrorDetail:
       type: object

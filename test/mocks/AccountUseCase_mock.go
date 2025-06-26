@@ -39,6 +39,63 @@ func (_m *AccountUseCase) EXPECT() *AccountUseCase_Expecter {
 	return &AccountUseCase_Expecter{mock: &_m.Mock}
 }
 
+// ChangePassword provides a mock function for the type AccountUseCase
+func (_mock *AccountUseCase) ChangePassword(ctx context.Context, input usecase.ChangePasswordInput) error {
+	ret := _mock.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ChangePassword")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.ChangePasswordInput) error); ok {
+		r0 = returnFunc(ctx, input)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// AccountUseCase_ChangePassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ChangePassword'
+type AccountUseCase_ChangePassword_Call struct {
+	*mock.Call
+}
+
+// ChangePassword is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.ChangePasswordInput
+func (_e *AccountUseCase_Expecter) ChangePassword(ctx interface{}, input interface{}) *AccountUseCase_ChangePassword_Call {
+	return &AccountUseCase_ChangePassword_Call{Call: _e.mock.On("ChangePassword", ctx, input)}
+}
+
+func (_c *AccountUseCase_ChangePassword_Call) Run(run func(ctx context.Context, input usecase.ChangePasswordInput)) *AccountUseCase_ChangePassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 usecase.ChangePasswordInput
+		if args[1] != nil {
+			arg1 = args[1].(usecase.ChangePasswordInput)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *AccountUseCase_ChangePassword_Call) Return(err error) *AccountUseCase_ChangePassword_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *AccountUseCase_ChangePassword_Call) RunAndReturn(run func(ctx context.Context, input usecase.ChangePasswordInput) error) *AccountUseCase_ChangePassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Register provides a mock function for the type AccountUseCase
 func (_mock *AccountUseCase) Register(ctx context.Context, input usecase.RegisterInput) (*model.Account, error) {
 	ret := _mock.Called(ctx, input)

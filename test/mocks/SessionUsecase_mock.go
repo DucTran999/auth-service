@@ -8,6 +8,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/model"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -142,6 +143,74 @@ func (_c *SessionUsecase_MarkExpiredSessions_Call) Return(err error) *SessionUse
 }
 
 func (_c *SessionUsecase_MarkExpiredSessions_Call) RunAndReturn(run func(ctx context.Context) error) *SessionUsecase_MarkExpiredSessions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ValidateSession provides a mock function for the type SessionUsecase
+func (_mock *SessionUsecase) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
+	ret := _mock.Called(ctx, sessionID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ValidateSession")
+	}
+
+	var r0 *model.Session
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*model.Session, error)); ok {
+		return returnFunc(ctx, sessionID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *model.Session); ok {
+		r0 = returnFunc(ctx, sessionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Session)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, sessionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// SessionUsecase_ValidateSession_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateSession'
+type SessionUsecase_ValidateSession_Call struct {
+	*mock.Call
+}
+
+// ValidateSession is a helper method to define mock.On call
+//   - ctx context.Context
+//   - sessionID string
+func (_e *SessionUsecase_Expecter) ValidateSession(ctx interface{}, sessionID interface{}) *SessionUsecase_ValidateSession_Call {
+	return &SessionUsecase_ValidateSession_Call{Call: _e.mock.On("ValidateSession", ctx, sessionID)}
+}
+
+func (_c *SessionUsecase_ValidateSession_Call) Run(run func(ctx context.Context, sessionID string)) *SessionUsecase_ValidateSession_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *SessionUsecase_ValidateSession_Call) Return(session *model.Session, err error) *SessionUsecase_ValidateSession_Call {
+	_c.Call.Return(session, err)
+	return _c
+}
+
+func (_c *SessionUsecase_ValidateSession_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionUsecase_ValidateSession_Call {
 	_c.Call.Return(run)
 	return _c
 }
