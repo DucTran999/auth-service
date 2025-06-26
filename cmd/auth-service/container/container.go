@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/DucTran999/auth-service/internal/config"
+	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/internal/handler/http"
