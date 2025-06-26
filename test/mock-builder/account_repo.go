@@ -10,9 +10,14 @@ import (
 )
 
 var (
-	FakeEmail             = "daniel@example.com"
-	ErrFindAccountByEmail = errors.New("find unexpected error")
+	FakeEmail   = "daniel@example.com"
+	FakeOldPass = "0ldP@ssW0rd"
+	FakeNewPass = "N3wP@ssW0rd"
+
+	ErrFindAccountByEmail = errors.New("find email unexpected error")
+	ErrFindAccountByID    = errors.New("find id unexpected error")
 	ErrCreateAccount      = errors.New("unexpected error create new account")
+	ErrUpdateHashPassword = errors.New("unexpected error when update hash password")
 )
 
 type mockAccountRepoBuilder struct {
@@ -80,4 +85,39 @@ func (b *mockAccountRepoBuilder) FindByEmailNoResult() {
 	b.inst.EXPECT().
 		FindByEmail(mock.Anything, mock.Anything).
 		Return(nil, nil)
+}
+
+func (b *mockAccountRepoBuilder) FindByIdFailed() {
+	b.inst.EXPECT().
+		FindByID(mock.Anything, mock.Anything).
+		Return(nil, ErrFindAccountByID)
+}
+
+func (b *mockAccountRepoBuilder) FindByIdSuccess() {
+	mockAccount := &model.Account{
+		ID:           FakeAccountID,
+		Email:        FakeEmail,
+		PasswordHash: FakeOldPass,
+		IsActive:     true,
+	}
+
+	b.inst.EXPECT().
+		FindByID(mock.Anything, mock.Anything).
+		Return(mockAccount, nil)
+}
+
+func (b *mockAccountRepoBuilder) UpdatePasswordHashFailed() {
+	b.inst.EXPECT().
+		UpdatePasswordHash(mock.Anything, mock.Anything, mock.Anything).
+		Return(ErrUpdateHashPassword)
+}
+
+func (b *mockAccountRepoBuilder) UpdatePasswordHashSuccess() {
+	b.inst.EXPECT().
+		UpdatePasswordHash(mock.Anything,
+			mock.MatchedBy(func(id string) bool {
+				return id == FakeAccountID.String()
+			}),
+			mock.Anything).
+		Return(nil)
 }

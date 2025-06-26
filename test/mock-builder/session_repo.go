@@ -38,13 +38,13 @@ func (b *mockSessionRepoBuilder) GetInstance() *mocks.SessionRepository {
 	return b.inst
 }
 
-func (blr *mockSessionRepoBuilder) FindSessionError() {
+func (blr *mockSessionRepoBuilder) FindByIdFailed() {
 	blr.inst.EXPECT().
 		FindByID(mock.Anything, mock.Anything).
 		Return(nil, ErrFindSessionByID)
 }
 
-func (blr *mockSessionRepoBuilder) FindSessionSuccess() {
+func (blr *mockSessionRepoBuilder) FindByIDSuccess() {
 	mockSession := model.Session{
 		ID:        FakeSessionID,
 		AccountID: FakeAccountID,
@@ -60,7 +60,7 @@ func (blr *mockSessionRepoBuilder) FindSessionSuccess() {
 		Return(&mockSession, nil)
 }
 
-func (blr *mockSessionRepoBuilder) FindExpiredSession() {
+func (blr *mockSessionRepoBuilder) FindByIDSessionExpired() {
 	expiredAt := time.Now().Add(-1 * time.Hour)
 	mockSession := model.Session{
 		ID:        FakeSessionID,
@@ -78,7 +78,7 @@ func (blr *mockSessionRepoBuilder) FindExpiredSession() {
 		Return(&mockSession, nil)
 }
 
-func (blr *mockSessionRepoBuilder) NotFoundSession() {
+func (blr *mockSessionRepoBuilder) FindByIDNotFound() {
 	blr.inst.EXPECT().
 		FindByID(mock.Anything, mock.Anything).
 		Return(nil, nil)

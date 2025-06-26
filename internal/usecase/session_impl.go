@@ -118,7 +118,7 @@ func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*mo
 		return nil, ErrSessionNotFound
 	}
 
-	_ = uc.cache.Set(ctx, common.KeyFromSessionID(sessionID), found, time.Until(*found.ExpiresAt))
+	_ = uc.cache.Set(ctx, common.KeyFromSessionID(sessionID), found, sessionDuration)
 
 	return found, nil
 }
