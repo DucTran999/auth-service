@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/cmd/auth-service/container"
-	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/config"
 	"github.com/DucTran999/auth-service/internal/server"
 	"github.com/DucTran999/auth-service/internal/worker"
 	pkgServer "github.com/DucTran999/shared-pkg/server"
