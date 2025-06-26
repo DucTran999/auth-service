@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
-func NewSessionUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) usecase.SessionUsecase {
+func NewSessionUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) domain.SessionUsecase {
 	return usecase.NewSessionUC(
 		builders.CacheBuilder.GetInstance(),
 		builders.SessionRepoBuilder.GetInstance(),
@@ -47,14 +48,14 @@ func TestDeleteExpiredBefore(t *testing.T) {
 func TestMarkExpiredSessions(t *testing.T) {
 	type testcase struct {
 		name        string
-		setup       func(t *testing.T) usecase.SessionUsecase
+		setup       func(t *testing.T) domain.SessionUsecase
 		expectedErr error
 	}
 
 	testTable := []testcase{
 		{
 			name: "failed to get list active session from db",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionFailed()
 				return NewSessionUseCaseUT(t, builders)
@@ -63,7 +64,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 		},
 		{
 			name: "failed when try to find sessionID key expired",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysFailed()
@@ -73,7 +74,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 		},
 		{
 			name: "failed when trying to mark session expires time",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysSuccess()
@@ -84,7 +85,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 		},
 		{
 			name: "no session are active",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindNoActiveSession()
 				return NewSessionUseCaseUT(t, builders)
@@ -93,7 +94,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 		},
 		{
 			name: "no session expire yet",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.NoMissingKeysFound()
@@ -103,7 +104,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 		},
 		{
 			name: "mark session expires success",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysSuccess()
@@ -128,7 +129,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 func TestValidateSession(t *testing.T) {
 	type testcase struct {
 		name              string
-		setup             func(t *testing.T) usecase.SessionUsecase
+		setup             func(t *testing.T) domain.SessionUsecase
 		sessionID         string
 		expectedAccountID uuid.UUID
 		expectedErr       error
@@ -137,16 +138,16 @@ func TestValidateSession(t *testing.T) {
 	testTable := []testcase{
 		{
 			name: "invalid session id",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
-			expectedErr: usecase.ErrInvalidSessionID,
+			expectedErr: domain.ErrInvalidSessionID,
 		},
 		{
 			name: "session found in cache",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.ValidSessionCached()
 				return NewSessionUseCaseUT(t, builders)
@@ -157,7 +158,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "miss cached but query db failed",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIdFailed()
@@ -168,29 +169,29 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "session not found",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDNotFound()
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   mockbuilder.FakeSessionID.String(),
-			expectedErr: usecase.ErrSessionNotFound,
+			expectedErr: domain.ErrSessionNotFound,
 		},
 		{
 			name: "session already expired",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSessionExpired()
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   mockbuilder.FakeSessionID.String(),
-			expectedErr: usecase.ErrSessionNotFound,
+			expectedErr: domain.ErrSessionNotFound,
 		},
 		{
 			name: "failed when set cache",
-			setup: func(t *testing.T) usecase.SessionUsecase {
+			setup: func(t *testing.T) domain.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSuccess()

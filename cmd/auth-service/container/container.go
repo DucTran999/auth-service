@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/internal/handler/http"
@@ -24,14 +25,14 @@ type Container interface {
 }
 
 type repositories struct {
-	account repository.AccountRepo
-	session repository.SessionRepository
+	account domain.AccountRepo
+	session domain.SessionRepository
 }
 
 type useCases struct {
-	auth    usecase.AuthUseCase
-	account usecase.AccountUseCase
-	session usecase.SessionUsecase
+	auth    domain.AuthUseCase
+	account domain.AccountUseCase
+	session domain.SessionUsecase
 }
 
 type handlers struct {

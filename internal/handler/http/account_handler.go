@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
-	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -20,14 +20,14 @@ type accountHandlerImpl struct {
 	logger logger.ILogger
 
 	BaseHandler
-	accountUC usecase.AccountUseCase
-	sessionUC usecase.SessionUsecase
+	accountUC domain.AccountUseCase
+	sessionUC domain.SessionUsecase
 }
 
 func NewAccountHandler(
 	logger logger.ILogger,
-	accountUC usecase.AccountUseCase,
-	sessionUC usecase.SessionUsecase,
+	accountUC domain.AccountUseCase,
+	sessionUC domain.SessionUsecase,
 ) *accountHandlerImpl {
 	return &accountHandlerImpl{
 		logger:    logger,
@@ -44,7 +44,7 @@ func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 		return
 	}
 
-	input := usecase.RegisterInput{
+	input := domain.RegisterInput{
 		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
@@ -69,7 +69,7 @@ func (hdl *accountHandlerImpl) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
-	input := usecase.ChangePasswordInput{
+	input := domain.ChangePasswordInput{
 		AccountID:   session.AccountID.String(),
 		OldPassword: payload.OldPassword,
 		NewPassword: payload.NewPassword,
@@ -83,14 +83,14 @@ func (hdl *accountHandlerImpl) ChangePassword(ctx *gin.Context) {
 }
 
 func (hdl *accountHandlerImpl) handleRegisterError(ctx *gin.Context, err error) {
-	if errors.Is(err, usecase.ErrEmailExisted) {
+	if errors.Is(err, domain.ErrEmailExisted) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 	hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 }
 
-func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *model.Account) {
+func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *domain.Account) {
 	resp := gen.RegisterResponse{
 		Version: ApiVersion1,
 		Success: true,
@@ -105,7 +105,7 @@ func (hdl *accountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *mo
 	ctx.JSON(http.StatusCreated, resp)
 }
 
-func (hdl *accountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
+func (hdl *accountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*domain.Session, bool) {
 	sessionID, err := ctx.Cookie("session_id")
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
@@ -114,7 +114,7 @@ func (hdl *accountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*mod
 
 	session, err := hdl.sessionUC.ValidateSession(ctx.Request.Context(), sessionID)
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidSessionID) || errors.Is(err, usecase.ErrSessionNotFound) {
+		if errors.Is(err, domain.ErrInvalidSessionID) || errors.Is(err, domain.ErrSessionNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
 		} else {
 			hdl.logger.Errorf("failed to validate session: %v", err)

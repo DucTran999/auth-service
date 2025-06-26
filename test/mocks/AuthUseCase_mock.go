@@ -7,8 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,26 +39,26 @@ func (_m *AuthUseCase) EXPECT() *AuthUseCase_Expecter {
 }
 
 // Login provides a mock function for the type AuthUseCase
-func (_mock *AuthUseCase) Login(ctx context.Context, input usecase.LoginInput) (*model.Session, error) {
+func (_mock *AuthUseCase) Login(ctx context.Context, input domain.LoginInput) (*domain.Session, error) {
 	ret := _mock.Called(ctx, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
 	}
 
-	var r0 *model.Session
+	var r0 *domain.Session
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) (*model.Session, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.LoginInput) (*domain.Session, error)); ok {
 		return returnFunc(ctx, input)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.LoginInput) *model.Session); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.LoginInput) *domain.Session); ok {
 		r0 = returnFunc(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Session)
+			r0 = ret.Get(0).(*domain.Session)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, usecase.LoginInput) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, domain.LoginInput) error); ok {
 		r1 = returnFunc(ctx, input)
 	} else {
 		r1 = ret.Error(1)
@@ -74,20 +73,20 @@ type AuthUseCase_Login_Call struct {
 
 // Login is a helper method to define mock.On call
 //   - ctx context.Context
-//   - input usecase.LoginInput
+//   - input domain.LoginInput
 func (_e *AuthUseCase_Expecter) Login(ctx interface{}, input interface{}) *AuthUseCase_Login_Call {
 	return &AuthUseCase_Login_Call{Call: _e.mock.On("Login", ctx, input)}
 }
 
-func (_c *AuthUseCase_Login_Call) Run(run func(ctx context.Context, input usecase.LoginInput)) *AuthUseCase_Login_Call {
+func (_c *AuthUseCase_Login_Call) Run(run func(ctx context.Context, input domain.LoginInput)) *AuthUseCase_Login_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 usecase.LoginInput
+		var arg1 domain.LoginInput
 		if args[1] != nil {
-			arg1 = args[1].(usecase.LoginInput)
+			arg1 = args[1].(domain.LoginInput)
 		}
 		run(
 			arg0,
@@ -97,12 +96,12 @@ func (_c *AuthUseCase_Login_Call) Run(run func(ctx context.Context, input usecas
 	return _c
 }
 
-func (_c *AuthUseCase_Login_Call) Return(session *model.Session, err error) *AuthUseCase_Login_Call {
+func (_c *AuthUseCase_Login_Call) Return(session *domain.Session, err error) *AuthUseCase_Login_Call {
 	_c.Call.Return(session, err)
 	return _c
 }
 
-func (_c *AuthUseCase_Login_Call) RunAndReturn(run func(ctx context.Context, input usecase.LoginInput) (*model.Session, error)) *AuthUseCase_Login_Call {
+func (_c *AuthUseCase_Login_Call) RunAndReturn(run func(ctx context.Context, input domain.LoginInput) (*domain.Session, error)) *AuthUseCase_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }

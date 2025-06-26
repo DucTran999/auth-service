@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/repository"
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/google/uuid"
@@ -19,15 +18,15 @@ const (
 type authUseCaseImpl struct {
 	hasher      hasher.Hasher
 	cache       cache.Cache
-	accountRepo repository.AccountRepo
-	sessionRepo repository.SessionRepository
+	accountRepo domain.AccountRepo
+	sessionRepo domain.SessionRepository
 }
 
 func NewAuthUseCase(
 	hasher hasher.Hasher,
 	cache cache.Cache,
-	accountRepo repository.AccountRepo,
-	sessionRepo repository.SessionRepository,
+	accountRepo domain.AccountRepo,
+	sessionRepo domain.SessionRepository,
 ) *authUseCaseImpl {
 	return &authUseCaseImpl{
 		hasher:      hasher,
@@ -39,7 +38,7 @@ func NewAuthUseCase(
 
 // Login authenticates a user using email and password.
 // It verifies credentials, checks account status, and creates a new session on success.
-func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.Session, error) {
+func (uc *authUseCaseImpl) Login(ctx context.Context, input domain.LoginInput) (*domain.Session, error) {
 	session, err := uc.tryReuseSession(ctx, input.CurrentSessionID)
 	if err != nil {
 		return nil, err
@@ -67,7 +66,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input LoginInput) (*model.
 func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return fmt.Errorf("logout: %w session=%s error=%w", ErrInvalidSessionID, sessionID, err)
+		return fmt.Errorf("logout: %w session=%s error=%w", domain.ErrInvalidSessionID, sessionID, err)
 	}
 
 	// Remove session in cache
@@ -84,7 +83,7 @@ func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
-func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
+func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string) (*domain.Session, error) {
 	if sessionID == "" || sessionID == uuid.Nil.String() {
 		return nil, nil
 	}
@@ -119,7 +118,7 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 func (uc *authUseCaseImpl) findAccountByEmail(
 	ctx context.Context,
 	email string,
-) (*model.Account, error) {
+) (*domain.Account, error) {
 
 	account, err := uc.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
@@ -132,9 +131,9 @@ func (uc *authUseCaseImpl) findAccountByEmail(
 	return account, nil
 }
 
-func (uc *authUseCaseImpl) checkAccountActive(account *model.Account) error {
+func (uc *authUseCaseImpl) checkAccountActive(account *domain.Account) error {
 	if !account.IsActive {
-		return ErrAccountDisabled
+		return domain.ErrAccountDisabled
 	}
 	return nil
 }
@@ -152,13 +151,13 @@ func (uc *authUseCaseImpl) verifyPassword(plain, hashed string) error {
 
 func (uc *authUseCaseImpl) createSession(
 	ctx context.Context,
-	account *model.Account,
-	input LoginInput,
-) (*model.Session, error) {
+	account *domain.Account,
+	input domain.LoginInput,
+) (*domain.Session, error) {
 
-	session := &model.Session{
+	session := &domain.Session{
 		AccountID: account.ID,
-		Account: model.Account{
+		Account: domain.Account{
 			ID:       account.ID,
 			Email:    account.Email,
 			Role:     account.Role,
@@ -180,9 +179,9 @@ func (uc *authUseCaseImpl) createSession(
 func (uc *authUseCaseImpl) getSessionFromCache(
 	ctx context.Context,
 	sessionKey string,
-) *model.Session {
+) *domain.Session {
 
-	var session model.Session
+	var session domain.Session
 	if err := uc.cache.GetInto(ctx, sessionKey, &session); err != nil {
 		// If get session from cache got error just pass it.
 		// Already has fallback form DB

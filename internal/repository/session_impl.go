@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -15,17 +15,17 @@ type sessionRepoImpl struct {
 }
 
 // NewSessionRepository returns a concrete implementation of SessionRepository.
-func NewSessionRepository(db *gorm.DB) SessionRepository {
+func NewSessionRepository(db *gorm.DB) *sessionRepoImpl {
 	return &sessionRepoImpl{db: db}
 }
 
 // Create inserts a new session record into the database.
-func (r *sessionRepoImpl) Create(ctx context.Context, session *model.Session) error {
+func (r *sessionRepoImpl) Create(ctx context.Context, session *domain.Session) error {
 	return r.db.WithContext(ctx).Create(session).Error
 }
 
-func (r *sessionRepoImpl) FindByID(ctx context.Context, sessionID string) (*model.Session, error) {
-	var session model.Session
+func (r *sessionRepoImpl) FindByID(ctx context.Context, sessionID string) (*domain.Session, error) {
+	var session domain.Session
 
 	err := r.db.WithContext(ctx).
 		Preload("Account", func(db *gorm.DB) *gorm.DB {
@@ -50,7 +50,7 @@ func (r *sessionRepoImpl) UpdateExpiresAt(
 	expiresAt time.Time,
 ) error {
 	return r.db.WithContext(ctx).
-		Model(&model.Session{}).
+		Model(&domain.Session{}).
 		Where("id = ?", sessionID).
 		Update("expires_at", expiresAt).Error
 }
@@ -60,8 +60,8 @@ func (r *sessionRepoImpl) DeleteExpiredBefore(ctx context.Context, cutoff time.T
 	return r.db.WithContext(ctx).Exec(query, cutoff).Error
 }
 
-func (r *sessionRepoImpl) FindAllActiveSession(ctx context.Context) ([]model.Session, error) {
-	var activeSessions []model.Session
+func (r *sessionRepoImpl) FindAllActiveSession(ctx context.Context) ([]domain.Session, error) {
+	var activeSessions []domain.Session
 
 	err := r.db.WithContext(ctx).
 		Select("id").
@@ -88,7 +88,7 @@ func (r *sessionRepoImpl) MarkSessionsExpired(
 
 	// Bulk update: set expires_at where session id is in sessionIDs
 	err := r.db.WithContext(ctx).
-		Model(&model.Session{}).
+		Model(&domain.Session{}).
 		Where("id IN ?", sessionIDs).
 		Update("expires_at", expiresAt).Error
 	if err != nil {
