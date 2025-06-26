@@ -3,7 +3,7 @@ package container
 import (
 	"time"
 
-	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/config"
 	"github.com/DucTran999/dbkit"
 	dbConfig "github.com/DucTran999/dbkit/config"
 )
