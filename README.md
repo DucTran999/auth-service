@@ -82,11 +82,12 @@ auth-service/
 
 ### 🔐 Auth Endpoints
 
-| Method | Endpoint           | Description            | Auth Required |
-| ------ | ------------------ | ---------------------- | ------------- |
-| POST   | `/api/v1/register` | Register a new account | ❌ No         |
-| POST   | `/api/v1/login`    | Login with credentials | ❌ No         |
-| DELETE | `/api/v1/logout`   | Logout current session | ✅ Yes        |
+| Method | Endpoint                   | Description            | Auth Required |
+| ------ | -------------------------- | ---------------------- | ------------- |
+| POST   | `/api/v1/register`         | Register a new account | ❌ No         |
+| POST   | `/api/v1/login`            | Login with credentials | ❌ No         |
+| DELETE | `/api/v1/logout`           | Logout current session | ✅ Yes        |
+| PATCH  | `/api/v1/account/password` | User change password   | ✅ Yes        |
 
 Sessions are stored as secure, HTTP-only cookies (`session_id`).
 
