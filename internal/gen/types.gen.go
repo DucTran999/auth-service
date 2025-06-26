@@ -35,6 +35,12 @@ type Account struct {
 	UpdatedAt *time.Time         `json:"updated_at,omitempty"`
 }
 
+// ChangePasswordRequest defines model for ChangePasswordRequest.
+type ChangePasswordRequest struct {
+	NewPassword string `binding:"required,password" json:"new_password"`
+	OldPassword string `binding:"required" json:"old_password"`
+}
+
 // CreateAccountRequest defines model for CreateAccountRequest.
 type CreateAccountRequest struct {
 	Email    openapi_types.Email `binding:"required,email" json:"email"`
@@ -119,6 +125,9 @@ type RegisterResponse struct {
 
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = ErrorResponse
+
+// ChangePasswordJSONRequestBody defines body for ChangePassword for application/json ContentType.
+type ChangePasswordJSONRequestBody = ChangePasswordRequest
 
 // LoginAccountJSONRequestBody defines body for LoginAccount for application/json ContentType.
 type LoginAccountJSONRequestBody = LoginRequest

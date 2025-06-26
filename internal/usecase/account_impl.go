@@ -54,6 +54,37 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 	return created, nil
 }
 
+func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input ChangePasswordInput) error {
+	// Find account by ID
+	account, err := uc.accountRepo.FindByID(ctx, input.AccountID)
+	if err != nil {
+		return err
+	}
+
+	// hash and Save new password
+	match, err := uc.hasher.ComparePasswordAndHash(input.OldPassword, account.PasswordHash)
+	if err != nil {
+		return err
+	}
+
+	if !match {
+		return err
+	}
+
+	// Hash the password
+	hashedPassword, err := uc.hasher.HashPassword(input.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	err = uc.accountRepo.UpdatePasswordHash(ctx, account.ID.String(), hashedPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // isEmailTaken checks if the provided email already exists in the system.
 // Returns ErrEmailExisted if a duplicate is found, or a repository error if any occurs.
 func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (bool, error) {

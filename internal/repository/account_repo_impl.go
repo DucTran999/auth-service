@@ -31,14 +31,35 @@ func (r *accountRepoImpl) Create(ctx context.Context, account model.Account) (*m
 func (r *accountRepoImpl) FindByEmail(ctx context.Context, email string) (*model.Account, error) {
 	var account model.Account
 
-	err := r.db.WithContext(ctx).Table(account.TableName()).First(&account, "email = ?", email).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-
+	err := r.db.WithContext(ctx).First(&account, "email = ?", email).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
 	return &account, nil
+}
+
+func (r *accountRepoImpl) FindByID(ctx context.Context, id string) (*model.Account, error) {
+	var account model.Account
+
+	err := r.db.WithContext(ctx).First(&account, "id = ?", id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &account, nil
+}
+
+func (r *accountRepoImpl) UpdatePasswordHash(ctx context.Context, id, passwordHash string) error {
+	return r.db.WithContext(ctx).
+		Model(&model.Account{}).
+		Where("id = ?", id).
+		Update("password_hash", passwordHash).
+		Error
 }
