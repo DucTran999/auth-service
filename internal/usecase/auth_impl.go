@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/pkg/cache"
+	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/google/uuid"
 )
 
@@ -17,15 +17,15 @@ const (
 )
 
 type authUseCaseImpl struct {
-	hasher      pkg.Hasher
-	cache       pkg.Cache
+	hasher      hasher.Hasher
+	cache       cache.Cache
 	accountRepo repository.AccountRepo
 	sessionRepo repository.SessionRepository
 }
 
 func NewAuthUseCase(
-	hasher pkg.Hasher,
-	cache pkg.Cache,
+	hasher hasher.Hasher,
+	cache cache.Cache,
 	accountRepo repository.AccountRepo,
 	sessionRepo repository.SessionRepository,
 ) *authUseCaseImpl {
@@ -71,7 +71,7 @@ func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 	}
 
 	// Remove session in cache
-	_ = uc.cache.Del(ctx, common.KeyFromSessionID(sessionID))
+	_ = uc.cache.Del(ctx, cache.KeyFromSessionID(sessionID))
 
 	// expire the session in db
 	err := uc.sessionRepo.UpdateExpiresAt(ctx, sessionID, time.Now())
@@ -90,7 +90,7 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	}
 
 	// Try get session from cache
-	sessionKey := common.KeyFromSessionID(sessionID)
+	sessionKey := cache.KeyFromSessionID(sessionID)
 	cachedSession := uc.getSessionFromCache(ctx, sessionKey)
 	if cachedSession != nil {
 		ttl, _ := uc.cache.TTL(ctx, sessionKey)
@@ -172,7 +172,7 @@ func (uc *authUseCaseImpl) createSession(
 		return nil, err
 	}
 
-	_ = uc.cache.Set(ctx, common.KeyFromSessionID(session.ID.String()), session, sessionDuration)
+	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(session.ID.String()), session, sessionDuration)
 
 	return session, nil
 }

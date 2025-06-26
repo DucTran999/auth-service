@@ -1,4 +1,4 @@
-package pkg
+package hasher
 
 import "github.com/alexedwards/argon2id"
 

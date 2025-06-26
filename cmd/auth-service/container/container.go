@@ -10,7 +10,8 @@ import (
 	"github.com/DucTran999/auth-service/internal/handler/http"
 	"github.com/DucTran999/auth-service/internal/repository"
 	"github.com/DucTran999/auth-service/internal/usecase"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/pkg/cache"
+	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/DucTran999/dbkit"
 	"github.com/DucTran999/shared-pkg/logger"
 )
@@ -47,10 +48,10 @@ type container struct {
 	appConfig *config.EnvConfiguration
 
 	logger logger.ILogger
-	hasher pkg.Hasher
+	hasher hasher.Hasher
 
 	authDBConn dbkit.Connection
-	cache      pkg.Cache
+	cache      cache.Cache
 
 	useCases     *useCases
 	repositories *repositories
@@ -91,7 +92,7 @@ func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
 		cache:      cache,
 		logger:     logger,
 		appConfig:  cfg,
-		hasher:     pkg.NewHasher(), // Utility for password hashing and similar needs
+		hasher:     hasher.NewHasher(), // Utility for password hashing and similar needs
 	}
 
 	// Initialize layered application components in dependency order

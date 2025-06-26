@@ -6,15 +6,15 @@ import (
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/pkg/hasher"
 )
 
 type accountUseCaseImpl struct {
-	hasher      pkg.Hasher
+	hasher      hasher.Hasher
 	accountRepo repository.AccountRepo
 }
 
-func NewAccountUseCase(hasher pkg.Hasher, accountRepo repository.AccountRepo) *accountUseCaseImpl {
+func NewAccountUseCase(hasher hasher.Hasher, accountRepo repository.AccountRepo) *accountUseCaseImpl {
 	return &accountUseCaseImpl{
 		hasher:      hasher,
 		accountRepo: accountRepo,

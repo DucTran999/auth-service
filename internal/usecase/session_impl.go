@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/google/uuid"
 )
 
 type sessionUC struct {
 	sessionRepo repository.SessionRepository
-	cache       pkg.Cache
+	cache       cache.Cache
 }
 
-func NewSessionUC(cache pkg.Cache, sessionRepo repository.SessionRepository) *sessionUC {
+func NewSessionUC(cache cache.Cache, sessionRepo repository.SessionRepository) *sessionUC {
 	return &sessionUC{
 		sessionRepo: sessionRepo,
 		cache:       cache,
@@ -83,7 +82,7 @@ func (uc *sessionUC) ValidateSession(ctx context.Context, sessionID string) (*mo
 func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []model.Session) ([]string, error) {
 	cacheKeys := make([]string, len(activeSessions))
 	for i, session := range activeSessions {
-		cacheKeys[i] = common.KeyFromSessionID(session.ID.String())
+		cacheKeys[i] = cache.KeyFromSessionID(session.ID.String())
 	}
 
 	missingKeys, err := uc.cache.MissingKeys(ctx, cacheKeys...)
@@ -93,7 +92,7 @@ func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []mo
 
 	timedOutSessionIDs := make([]string, 0, len(missingKeys))
 	for _, key := range missingKeys {
-		timedOutSessionIDs = append(timedOutSessionIDs, common.SessionIDFromKey(key))
+		timedOutSessionIDs = append(timedOutSessionIDs, cache.SessionIDFromKey(key))
 	}
 
 	return timedOutSessionIDs, nil
@@ -103,7 +102,7 @@ func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*mo
 	var session model.Session
 
 	// Try lookup in cache first
-	if err := uc.cache.GetInto(ctx, common.KeyFromSessionID(sessionID), &session); err == nil {
+	if err := uc.cache.GetInto(ctx, cache.KeyFromSessionID(sessionID), &session); err == nil {
 		return &session, nil
 	}
 
@@ -118,7 +117,7 @@ func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*mo
 		return nil, ErrSessionNotFound
 	}
 
-	_ = uc.cache.Set(ctx, common.KeyFromSessionID(sessionID), found, sessionDuration)
+	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(sessionID), found, sessionDuration)
 
 	return found, nil
 }

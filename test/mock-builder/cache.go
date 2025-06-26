@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/common"
 	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/mock"
 )
@@ -98,7 +98,7 @@ func (b *mockCacheBuilder) CallMissingKeysFailed() {
 }
 
 func (b *mockCacheBuilder) CallMissingKeysSuccess() {
-	cachedKey := common.KeyFromSessionID(FakeSessionID.String())
+	cachedKey := cache.KeyFromSessionID(FakeSessionID.String())
 	missingKeys := []string{cachedKey}
 
 	b.inst.EXPECT().
@@ -115,7 +115,7 @@ func (b *mockCacheBuilder) NoMissingKeysFound() {
 func (b *mockCacheBuilder) DelKeySuccess() {
 	b.inst.EXPECT().
 		Del(mock.Anything, mock.MatchedBy(func(key string) bool {
-			return strings.HasPrefix(key, common.SessionKeyPrefix)
+			return strings.HasPrefix(key, cache.SessionKeyPrefix)
 		})).
 		Return(nil)
 }
