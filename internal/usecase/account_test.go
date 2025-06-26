@@ -119,13 +119,20 @@ func TestChangePassword(t *testing.T) {
 	type testCase struct {
 		name        string
 		setup       func(t *testing.T) usecase.AccountUseCase
+		input       usecase.ChangePasswordInput
 		expectedErr error
 	}
 
-	input := usecase.ChangePasswordInput{
+	validInput := usecase.ChangePasswordInput{
 		AccountID:   mockbuilder.FakeAccountID.String(),
 		OldPassword: mockbuilder.FakeOldPass,
 		NewPassword: mockbuilder.FakeNewPass,
+	}
+
+	samePassInput := usecase.ChangePasswordInput{
+		AccountID:   mockbuilder.FakeAccountID.String(),
+		OldPassword: mockbuilder.FakeOldPass,
+		NewPassword: mockbuilder.FakeOldPass,
 	}
 
 	testTable := []testCase{
@@ -136,6 +143,7 @@ func TestChangePassword(t *testing.T) {
 				builders.AccountRepoBuilder.FindByIDFailed()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: mockbuilder.ErrFindAccountByID,
 		},
 		{
@@ -146,6 +154,7 @@ func TestChangePassword(t *testing.T) {
 				builders.HasherBuilder.CompareHashPasswordGotError()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: mockbuilder.ErrCompareHashPassword,
 		},
 		{
@@ -156,6 +165,7 @@ func TestChangePassword(t *testing.T) {
 				builders.HasherBuilder.HashPasswordNotMatch()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: usecase.ErrInvalidCredentials,
 		},
 		{
@@ -167,6 +177,7 @@ func TestChangePassword(t *testing.T) {
 				builders.HasherBuilder.HashingPasswordFailed()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: mockbuilder.ErrHashingPassword,
 		},
 		{
@@ -179,7 +190,19 @@ func TestChangePassword(t *testing.T) {
 				builders.AccountRepoBuilder.UpdatePasswordHashFailed()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: mockbuilder.ErrUpdateHashPassword,
+		},
+		{
+			name: "new password must same ass the old one",
+			setup: func(t *testing.T) usecase.AccountUseCase {
+				builders := mockbuilder.NewBuilderContainer(t)
+				builders.AccountRepoBuilder.FindByIDSuccess()
+				builders.HasherBuilder.HashPasswordMatch()
+				return NewAccountUseCaseUT(t, builders)
+			},
+			input:       samePassInput,
+			expectedErr: usecase.ErrNewPasswordMustChanged,
 		},
 		{
 			name: "change password success",
@@ -191,6 +214,7 @@ func TestChangePassword(t *testing.T) {
 				builders.AccountRepoBuilder.UpdatePasswordHashSuccess()
 				return NewAccountUseCaseUT(t, builders)
 			},
+			input:       validInput,
 			expectedErr: nil,
 		},
 	}
@@ -200,7 +224,7 @@ func TestChangePassword(t *testing.T) {
 			sut := tc.setup(t)
 			ctx := context.Background()
 
-			err := sut.ChangePassword(ctx, input)
+			err := sut.ChangePassword(ctx, tc.input)
 
 			require.ErrorIs(t, err, tc.expectedErr)
 		})

@@ -48,7 +48,6 @@ func (hdl *accountHandlerImpl) CreateAccount(ctx *gin.Context) {
 		Email:    string(payload.Email),
 		Password: payload.Password,
 	}
-
 	account, err := hdl.accountUC.Register(ctx.Request.Context(), input)
 	if err != nil {
 		hdl.handleRegisterError(ctx, err)
@@ -76,12 +75,10 @@ func (hdl *accountHandlerImpl) ChangePassword(ctx *gin.Context) {
 		NewPassword: payload.NewPassword,
 	}
 	if err := hdl.accountUC.ChangePassword(ctx.Request.Context(), input); err != nil {
-		hdl.logger.Errorf("failed to change password: %v", err)
-		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+		hdl.handleChangePasswordError(ctx, err)
 		return
 	}
 
-	// Change password successfully
 	hdl.NoContentResponse(ctx)
 }
 
@@ -127,4 +124,16 @@ func (hdl *accountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*mod
 	}
 
 	return session, true
+}
+
+func (hdl *accountHandlerImpl) handleChangePasswordError(ctx *gin.Context, err error) {
+	switch {
+	case errors.Is(err, usecase.ErrInvalidCredentials):
+		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
+	case errors.Is(err, usecase.ErrNewPasswordMustChanged):
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+	default:
+		hdl.logger.Errorf("failed to change password: %v", err)
+		hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+	}
 }

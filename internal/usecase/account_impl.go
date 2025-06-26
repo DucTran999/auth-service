@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
@@ -55,31 +56,23 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 }
 
 func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input ChangePasswordInput) error {
-	// Find account by ID
 	account, err := uc.accountRepo.FindByID(ctx, input.AccountID)
 	if err != nil {
 		return err
 	}
 
-	// hash and Save new password
-	match, err := uc.hasher.ComparePasswordAndHash(input.OldPassword, account.PasswordHash)
-	if err != nil {
-		return err
+	if err = uc.validatePassword(input.OldPassword, account.PasswordHash); err != nil {
+		return fmt.Errorf("validate password: %w", err)
 	}
 
-	if !match {
-		return ErrInvalidCredentials
-	}
-
-	// Hash the password
-	hashedPassword, err := uc.hasher.HashPassword(input.NewPassword)
+	hashedPassword, err := uc.hashIfChanged(input.OldPassword, input.NewPassword)
 	if err != nil {
-		return err
+		return fmt.Errorf("hash if changed: %w", err)
 	}
 
 	err = uc.accountRepo.UpdatePasswordHash(ctx, account.ID.String(), hashedPassword)
 	if err != nil {
-		return err
+		return fmt.Errorf("update new password: %w", err)
 	}
 
 	return nil
@@ -94,4 +87,24 @@ func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (b
 	}
 
 	return account != nil, nil
+}
+
+func (uc *accountUseCaseImpl) validatePassword(password, hashed string) error {
+	match, err := uc.hasher.ComparePasswordAndHash(password, hashed)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return ErrInvalidCredentials
+	}
+
+	return nil
+}
+
+func (uc *accountUseCaseImpl) hashIfChanged(oldPassword, newPassword string) (string, error) {
+	if oldPassword == newPassword {
+		return "", ErrNewPasswordMustChanged
+	}
+
+	return uc.hasher.HashPassword(newPassword)
 }
