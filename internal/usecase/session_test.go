@@ -213,7 +213,7 @@ func TestValidateSession(t *testing.T) {
 			if err != nil {
 				require.ErrorIs(t, err, tc.expectedErr)
 			} else {
-				require.Equal(t, session.AccountID, tc.expectedAccountID)
+				require.Equal(t, tc.expectedAccountID, session.AccountID)
 			}
 		})
 	}

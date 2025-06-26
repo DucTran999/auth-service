@@ -133,7 +133,7 @@ func TestChangePassword(t *testing.T) {
 			name: "failed find account by id",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdFailed()
+				builders.AccountRepoBuilder.FindByIDFailed()
 				return NewAccountUseCaseUT(t, builders)
 			},
 			expectedErr: mockbuilder.ErrFindAccountByID,
@@ -142,7 +142,7 @@ func TestChangePassword(t *testing.T) {
 			name: "failed to compare old password to hash",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdSuccess()
+				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.CompareHashPasswordGotError()
 				return NewAccountUseCaseUT(t, builders)
 			},
@@ -152,7 +152,7 @@ func TestChangePassword(t *testing.T) {
 			name: "old password not match",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdSuccess()
+				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordNotMatch()
 				return NewAccountUseCaseUT(t, builders)
 			},
@@ -162,7 +162,7 @@ func TestChangePassword(t *testing.T) {
 			name: "failed to hashing password",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdSuccess()
+				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.HasherBuilder.HashingPasswordFailed()
 				return NewAccountUseCaseUT(t, builders)
@@ -173,7 +173,7 @@ func TestChangePassword(t *testing.T) {
 			name: "failed to update new password",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdSuccess()
+				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.HasherBuilder.HashingPasswordSuccess()
 				builders.AccountRepoBuilder.UpdatePasswordHashFailed()
@@ -185,7 +185,7 @@ func TestChangePassword(t *testing.T) {
 			name: "change password success",
 			setup: func(t *testing.T) usecase.AccountUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountRepoBuilder.FindByIdSuccess()
+				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
 				builders.HasherBuilder.HashingPasswordSuccess()
 				builders.AccountRepoBuilder.UpdatePasswordHashSuccess()

@@ -259,7 +259,7 @@ components:
         password:
           type: string
           format: password
-          minLength: 1
+          minLength: 8
           x-oapi-codegen-extra-tags:
             binding: "required"
           example: secret123
@@ -273,14 +273,14 @@ components:
         old_password:
           type: string
           format: password
-          minLength: 1
+          minLength: 8
           x-oapi-codegen-extra-tags:
             binding: "required"
           example: 0ldP@ssW0rd
         new_password:
           type: string
           format: password
-          minLength: 1
+          minLength: 8
           x-oapi-codegen-extra-tags:
             binding: "required,password"
           example: N3w@ssW0rd

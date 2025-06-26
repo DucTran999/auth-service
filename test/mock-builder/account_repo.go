@@ -87,13 +87,13 @@ func (b *mockAccountRepoBuilder) FindByEmailNoResult() {
 		Return(nil, nil)
 }
 
-func (b *mockAccountRepoBuilder) FindByIdFailed() {
+func (b *mockAccountRepoBuilder) FindByIDFailed() {
 	b.inst.EXPECT().
 		FindByID(mock.Anything, mock.Anything).
 		Return(nil, ErrFindAccountByID)
 }
 
-func (b *mockAccountRepoBuilder) FindByIdSuccess() {
+func (b *mockAccountRepoBuilder) FindByIDSuccess() {
 	mockAccount := &model.Account{
 		ID:           FakeAccountID,
 		Email:        FakeEmail,
