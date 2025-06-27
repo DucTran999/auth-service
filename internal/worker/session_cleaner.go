@@ -31,7 +31,6 @@ func NewSessionCleanupWorker(
 	cfg *config.EnvConfiguration,
 	cleaner background.SessionCleaner,
 ) *sessionCleanupWorker {
-
 	return &sessionCleanupWorker{
 		logger:        logger,
 		cleaner:       cleaner,

@@ -40,7 +40,7 @@ func LoadConfig(configFile string) (*EnvConfiguration, error) {
 	return &conf, nil
 }
 
-// FindGoModDir returns the directory containing the nearest go.mod file
+// FindGoModDir returns the directory containing the nearest go.mod file.
 func findGoModDir() (string, error) {
 	// cwd
 	startPath, err := os.Getwd()

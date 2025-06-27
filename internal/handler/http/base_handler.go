@@ -13,7 +13,7 @@ import (
 const (
 	ApiVersion1 = "v1.0"
 
-	// General Errors
+	// General Errors.
 	InternalErrorCode      = "INTERNAL_ERROR"
 	BadRequestErrorCode    = "BAD_REQUEST"
 	UnauthorizedErrorCode  = "UNAUTHORIZED"

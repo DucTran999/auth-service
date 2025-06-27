@@ -16,7 +16,7 @@ func NewHasher() *hasher {
 	return &hasher{}
 }
 
-// HashPassword securely hashes a plain password
+// HashPassword securely hashes a plain password.
 func (h *hasher) HashPassword(password string) (string, error) {
 	return argon2id.CreateHash(password, argon2id.DefaultParams)
 }

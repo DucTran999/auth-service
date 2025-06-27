@@ -86,7 +86,7 @@ func (lc *loggingCache) Del(ctx context.Context, key string) error {
 	return err
 }
 
-// Close client connection
+// Close client connection.
 func (lc *loggingCache) Close() error {
 	return lc.inner.Close()
 }

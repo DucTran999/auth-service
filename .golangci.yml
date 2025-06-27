@@ -16,13 +16,13 @@ linters:
   disable:
     # containedctx is a linter that detects struct contained context.Context field [fast: true, auto-fix: false]
     # using contextcheck which looks more active
-    - containedctx
+    # - containedctx
     # Go linter that checks if package imports are in a list of acceptable packages [fast: false, auto-fix: false]
     # not required because of dependabot
     - depguard
     # checks for duplicate words in the source code
     # not sure if it makes sense
-    - dupword
+    # - dupword
     # Checks types passed to the json encoding functions. Reports unsupported types and optionally reports occations, where the check for the returned error can be omitted. [fast: false, auto-fix: false]
     # FUTURE: use asap, because we use json alot. nice feature is possibility to check if err check is required
     - errchkjson
@@ -49,10 +49,10 @@ linters:
     - gochecknoinits
     # Computes and checks the cyclomatic complexity of functions [fast: true, auto-fix: false]
     # not used because cyclop also checks complexity of package
-    - gocyclo
+    # - gocyclo
     # Check if comments end in a period [fast: true, auto-fix: true]
     # FUTURE: checks if comments are written as specified
-    - godot
+    # - godot
     # Golang linter to check the errors handling expressions [fast: false, auto-fix: false]
     # Not used in favore of errorlint
     #    - goerr113
@@ -130,7 +130,7 @@ linters:
     - promlinter
     # Checks that package variables are not reassigned
     # FUTURE: checks if vars like Err's are reassigned which might break code
-    - reassign
+    # - reassign
     # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint. [fast: false, auto-fix: false]
     # Linter aggregator, would allow to use less other linters
     - revive
@@ -172,7 +172,7 @@ linters:
     - wastedassign
     # Tool for detection of leading and trailing whitespace [fast: true, auto-fix: true]
     # Not sure if it improves code readability
-    - whitespace
+    # - whitespace
     # Checks that errors returned from external packages are wrapped [fast: false, auto-fix: false]
     # FUTURE: improves UX because all the errors will be ZITADEL errors
     - wrapcheck

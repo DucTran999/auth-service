@@ -119,7 +119,6 @@ func (uc *authUseCaseImpl) findAccountByEmail(
 	ctx context.Context,
 	email string,
 ) (*domain.Account, error) {
-
 	account, err := uc.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -154,7 +153,6 @@ func (uc *authUseCaseImpl) createSession(
 	account *domain.Account,
 	input domain.LoginInput,
 ) (*domain.Session, error) {
-
 	session := &domain.Session{
 		AccountID: account.ID,
 		Account: domain.Account{
@@ -180,7 +178,6 @@ func (uc *authUseCaseImpl) getSessionFromCache(
 	ctx context.Context,
 	sessionKey string,
 ) *domain.Session {
-
 	var session domain.Session
 	if err := uc.cache.GetInto(ctx, sessionKey, &session); err != nil {
 		// If get session from cache got error just pass it.

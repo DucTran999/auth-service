@@ -81,7 +81,6 @@ func (r *sessionRepoImpl) MarkSessionsExpired(
 	sessionIDs []string,
 	expiresAt time.Time,
 ) error {
-
 	if len(sessionIDs) == 0 {
 		return nil // nothing to do
 	}

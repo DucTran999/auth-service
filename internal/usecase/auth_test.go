@@ -13,7 +13,6 @@ import (
 )
 
 func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) domain.AuthUseCase {
-
 	return usecase.NewAuthUseCase(
 		builders.HasherBuilder.GetInstance(),
 		builders.CacheBuilder.GetInstance(),
