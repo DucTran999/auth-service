@@ -1,5 +1,5 @@
 # Step 1: Build the Go application (builder stage)
-FROM golang@sha256:ac67716dd016429be8d4c2c53a248d7bcdf06d34127d3dc451bda6aa5a87bc06 AS builder
+FROM golang:tip-alpine3.22 AS builder
 
 # Set the image metadata with labels
 LABEL maintainer="tranaduc9x@gmail.com"
@@ -22,10 +22,10 @@ ENV GOOS=linux
 ENV GOARCH=amd64
 
 # Build the Go application
-RUN go build -o main ./cmd/app/main.go
+RUN go build -o main ./cmd/auth-service/main.go
 
 # Step 2: Create the minimal image (distroless stage)
-FROM gcr.io/distroless/static-debian12@sha256:c0f429e16b13e583da7e5a6ec20dd656d325d88e6819cafe0adb0828976529dc
+FROM gcr.io/distroless/static-debian12:latest
 
 # Set working directory in the distroless container
 WORKDIR /app
