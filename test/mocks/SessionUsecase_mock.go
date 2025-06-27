@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -148,23 +148,23 @@ func (_c *SessionUsecase_MarkExpiredSessions_Call) RunAndReturn(run func(ctx con
 }
 
 // ValidateSession provides a mock function for the type SessionUsecase
-func (_mock *SessionUsecase) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
+func (_mock *SessionUsecase) ValidateSession(ctx context.Context, sessionID string) (*domain.Session, error) {
 	ret := _mock.Called(ctx, sessionID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ValidateSession")
 	}
 
-	var r0 *model.Session
+	var r0 *domain.Session
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*model.Session, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*domain.Session, error)); ok {
 		return returnFunc(ctx, sessionID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *model.Session); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *domain.Session); ok {
 		r0 = returnFunc(ctx, sessionID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Session)
+			r0 = ret.Get(0).(*domain.Session)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -205,12 +205,12 @@ func (_c *SessionUsecase_ValidateSession_Call) Run(run func(ctx context.Context,
 	return _c
 }
 
-func (_c *SessionUsecase_ValidateSession_Call) Return(session *model.Session, err error) *SessionUsecase_ValidateSession_Call {
+func (_c *SessionUsecase_ValidateSession_Call) Return(session *domain.Session, err error) *SessionUsecase_ValidateSession_Call {
 	_c.Call.Return(session, err)
 	return _c
 }
 
-func (_c *SessionUsecase_ValidateSession_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionUsecase_ValidateSession_Call {
+func (_c *SessionUsecase_ValidateSession_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*domain.Session, error)) *SessionUsecase_ValidateSession_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/config"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/cachekit"
 	"github.com/DucTran999/shared-pkg/logger"
 )
@@ -15,7 +15,7 @@ type loggingCache struct {
 	logger logger.ILogger
 }
 
-func newRedisCache(config *config.EnvConfiguration, logger logger.ILogger) (pkg.Cache, error) {
+func newRedisCache(config *config.EnvConfiguration, logger logger.ILogger) (cache.Cache, error) {
 	cacheConf := cachekit.RedisConfig{
 		Host:     config.RedisHost,
 		Port:     config.RedisPort,
@@ -86,7 +86,7 @@ func (lc *loggingCache) Del(ctx context.Context, key string) error {
 	return err
 }
 
-// Close client connection
+// Close client connection.
 func (lc *loggingCache) Close() error {
 	return lc.inner.Close()
 }

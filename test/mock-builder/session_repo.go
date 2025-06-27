@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
@@ -45,10 +45,10 @@ func (blr *mockSessionRepoBuilder) FindByIdFailed() {
 }
 
 func (blr *mockSessionRepoBuilder) FindByIDSuccess() {
-	mockSession := model.Session{
+	mockSession := domain.Session{
 		ID:        FakeSessionID,
 		AccountID: FakeAccountID,
-		Account: model.Account{
+		Account: domain.Account{
 			ID:       FakeAccountID,
 			Email:    FakeEmail,
 			IsActive: true,
@@ -62,10 +62,10 @@ func (blr *mockSessionRepoBuilder) FindByIDSuccess() {
 
 func (blr *mockSessionRepoBuilder) FindByIDSessionExpired() {
 	expiredAt := time.Now().Add(-1 * time.Hour)
-	mockSession := model.Session{
+	mockSession := domain.Session{
 		ID:        FakeSessionID,
 		AccountID: FakeAccountID,
-		Account: model.Account{
+		Account: domain.Account{
 			ID:       FakeAccountID,
 			Email:    FakeEmail,
 			IsActive: true,
@@ -88,7 +88,7 @@ func (blr *mockSessionRepoBuilder) FindSessionReuse() {
 	mockExpires := time.Now().Add(time.Minute)
 	blr.inst.EXPECT().
 		FindByID(mock.Anything, mock.Anything).
-		Return(&model.Session{
+		Return(&domain.Session{
 			ID:        FakeSessionID,
 			AccountID: FakeAccountID,
 			ExpiresAt: &mockExpires,
@@ -109,8 +109,8 @@ func (blr *mockSessionRepoBuilder) UpdateExpiresAtSuccess() {
 
 func (blr *mockSessionRepoBuilder) CreateSessionSuccess() {
 	blr.inst.EXPECT().
-		Create(mock.Anything, mock.AnythingOfType("*model.Session")).
-		Run(func(ctx context.Context, s *model.Session) {
+		Create(mock.Anything, mock.AnythingOfType("*domain.Session")).
+		Run(func(ctx context.Context, s *domain.Session) {
 			s.ID = FakeSessionID
 		}).
 		Return(nil)
@@ -141,7 +141,7 @@ func (blr *mockSessionRepoBuilder) FindAllActiveSessionFailed() {
 }
 
 func (blr *mockSessionRepoBuilder) FindAllActiveSessionSuccess() {
-	activeSessions := []model.Session{
+	activeSessions := []domain.Session{
 		{
 			ID:        FakeSessionID,
 			AccountID: FakeAccountID,

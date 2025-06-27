@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/cmd/auth-service/app"
-	"github.com/DucTran999/auth-service/internal/config"
+	"github.com/DucTran999/auth-service/config"
 )
 
 func main() {

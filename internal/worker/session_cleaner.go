@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/config"
+	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/shared-pkg/logger"
 )
@@ -31,7 +31,6 @@ func NewSessionCleanupWorker(
 	cfg *config.EnvConfiguration,
 	cleaner background.SessionCleaner,
 ) *sessionCleanupWorker {
-
 	return &sessionCleanupWorker{
 		logger:        logger,
 		cleaner:       cleaner,

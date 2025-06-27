@@ -7,8 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,7 +39,7 @@ func (_m *AccountUseCase) EXPECT() *AccountUseCase_Expecter {
 }
 
 // ChangePassword provides a mock function for the type AccountUseCase
-func (_mock *AccountUseCase) ChangePassword(ctx context.Context, input usecase.ChangePasswordInput) error {
+func (_mock *AccountUseCase) ChangePassword(ctx context.Context, input domain.ChangePasswordInput) error {
 	ret := _mock.Called(ctx, input)
 
 	if len(ret) == 0 {
@@ -48,7 +47,7 @@ func (_mock *AccountUseCase) ChangePassword(ctx context.Context, input usecase.C
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.ChangePasswordInput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.ChangePasswordInput) error); ok {
 		r0 = returnFunc(ctx, input)
 	} else {
 		r0 = ret.Error(0)
@@ -63,20 +62,20 @@ type AccountUseCase_ChangePassword_Call struct {
 
 // ChangePassword is a helper method to define mock.On call
 //   - ctx context.Context
-//   - input usecase.ChangePasswordInput
+//   - input domain.ChangePasswordInput
 func (_e *AccountUseCase_Expecter) ChangePassword(ctx interface{}, input interface{}) *AccountUseCase_ChangePassword_Call {
 	return &AccountUseCase_ChangePassword_Call{Call: _e.mock.On("ChangePassword", ctx, input)}
 }
 
-func (_c *AccountUseCase_ChangePassword_Call) Run(run func(ctx context.Context, input usecase.ChangePasswordInput)) *AccountUseCase_ChangePassword_Call {
+func (_c *AccountUseCase_ChangePassword_Call) Run(run func(ctx context.Context, input domain.ChangePasswordInput)) *AccountUseCase_ChangePassword_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 usecase.ChangePasswordInput
+		var arg1 domain.ChangePasswordInput
 		if args[1] != nil {
-			arg1 = args[1].(usecase.ChangePasswordInput)
+			arg1 = args[1].(domain.ChangePasswordInput)
 		}
 		run(
 			arg0,
@@ -91,32 +90,32 @@ func (_c *AccountUseCase_ChangePassword_Call) Return(err error) *AccountUseCase_
 	return _c
 }
 
-func (_c *AccountUseCase_ChangePassword_Call) RunAndReturn(run func(ctx context.Context, input usecase.ChangePasswordInput) error) *AccountUseCase_ChangePassword_Call {
+func (_c *AccountUseCase_ChangePassword_Call) RunAndReturn(run func(ctx context.Context, input domain.ChangePasswordInput) error) *AccountUseCase_ChangePassword_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Register provides a mock function for the type AccountUseCase
-func (_mock *AccountUseCase) Register(ctx context.Context, input usecase.RegisterInput) (*model.Account, error) {
+func (_mock *AccountUseCase) Register(ctx context.Context, input domain.RegisterInput) (*domain.Account, error) {
 	ret := _mock.Called(ctx, input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Register")
 	}
 
-	var r0 *model.Account
+	var r0 *domain.Account
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.RegisterInput) (*model.Account, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.RegisterInput) (*domain.Account, error)); ok {
 		return returnFunc(ctx, input)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, usecase.RegisterInput) *model.Account); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.RegisterInput) *domain.Account); ok {
 		r0 = returnFunc(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Account)
+			r0 = ret.Get(0).(*domain.Account)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, usecase.RegisterInput) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, domain.RegisterInput) error); ok {
 		r1 = returnFunc(ctx, input)
 	} else {
 		r1 = ret.Error(1)
@@ -131,20 +130,20 @@ type AccountUseCase_Register_Call struct {
 
 // Register is a helper method to define mock.On call
 //   - ctx context.Context
-//   - input usecase.RegisterInput
+//   - input domain.RegisterInput
 func (_e *AccountUseCase_Expecter) Register(ctx interface{}, input interface{}) *AccountUseCase_Register_Call {
 	return &AccountUseCase_Register_Call{Call: _e.mock.On("Register", ctx, input)}
 }
 
-func (_c *AccountUseCase_Register_Call) Run(run func(ctx context.Context, input usecase.RegisterInput)) *AccountUseCase_Register_Call {
+func (_c *AccountUseCase_Register_Call) Run(run func(ctx context.Context, input domain.RegisterInput)) *AccountUseCase_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 usecase.RegisterInput
+		var arg1 domain.RegisterInput
 		if args[1] != nil {
-			arg1 = args[1].(usecase.RegisterInput)
+			arg1 = args[1].(domain.RegisterInput)
 		}
 		run(
 			arg0,
@@ -154,12 +153,12 @@ func (_c *AccountUseCase_Register_Call) Run(run func(ctx context.Context, input 
 	return _c
 }
 
-func (_c *AccountUseCase_Register_Call) Return(account *model.Account, err error) *AccountUseCase_Register_Call {
+func (_c *AccountUseCase_Register_Call) Return(account *domain.Account, err error) *AccountUseCase_Register_Call {
 	_c.Call.Return(account, err)
 	return _c
 }
 
-func (_c *AccountUseCase_Register_Call) RunAndReturn(run func(ctx context.Context, input usecase.RegisterInput) (*model.Account, error)) *AccountUseCase_Register_Call {
+func (_c *AccountUseCase_Register_Call) RunAndReturn(run func(ctx context.Context, input domain.RegisterInput) (*domain.Account, error)) *AccountUseCase_Register_Call {
 	_c.Call.Return(run)
 	return _c
 }

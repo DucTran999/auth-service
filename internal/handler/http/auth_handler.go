@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
-	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -23,10 +23,10 @@ type AuthHandler interface {
 type authHandlerImpl struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC usecase.AuthUseCase
+	authUC domain.AuthUseCase
 }
 
-func NewAuthHandler(logger logger.ILogger, authUC usecase.AuthUseCase) *authHandlerImpl {
+func NewAuthHandler(logger logger.ILogger, authUC domain.AuthUseCase) *authHandlerImpl {
 	return &authHandlerImpl{
 		logger: logger,
 		authUC: authUC,
@@ -48,7 +48,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	}
 
 	// Convert request to domain model
-	loginInput := usecase.LoginInput{
+	loginInput := domain.LoginInput{
 		CurrentSessionID: currentSessionID,
 		Email:            string(payload.Email),
 		Password:         payload.Password,
@@ -89,7 +89,7 @@ func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
-func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
+func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *domain.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 

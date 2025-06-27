@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/shared-pkg/logger"
 )
 
@@ -21,10 +21,10 @@ type SessionCleaner interface {
 
 type sessionCleaner struct {
 	logger    logger.ILogger
-	sessionUC usecase.SessionUsecase
+	sessionUC domain.SessionUsecase
 }
 
-func NewSessionCleaner(logger logger.ILogger, sessionUC usecase.SessionUsecase) *sessionCleaner {
+func NewSessionCleaner(logger logger.ILogger, sessionUC domain.SessionUsecase) *sessionCleaner {
 	return &sessionCleaner{
 		logger:    logger,
 		sessionUC: sessionUC,

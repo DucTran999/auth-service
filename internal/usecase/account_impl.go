@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/DucTran999/auth-service/pkg"
+	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/pkg/hasher"
 )
 
 type accountUseCaseImpl struct {
-	hasher      pkg.Hasher
-	accountRepo repository.AccountRepo
+	hasher      hasher.Hasher
+	accountRepo domain.AccountRepo
 }
 
-func NewAccountUseCase(hasher pkg.Hasher, accountRepo repository.AccountRepo) *accountUseCaseImpl {
+func NewAccountUseCase(hasher hasher.Hasher, accountRepo domain.AccountRepo) *accountUseCaseImpl {
 	return &accountUseCaseImpl{
 		hasher:      hasher,
 		accountRepo: accountRepo,
@@ -25,13 +24,13 @@ func NewAccountUseCase(hasher pkg.Hasher, accountRepo repository.AccountRepo) *a
 // 1. Checks if the email is already in use.
 // 2. Hashes the password securely.
 // 3. Persists the account to the repository.
-func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput) (*model.Account, error) {
+func (uc *accountUseCaseImpl) Register(ctx context.Context, input domain.RegisterInput) (*domain.Account, error) {
 	taken, err := uc.isEmailTaken(ctx, input.Email)
 	if err != nil {
 		return nil, err
 	}
 	if taken {
-		return nil, ErrEmailExisted
+		return nil, domain.ErrEmailExisted
 	}
 
 	// Hash the password
@@ -41,7 +40,7 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 	}
 
 	// Bind input to domain model
-	account := model.Account{
+	account := domain.Account{
 		Email:        input.Email,
 		PasswordHash: hashedPassword,
 	}
@@ -55,7 +54,7 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input RegisterInput)
 	return created, nil
 }
 
-func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input ChangePasswordInput) error {
+func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input domain.ChangePasswordInput) error {
 	account, err := uc.accountRepo.FindByID(ctx, input.AccountID)
 	if err != nil {
 		return err

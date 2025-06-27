@@ -1,7 +1,7 @@
 package container
 
 import (
-	"github.com/DucTran999/auth-service/internal/config"
+	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/shared-pkg/logger"
 )
 
