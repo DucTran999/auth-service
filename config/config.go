@@ -2,96 +2,77 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 
-	"github.com/spf13/viper"
+	"github.com/go-playground/validator/v10"
 )
 
 type EnvConfiguration struct {
-	ServiceEnv     string `mapstructure:"SERVICE_ENV"`
-	ServiceName    string `mapstructure:"SERVICE_NAME"`
-	ServiceID      string `mapstructure:"SERVICE_ID"`
-	ServiceVersion string `mapstructure:"SERVICE_VERSION"`
-	ShutdownTime   int    `mapstructure:"SHUTDOWN_TIME"`
+	ServiceEnv     string `mapstructure:"SERVICE_ENV" validate:"required,oneof=dev staging prod"`
+	ServiceName    string `mapstructure:"SERVICE_NAME" validate:"required"`
+	ServiceID      string `mapstructure:"SERVICE_ID" validate:"required"`
+	ServiceVersion string `mapstructure:"SERVICE_VERSION" validate:"required"`
+	ShutdownTime   int    `mapstructure:"SHUTDOWN_TIME" validate:"gte=0"`
 
-	Host string `mapstructure:"HOST"`
-	Port int    `mapstructure:"PORT"`
+	Host string `mapstructure:"HOST" validate:"required"`
+	Port int    `mapstructure:"PORT" validate:"required,min=1,max=65535"`
 
 	LogToFile   bool   `mapstructure:"LOG_TO_FILE"`
-	LogFilePath string `mapstructure:"LOG_FILE_PATH"`
+	LogFilePath string `mapstructure:"LOG_FILE_PATH"` // validate if LogToFile is true (custom)
 
-	DBDriver                string `mapstructure:"DB_DRIVER"`
-	DBHost                  string `mapstructure:"DB_HOST"`
-	DBPort                  int    `mapstructure:"DB_PORT"`
-	DBUsername              string `mapstructure:"DB_USERNAME"`
-	DBPasswd                string `mapstructure:"DB_PASSWORD"`
-	DBDatName               string `mapstructure:"DB_DATABASE"`
-	DBSslMode               string `mapstructure:"DB_SSL_MODE"`
-	DBMaxOpenConnections    int    `mapstructure:"DB_MAX_OPEN_CONNECTIONS"`
-	DBMaxIdleConnections    int    `mapstructure:"DB_MAX_IDLE_CONNECTIONS"`
-	DBMaxConnectionIdleTime int    `mapstructure:"DB_MAX_CONNECTION_IDLE_TIME"`
-	DBTimezone              string `mapstructure:"DB_TIMEZONE"`
+	DBDriver                string `mapstructure:"DB_DRIVER" validate:"required"`
+	DBHost                  string `mapstructure:"DB_HOST" validate:"required"`
+	DBPort                  int    `mapstructure:"DB_PORT" validate:"required,min=1,max=65535"`
+	DBUsername              string `mapstructure:"DB_USERNAME" validate:"required"`
+	DBPasswd                string `mapstructure:"DB_PASSWORD" validate:"required"`
+	DBDatName               string `mapstructure:"DB_DATABASE" validate:"required"`
+	DBSslMode               string `mapstructure:"DB_SSL_MODE" validate:"omitempty,oneof=disable require verify-ca verify-full"`
+	DBMaxOpenConnections    int    `mapstructure:"DB_MAX_OPEN_CONNECTIONS" validate:"gte=0"`
+	DBMaxIdleConnections    int    `mapstructure:"DB_MAX_IDLE_CONNECTIONS" validate:"gte=0"`
+	DBMaxConnectionIdleTime int    `mapstructure:"DB_MAX_CONNECTION_IDLE_TIME" validate:"gte=0"`
+	DBTimezone              string `mapstructure:"DB_TIMEZONE" validate:"omitempty"`
 
-	CacheInMem  bool   `mapstructure:"CACHE_IN_MEM"`
-	RedisHost   string `mapstructure:"REDIS_HOST"`
-	RedisPort   int    `mapstructure:"REDIS_PORT"`
+	RedisHost   string `mapstructure:"REDIS_HOST" validate:"required"`
+	RedisPort   int    `mapstructure:"REDIS_PORT" validate:"required,min=1,max=65535"`
 	RedisPasswd string `mapstructure:"REDIS_PASSWORD"`
-	RedisDB     int    `mapstructure:"REDIS_DATABASE"`
+	RedisDB     int    `mapstructure:"REDIS_DATABASE" validate:"gte=0"`
 
-	PurgeIntervalInDays  int `mapstructure:"PURGE_INTERVAL_IN_DAYS"`
-	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS"`
+	PurgeIntervalInDays  int `mapstructure:"PURGE_INTERVAL_IN_DAYS" validate:"gte=0"`
+	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS" validate:"gte=0"`
 }
 
-func LoadConfig(configFile string) (*EnvConfiguration, error) {
-	// Locate the directory containing go.mod
-	goModDir, err := findGoModDir()
-	if err != nil {
-		return nil, fmt.Errorf("go.mod not found: %w", err)
-	}
+func (cfg *EnvConfiguration) Normalize() {
+	cfg.ServiceEnv = strings.TrimSpace(cfg.ServiceEnv)
+	cfg.ServiceName = strings.TrimSpace(cfg.ServiceName)
+	cfg.ServiceID = strings.TrimSpace(cfg.ServiceID)
+	cfg.ServiceVersion = strings.TrimSpace(cfg.ServiceVersion)
 
-	// Build the full path to the config file (e.g., .env)
-	configPath := filepath.Join(goModDir, configFile)
+	cfg.Host = strings.TrimSpace(cfg.Host)
+	cfg.LogFilePath = strings.TrimSpace(cfg.LogFilePath)
 
-	// Load the config file using Viper
-	viper.SetConfigFile(configPath)
-	viper.AutomaticEnv() // override with environment variables if present
+	cfg.DBDriver = strings.TrimSpace(cfg.DBDriver)
+	cfg.DBHost = strings.TrimSpace(cfg.DBHost)
+	cfg.DBUsername = strings.TrimSpace(cfg.DBUsername)
+	cfg.DBPasswd = strings.TrimSpace(cfg.DBPasswd)
+	cfg.DBDatName = strings.TrimSpace(cfg.DBDatName)
+	cfg.DBSslMode = strings.TrimSpace(cfg.DBSslMode)
+	cfg.DBTimezone = strings.TrimSpace(cfg.DBTimezone)
 
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
-	}
-
-	// Unmarshal into custom config struct
-	var conf EnvConfiguration
-	if err := viper.Unmarshal(&conf); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
-	}
-
-	return &conf, nil
+	cfg.RedisHost = strings.TrimSpace(cfg.RedisHost)
+	cfg.RedisPasswd = strings.TrimSpace(cfg.RedisPasswd)
 }
 
-// FindGoModDir returns the directory containing the nearest go.mod file
-func findGoModDir() (string, error) {
-	// cwd
-	startPath := "."
+func (cfg *EnvConfiguration) Validate() error {
+	validate := validator.New()
 
-	dir := startPath
-	if fi, err := os.Stat(startPath); err == nil && !fi.IsDir() {
-		dir = filepath.Dir(startPath)
+	// Basic tag-based validation
+	if err := validate.Struct(cfg); err != nil {
+		return err
 	}
 
-	for {
-		goMod := filepath.Join(dir, "go.mod")
-		if _, err := os.Stat(goMod); err == nil {
-			return dir, nil
-		}
-
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break // root reached
-		}
-		dir = parent
+	if cfg.LogToFile && cfg.LogFilePath == "" {
+		return fmt.Errorf("LOG_FILE_PATH is required when LOG_TO_FILE is true")
 	}
 
-	return "", fmt.Errorf("go.mod not found from path: %s", startPath)
+	return nil
 }
