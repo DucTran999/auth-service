@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -71,7 +71,7 @@ func (cfg *EnvConfiguration) Validate() error {
 	}
 
 	if cfg.LogToFile && cfg.LogFilePath == "" {
-		return fmt.Errorf("LOG_FILE_PATH is required when LOG_TO_FILE is true")
+		return errors.New("LOG_FILE_PATH is required when LOG_TO_FILE is true")
 	}
 
 	return nil
