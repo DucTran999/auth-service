@@ -1,4 +1,4 @@
-package http
+package rest
 
 import (
 	"errors"
@@ -7,6 +7,8 @@ import (
 	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -15,25 +17,20 @@ const (
 	sessionKey = "session_id"
 )
 
-type AuthHandler interface {
-	LoginAccount(ctx *gin.Context)
-	LogoutAccount(ctx *gin.Context)
-}
-
-type authHandlerImpl struct {
+type AuthHandlerImpl struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC domain.AuthUseCase
+	authUC port.AuthUseCase
 }
 
-func NewAuthHandler(logger logger.ILogger, authUC domain.AuthUseCase) *authHandlerImpl {
-	return &authHandlerImpl{
+func NewAuthHandler(logger logger.ILogger, authUC port.AuthUseCase) *AuthHandlerImpl {
+	return &AuthHandlerImpl{
 		logger: logger,
 		authUC: authUC,
 	}
 }
 
-func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
+func (hdl *AuthHandlerImpl) LoginAccount(ctx *gin.Context) {
 	// Parse request body
 	payload, err := ParseAndValidateJSON[gen.LoginAccountJSONRequestBody](ctx)
 	if err != nil {
@@ -48,7 +45,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	}
 
 	// Convert request to domain model
-	loginInput := domain.LoginInput{
+	loginInput := dto.LoginInput{
 		CurrentSessionID: currentSessionID,
 		Email:            string(payload.Email),
 		Password:         payload.Password,
@@ -72,7 +69,7 @@ func (hdl *authHandlerImpl) LoginAccount(ctx *gin.Context) {
 	hdl.responseLoginSuccess(ctx, session)
 }
 
-func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
+func (hdl *AuthHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	// Try to get session ID from cookie
 	sessionID, err := ctx.Cookie(sessionKey)
 	if err == nil {
@@ -89,7 +86,7 @@ func (hdl *authHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
-func (hdl *authHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *domain.Session) {
+func (hdl *AuthHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *domain.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 

@@ -1,4 +1,4 @@
-package domain
+package dto
 
 // LoginInput represents the input required to authenticate a user using email and password.
 // It also includes optional request metadata for logging, auditing, or session management.

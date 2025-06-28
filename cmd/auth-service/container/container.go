@@ -5,12 +5,8 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/handler/background"
-	"github.com/DucTran999/auth-service/internal/handler/http"
-	"github.com/DucTran999/auth-service/internal/repository"
-	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/DucTran999/dbkit"
@@ -22,27 +18,6 @@ type Container interface {
 	SessionCleaner() background.SessionCleaner
 	Logger() logger.ILogger
 	Close()
-}
-
-type repositories struct {
-	account domain.AccountRepo
-	session domain.SessionRepository
-}
-
-type useCases struct {
-	auth    domain.AuthUseCase
-	account domain.AccountUseCase
-	session domain.SessionUsecase
-}
-
-type handlers struct {
-	auth    http.AuthHandler
-	account http.AccountHandler
-	health  http.HealthHandler
-}
-
-type jobs struct {
-	SessionCleaner background.SessionCleaner
 }
 
 type container struct {
@@ -126,61 +101,4 @@ func (c *container) Close() {
 		c.logger.Warnf("failed to close cache connection: %v", err)
 	}
 	c.logger.Info("db connection closed gracefully")
-}
-
-func (c *container) initRepositories() {
-	c.repositories = &repositories{
-		account: repository.NewAccountRepo(c.authDBConn.DB()),
-		session: repository.NewSessionRepository(c.authDBConn.DB()),
-	}
-}
-
-func (c *container) initUseCases() {
-	accountUC := usecase.NewAccountUseCase(
-		c.hasher,
-		c.repositories.account,
-	)
-
-	authUC := usecase.NewAuthUseCase(
-		c.hasher,
-		c.cache,
-		c.repositories.account,
-		c.repositories.session,
-	)
-
-	sessionUC := usecase.NewSessionUC(c.cache, c.repositories.session)
-
-	c.useCases = &useCases{
-		account: accountUC,
-		auth:    authUC,
-		session: sessionUC,
-	}
-}
-
-func (c *container) initHandlers() {
-	c.handlers = &handlers{
-		auth:    http.NewAuthHandler(c.logger, c.useCases.auth),
-		account: http.NewAccountHandler(c.logger, c.useCases.account, c.useCases.session),
-		health:  http.NewHealthHandler(c.appConfig.ServiceEnv),
-	}
-}
-
-type apiHandler struct {
-	http.AuthHandler
-	http.AccountHandler
-	http.HealthHandler
-}
-
-func (c *container) initAPIHandler() {
-	c.apiHandler = &apiHandler{
-		AuthHandler:    c.handlers.auth,
-		AccountHandler: c.handlers.account,
-		HealthHandler:  c.handlers.health,
-	}
-}
-
-func (c *container) initJobs() {
-	c.jobs = &jobs{
-		SessionCleaner: background.NewSessionCleaner(c.logger, c.useCases.session),
-	}
 }

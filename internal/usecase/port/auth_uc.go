@@ -1,12 +1,17 @@
-package domain
+package port
 
-import "context"
+import (
+	"context"
+
+	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
+)
 
 // AuthUseCase defines the authentication-related business logic.
 type AuthUseCase interface {
 	// Login verifies the provided credentials and returns the authenticated account.
 	// Returns an error if authentication fails.
-	Login(ctx context.Context, input LoginInput) (*Session, error)
+	Login(ctx context.Context, input dto.LoginInput) (*domain.Session, error)
 
 	// Logout terminates the session associated with the given session ID.
 	// It removes the session from cache (best-effort) and marks it as expired in the database.

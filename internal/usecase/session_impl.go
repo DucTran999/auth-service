@@ -6,17 +6,18 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/google/uuid"
 )
 
-type sessionUC struct {
-	sessionRepo domain.SessionRepository
+type SessionUCImpl struct {
+	sessionRepo port.SessionRepository
 	cache       cache.Cache
 }
 
-func NewSessionUC(cache cache.Cache, sessionRepo domain.SessionRepository) *sessionUC {
-	return &sessionUC{
+func NewSessionUC(cache cache.Cache, sessionRepo port.SessionRepository) *SessionUCImpl {
+	return &SessionUCImpl{
 		sessionRepo: sessionRepo,
 		cache:       cache,
 	}
@@ -24,14 +25,14 @@ func NewSessionUC(cache cache.Cache, sessionRepo domain.SessionRepository) *sess
 
 // DeleteExpiredBefore removes all sessions from the repository that expired before the given cutoff time.
 // Useful for periodic cleanup of stale session data.
-func (uc *sessionUC) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
+func (uc *SessionUCImpl) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
 	if err := uc.sessionRepo.DeleteExpiredBefore(ctx, cutoff); err != nil {
 		return fmt.Errorf("failed to delete sessions expired before %s: %w", cutoff.Format(time.RFC3339), err)
 	}
 	return nil
 }
 
-func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
+func (uc *SessionUCImpl) MarkExpiredSessions(ctx context.Context) error {
 	// Fetch all active sessions from the DB
 	activeSessions, err := uc.sessionRepo.FindAllActiveSession(ctx)
 	if err != nil {
@@ -63,7 +64,7 @@ func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 	return nil
 }
 
-func (uc *sessionUC) ValidateSession(ctx context.Context, sessionID string) (*domain.Session, error) {
+func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) (*domain.Session, error) {
 	if _, err := uuid.Parse(sessionID); err != nil {
 		return nil, fmt.Errorf("%w: %w", domain.ErrInvalidSessionID, err)
 	}
@@ -78,7 +79,7 @@ func (uc *sessionUC) ValidateSession(ctx context.Context, sessionID string) (*do
 
 // findSessionTimeout returns the IDs of sessions that are not found in the cache.
 // These sessions are considered "timed out" and may need to be expired.
-func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []domain.Session) ([]string, error) {
+func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions []domain.Session) ([]string, error) {
 	cacheKeys := make([]string, len(activeSessions))
 	for i, session := range activeSessions {
 		cacheKeys[i] = cache.KeyFromSessionID(session.ID.String())
@@ -97,7 +98,7 @@ func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []do
 	return timedOutSessionIDs, nil
 }
 
-func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*domain.Session, error) {
+func (uc *SessionUCImpl) findSessionByID(ctx context.Context, sessionID string) (*domain.Session, error) {
 	var session domain.Session
 
 	// Try lookup in cache first
