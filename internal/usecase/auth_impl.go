@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/google/uuid"
@@ -15,20 +17,20 @@ const (
 	sessionDuration = 60 * time.Minute
 )
 
-type authUseCaseImpl struct {
+type AuthUseCaseImpl struct {
 	hasher      hasher.Hasher
 	cache       cache.Cache
-	accountRepo domain.AccountRepo
-	sessionRepo domain.SessionRepository
+	accountRepo port.AccountRepo
+	sessionRepo port.SessionRepository
 }
 
 func NewAuthUseCase(
 	hasher hasher.Hasher,
 	cache cache.Cache,
-	accountRepo domain.AccountRepo,
-	sessionRepo domain.SessionRepository,
-) *authUseCaseImpl {
-	return &authUseCaseImpl{
+	accountRepo port.AccountRepo,
+	sessionRepo port.SessionRepository,
+) *AuthUseCaseImpl {
+	return &AuthUseCaseImpl{
 		hasher:      hasher,
 		cache:       cache,
 		accountRepo: accountRepo,
@@ -38,7 +40,7 @@ func NewAuthUseCase(
 
 // Login authenticates a user using email and password.
 // It verifies credentials, checks account status, and creates a new session on success.
-func (uc *authUseCaseImpl) Login(ctx context.Context, input domain.LoginInput) (*domain.Session, error) {
+func (uc *AuthUseCaseImpl) Login(ctx context.Context, input dto.LoginInput) (*domain.Session, error) {
 	session, err := uc.tryReuseSession(ctx, input.CurrentSessionID)
 	if err != nil {
 		return nil, err
@@ -63,7 +65,7 @@ func (uc *authUseCaseImpl) Login(ctx context.Context, input domain.LoginInput) (
 	return uc.createSession(ctx, account, input)
 }
 
-func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
+func (uc *AuthUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
 		return fmt.Errorf("logout: %w session=%s error=%w", domain.ErrInvalidSessionID, sessionID, err)
@@ -83,7 +85,7 @@ func (uc *authUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
-func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string) (*domain.Session, error) {
+func (uc *AuthUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string) (*domain.Session, error) {
 	if sessionID == "" || sessionID == uuid.Nil.String() {
 		return nil, nil
 	}
@@ -115,7 +117,7 @@ func (uc *authUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	return session, nil
 }
 
-func (uc *authUseCaseImpl) findAccountByEmail(
+func (uc *AuthUseCaseImpl) findAccountByEmail(
 	ctx context.Context,
 	email string,
 ) (*domain.Account, error) {
@@ -130,14 +132,14 @@ func (uc *authUseCaseImpl) findAccountByEmail(
 	return account, nil
 }
 
-func (uc *authUseCaseImpl) checkAccountActive(account *domain.Account) error {
+func (uc *AuthUseCaseImpl) checkAccountActive(account *domain.Account) error {
 	if !account.IsActive {
 		return domain.ErrAccountDisabled
 	}
 	return nil
 }
 
-func (uc *authUseCaseImpl) verifyPassword(plain, hashed string) error {
+func (uc *AuthUseCaseImpl) verifyPassword(plain, hashed string) error {
 	match, err := uc.hasher.ComparePasswordAndHash(plain, hashed)
 	if err != nil {
 		return err
@@ -148,10 +150,10 @@ func (uc *authUseCaseImpl) verifyPassword(plain, hashed string) error {
 	return nil
 }
 
-func (uc *authUseCaseImpl) createSession(
+func (uc *AuthUseCaseImpl) createSession(
 	ctx context.Context,
 	account *domain.Account,
-	input domain.LoginInput,
+	input dto.LoginInput,
 ) (*domain.Session, error) {
 	session := &domain.Session{
 		AccountID: account.ID,
@@ -174,7 +176,7 @@ func (uc *authUseCaseImpl) createSession(
 	return session, nil
 }
 
-func (uc *authUseCaseImpl) getSessionFromCache(
+func (uc *AuthUseCaseImpl) getSessionFromCache(
 	ctx context.Context,
 	sessionKey string,
 ) *domain.Session {

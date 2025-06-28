@@ -7,8 +7,44 @@ import (
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/cachekit"
+	"github.com/DucTran999/dbkit"
+	dbConfig "github.com/DucTran999/dbkit/config"
 	"github.com/DucTran999/shared-pkg/logger"
 )
+
+func newLogger(cfg *config.EnvConfiguration) (logger.ILogger, error) {
+	return logger.NewLogger(logger.Config{
+		Environment: cfg.ServiceEnv,
+		LogToFile:   cfg.LogToFile,
+		FilePath:    cfg.LogFilePath,
+	})
+}
+
+func newAuthDBConnection(config *config.EnvConfiguration) (dbkit.Connection, error) {
+	pgConf := dbConfig.PostgreSQLConfig{
+		Config: dbConfig.Config{
+			Host:     config.DBHost,
+			Port:     config.DBPort,
+			Username: config.DBUsername,
+			Password: config.DBPasswd,
+			Database: config.DBDatName,
+			TimeZone: config.DBTimezone,
+		},
+		PoolConfig: dbConfig.PoolConfig{
+			MaxOpenConnection: config.DBMaxOpenConnections,
+			MaxIdleConnection: config.DBMaxIdleConnections,
+			ConnMaxIdleTime:   time.Duration(config.DBMaxConnectionIdleTime) * time.Second,
+		},
+		SSLMode: dbConfig.PgSSLDisable,
+	}
+
+	conn, err := dbkit.NewPostgreSQLConnection(pgConf)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
 
 type loggingCache struct {
 	inner  cachekit.RemoteCache

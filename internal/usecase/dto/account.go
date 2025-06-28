@@ -1,4 +1,4 @@
-package domain
+package dto
 
 type ChangePasswordInput struct {
 	AccountID   string

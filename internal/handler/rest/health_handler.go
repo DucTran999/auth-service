@@ -1,4 +1,4 @@
-package http
+package rest
 
 import (
 	"net/http"
@@ -8,23 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HealthHandler interface {
-	CheckLiveness(ctx *gin.Context)
-}
-
-type healthHandlerImpl struct {
+type HealthHandlerImpl struct {
 	serviceVersion string // version release
 	startTime      time.Time
 }
 
-func NewHealthHandler(serviceVersion string) *healthHandlerImpl {
-	return &healthHandlerImpl{
+func NewHealthHandler(serviceVersion string) *HealthHandlerImpl {
+	return &HealthHandlerImpl{
 		serviceVersion: serviceVersion,
 		startTime:      time.Now(),
 	}
 }
 
-func (h *healthHandlerImpl) CheckLiveness(ctx *gin.Context) {
+func (h *HealthHandlerImpl) CheckLiveness(ctx *gin.Context) {
 	uptime := int64(time.Since(h.startTime).Seconds())
 
 	response := gen.HealthResponse{

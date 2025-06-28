@@ -5,16 +5,18 @@ import (
 	"fmt"
 
 	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 )
 
-type accountUseCaseImpl struct {
+type AccountUseCaseImpl struct {
 	hasher      hasher.Hasher
-	accountRepo domain.AccountRepo
+	accountRepo port.AccountRepo
 }
 
-func NewAccountUseCase(hasher hasher.Hasher, accountRepo domain.AccountRepo) *accountUseCaseImpl {
-	return &accountUseCaseImpl{
+func NewAccountUseCase(hasher hasher.Hasher, accountRepo port.AccountRepo) *AccountUseCaseImpl {
+	return &AccountUseCaseImpl{
 		hasher:      hasher,
 		accountRepo: accountRepo,
 	}
@@ -24,7 +26,7 @@ func NewAccountUseCase(hasher hasher.Hasher, accountRepo domain.AccountRepo) *ac
 // 1. Checks if the email is already in use.
 // 2. Hashes the password securely.
 // 3. Persists the account to the repository.
-func (uc *accountUseCaseImpl) Register(ctx context.Context, input domain.RegisterInput) (*domain.Account, error) {
+func (uc *AccountUseCaseImpl) Register(ctx context.Context, input dto.RegisterInput) (*domain.Account, error) {
 	taken, err := uc.isEmailTaken(ctx, input.Email)
 	if err != nil {
 		return nil, err
@@ -54,7 +56,7 @@ func (uc *accountUseCaseImpl) Register(ctx context.Context, input domain.Registe
 	return created, nil
 }
 
-func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input domain.ChangePasswordInput) error {
+func (uc *AccountUseCaseImpl) ChangePassword(ctx context.Context, input dto.ChangePasswordInput) error {
 	account, err := uc.accountRepo.FindByID(ctx, input.AccountID)
 	if err != nil {
 		return err
@@ -79,7 +81,7 @@ func (uc *accountUseCaseImpl) ChangePassword(ctx context.Context, input domain.C
 
 // isEmailTaken checks if the provided email already exists in the system.
 // Returns ErrEmailExisted if a duplicate is found, or a repository error if any occurs.
-func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (bool, error) {
+func (uc *AccountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (bool, error) {
 	account, err := uc.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return false, err
@@ -88,7 +90,7 @@ func (uc *accountUseCaseImpl) isEmailTaken(ctx context.Context, email string) (b
 	return account != nil, nil
 }
 
-func (uc *accountUseCaseImpl) validatePassword(password, hashed string) error {
+func (uc *AccountUseCaseImpl) validatePassword(password, hashed string) error {
 	match, err := uc.hasher.ComparePasswordAndHash(password, hashed)
 	if err != nil {
 		return err
@@ -100,7 +102,7 @@ func (uc *accountUseCaseImpl) validatePassword(password, hashed string) error {
 	return nil
 }
 
-func (uc *accountUseCaseImpl) hashIfChanged(oldPassword, newPassword string) (string, error) {
+func (uc *AccountUseCaseImpl) hashIfChanged(oldPassword, newPassword string) (string, error) {
 	if oldPassword == newPassword {
 		return "", ErrNewPasswordMustChanged
 	}
