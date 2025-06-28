@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
@@ -9,39 +8,23 @@ import (
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
 )
-
-// AccountUseCase defines the business logic for managing user accounts.
-type AccountUseCase interface {
-	// Register creates a new user account with the provided information.
-	// It typically includes validation, password hashing, and persistence logic.
-	Register(ctx context.Context, input dto.RegisterInput) (*domain.Account, error)
-
-	// ChangePassword change password for user when old password are match
-	ChangePassword(ctx context.Context, input dto.ChangePasswordInput) error
-}
-
-// SessionUsecase defines business logic operations related to session lifecycle management.
-type SessionUsecase interface {
-	// ValidateSession find session in cache first if not try to lookup in DB.
-	// Return session only if it is existed and not expire
-	ValidateSession(ctx context.Context, sessionID string) (*domain.Session, error)
-}
 
 type AccountHandlerImpl struct {
 	logger logger.ILogger
 
 	BaseHandler
-	accountUC AccountUseCase
-	sessionUC SessionUsecase
+	accountUC port.AccountUseCase
+	sessionUC port.SessionUsecase
 }
 
 func NewAccountHandler(
 	logger logger.ILogger,
-	accountUC AccountUseCase,
-	sessionUC SessionUsecase,
+	accountUC port.AccountUseCase,
+	sessionUC port.SessionUsecase,
 ) *AccountHandlerImpl {
 	return &AccountHandlerImpl{
 		logger:    logger,

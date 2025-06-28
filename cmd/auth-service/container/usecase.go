@@ -2,14 +2,14 @@ package container
 
 import (
 	"github.com/DucTran999/auth-service/internal/handler/background"
-	"github.com/DucTran999/auth-service/internal/handler/rest"
 	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 )
 
 type useCases struct {
-	auth              rest.AuthUseCase
-	account           rest.AccountUseCase
-	restSession       rest.SessionUsecase
+	auth              port.AuthUseCase
+	account           port.AccountUseCase
+	restSession       port.SessionUsecase
 	backgroundSession background.SessionUsecase
 }
 

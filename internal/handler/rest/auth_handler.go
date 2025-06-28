@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
@@ -9,21 +8,10 @@ import (
 	"github.com/DucTran999/auth-service/internal/gen"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
 )
-
-// AuthUseCase defines the authentication-related business logic.
-type AuthUseCase interface {
-	// Login verifies the provided credentials and returns the authenticated account.
-	// Returns an error if authentication fails.
-	Login(ctx context.Context, input dto.LoginInput) (*domain.Session, error)
-
-	// Logout terminates the session associated with the given session ID.
-	// It removes the session from cache (best-effort) and marks it as expired in the database.
-	// Returns an error only if the database update fails.
-	Logout(ctx context.Context, sessionID string) error
-}
 
 const (
 	sessionKey = "session_id"
@@ -32,10 +20,10 @@ const (
 type AuthHandlerImpl struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC AuthUseCase
+	authUC port.AuthUseCase
 }
 
-func NewAuthHandler(logger logger.ILogger, authUC AuthUseCase) *AuthHandlerImpl {
+func NewAuthHandler(logger logger.ILogger, authUC port.AuthUseCase) *AuthHandlerImpl {
 	return &AuthHandlerImpl{
 		logger: logger,
 		authUC: authUC,
