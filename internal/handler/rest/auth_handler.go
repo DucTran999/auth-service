@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -44,7 +44,7 @@ func (hdl *AuthHandlerImpl) LoginAccount(ctx *gin.Context) {
 		currentSessionID = ""
 	}
 
-	// Convert request to domain model
+	// Convert request to model model
 	loginInput := dto.LoginInput{
 		CurrentSessionID: currentSessionID,
 		Email:            string(payload.Email),
@@ -86,7 +86,7 @@ func (hdl *AuthHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
-func (hdl *AuthHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *domain.Session) {
+func (hdl *AuthHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 

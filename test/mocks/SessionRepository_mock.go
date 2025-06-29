@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,7 +40,7 @@ func (_m *SessionRepository) EXPECT() *SessionRepository_Expecter {
 }
 
 // Create provides a mock function for the type SessionRepository
-func (_mock *SessionRepository) Create(ctx context.Context, session *domain.Session) error {
+func (_mock *SessionRepository) Create(ctx context.Context, session *model.Session) error {
 	ret := _mock.Called(ctx, session)
 
 	if len(ret) == 0 {
@@ -48,7 +48,7 @@ func (_mock *SessionRepository) Create(ctx context.Context, session *domain.Sess
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *domain.Session) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Session) error); ok {
 		r0 = returnFunc(ctx, session)
 	} else {
 		r0 = ret.Error(0)
@@ -63,20 +63,20 @@ type SessionRepository_Create_Call struct {
 
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
-//   - session *domain.Session
+//   - session *model.Session
 func (_e *SessionRepository_Expecter) Create(ctx interface{}, session interface{}) *SessionRepository_Create_Call {
 	return &SessionRepository_Create_Call{Call: _e.mock.On("Create", ctx, session)}
 }
 
-func (_c *SessionRepository_Create_Call) Run(run func(ctx context.Context, session *domain.Session)) *SessionRepository_Create_Call {
+func (_c *SessionRepository_Create_Call) Run(run func(ctx context.Context, session *model.Session)) *SessionRepository_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *domain.Session
+		var arg1 *model.Session
 		if args[1] != nil {
-			arg1 = args[1].(*domain.Session)
+			arg1 = args[1].(*model.Session)
 		}
 		run(
 			arg0,
@@ -91,7 +91,7 @@ func (_c *SessionRepository_Create_Call) Return(err error) *SessionRepository_Cr
 	return _c
 }
 
-func (_c *SessionRepository_Create_Call) RunAndReturn(run func(ctx context.Context, session *domain.Session) error) *SessionRepository_Create_Call {
+func (_c *SessionRepository_Create_Call) RunAndReturn(run func(ctx context.Context, session *model.Session) error) *SessionRepository_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -154,23 +154,23 @@ func (_c *SessionRepository_DeleteExpiredBefore_Call) RunAndReturn(run func(ctx 
 }
 
 // FindAllActiveSession provides a mock function for the type SessionRepository
-func (_mock *SessionRepository) FindAllActiveSession(ctx context.Context) ([]domain.Session, error) {
+func (_mock *SessionRepository) FindAllActiveSession(ctx context.Context) ([]model.Session, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindAllActiveSession")
 	}
 
-	var r0 []domain.Session
+	var r0 []model.Session
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]domain.Session, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]model.Session, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []domain.Session); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []model.Session); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Session)
+			r0 = ret.Get(0).([]model.Session)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -205,34 +205,34 @@ func (_c *SessionRepository_FindAllActiveSession_Call) Run(run func(ctx context.
 	return _c
 }
 
-func (_c *SessionRepository_FindAllActiveSession_Call) Return(sessions []domain.Session, err error) *SessionRepository_FindAllActiveSession_Call {
+func (_c *SessionRepository_FindAllActiveSession_Call) Return(sessions []model.Session, err error) *SessionRepository_FindAllActiveSession_Call {
 	_c.Call.Return(sessions, err)
 	return _c
 }
 
-func (_c *SessionRepository_FindAllActiveSession_Call) RunAndReturn(run func(ctx context.Context) ([]domain.Session, error)) *SessionRepository_FindAllActiveSession_Call {
+func (_c *SessionRepository_FindAllActiveSession_Call) RunAndReturn(run func(ctx context.Context) ([]model.Session, error)) *SessionRepository_FindAllActiveSession_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // FindByID provides a mock function for the type SessionRepository
-func (_mock *SessionRepository) FindByID(ctx context.Context, sessionID string) (*domain.Session, error) {
+func (_mock *SessionRepository) FindByID(ctx context.Context, sessionID string) (*model.Session, error) {
 	ret := _mock.Called(ctx, sessionID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindByID")
 	}
 
-	var r0 *domain.Session
+	var r0 *model.Session
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*domain.Session, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*model.Session, error)); ok {
 		return returnFunc(ctx, sessionID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *domain.Session); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *model.Session); ok {
 		r0 = returnFunc(ctx, sessionID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.Session)
+			r0 = ret.Get(0).(*model.Session)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -273,12 +273,12 @@ func (_c *SessionRepository_FindByID_Call) Run(run func(ctx context.Context, ses
 	return _c
 }
 
-func (_c *SessionRepository_FindByID_Call) Return(session *domain.Session, err error) *SessionRepository_FindByID_Call {
+func (_c *SessionRepository_FindByID_Call) Return(session *model.Session, err error) *SessionRepository_FindByID_Call {
 	_c.Call.Return(session, err)
 	return _c
 }
 
-func (_c *SessionRepository_FindByID_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*domain.Session, error)) *SessionRepository_FindByID_Call {
+func (_c *SessionRepository_FindByID_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionRepository_FindByID_Call {
 	_c.Call.Return(run)
 	return _c
 }

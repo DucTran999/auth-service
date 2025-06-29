@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/hasher"
@@ -26,13 +26,13 @@ func NewAccountUseCase(hasher hasher.Hasher, accountRepo port.AccountRepo) *Acco
 // 1. Checks if the email is already in use.
 // 2. Hashes the password securely.
 // 3. Persists the account to the repository.
-func (uc *AccountUseCaseImpl) Register(ctx context.Context, input dto.RegisterInput) (*domain.Account, error) {
+func (uc *AccountUseCaseImpl) Register(ctx context.Context, input dto.RegisterInput) (*model.Account, error) {
 	taken, err := uc.isEmailTaken(ctx, input.Email)
 	if err != nil {
 		return nil, err
 	}
 	if taken {
-		return nil, domain.ErrEmailExisted
+		return nil, model.ErrEmailExisted
 	}
 
 	// Hash the password
@@ -42,7 +42,7 @@ func (uc *AccountUseCaseImpl) Register(ctx context.Context, input dto.RegisterIn
 	}
 
 	// Bind input to domain model
-	account := domain.Account{
+	account := model.Account{
 		Email:        input.Email,
 		PasswordHash: hashedPassword,
 	}

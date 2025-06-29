@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/DucTran999/auth-service/internal/domain"
 	"github.com/DucTran999/auth-service/internal/gen"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -80,14 +80,14 @@ func (hdl *AccountHandlerImpl) ChangePassword(ctx *gin.Context) {
 }
 
 func (hdl *AccountHandlerImpl) handleRegisterError(ctx *gin.Context, err error) {
-	if errors.Is(err, domain.ErrEmailExisted) {
+	if errors.Is(err, model.ErrEmailExisted) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 	hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 }
 
-func (hdl *AccountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *domain.Account) {
+func (hdl *AccountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *model.Account) {
 	resp := gen.RegisterResponse{
 		Version: ApiVersion1,
 		Success: true,
@@ -102,7 +102,7 @@ func (hdl *AccountHandlerImpl) sendRegisterSuccess(ctx *gin.Context, account *do
 	ctx.JSON(http.StatusCreated, resp)
 }
 
-func (hdl *AccountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*domain.Session, bool) {
+func (hdl *AccountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
 	sessionID, err := ctx.Cookie("session_id")
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
@@ -111,7 +111,7 @@ func (hdl *AccountHandlerImpl) validateSessionFromCookie(ctx *gin.Context) (*dom
 
 	session, err := hdl.sessionUC.ValidateSession(ctx.Request.Context(), sessionID)
 	if err != nil {
-		if errors.Is(err, domain.ErrInvalidSessionID) || errors.Is(err, domain.ErrSessionNotFound) {
+		if errors.Is(err, model.ErrInvalidSessionID) || errors.Is(err, model.ErrSessionNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
 		} else {
 			hdl.logger.Errorf("failed to validate session: %v", err)

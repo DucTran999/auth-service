@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/mock"
@@ -39,10 +39,10 @@ func (b *mockCacheBuilder) GetCacheErr() {
 }
 
 func (b *mockCacheBuilder) ValidSessionCached() {
-	sessionCached := domain.Session{
+	sessionCached := model.Session{
 		ID:        FakeSessionID,
 		AccountID: FakeAccountID,
-		Account: domain.Account{
+		Account: model.Account{
 			ID:       FakeAccountID,
 			Email:    FakeEmail,
 			IsActive: true,
@@ -54,7 +54,7 @@ func (b *mockCacheBuilder) ValidSessionCached() {
 		GetInto(mock.Anything, mock.Anything, mock.Anything).
 		Run(func(ctx context.Context, key string, dest any) {
 			// Type assert to pointer type
-			if ptr, ok := dest.(*domain.Session); ok {
+			if ptr, ok := dest.(*model.Session); ok {
 				*ptr = sessionCached // Copy value into the pointed-to object
 			}
 		}).

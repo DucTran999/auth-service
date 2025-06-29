@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
@@ -28,14 +28,14 @@ func TestLogin(t *testing.T) {
 		setup       func(t *testing.T) *usecase.AuthUseCaseImpl
 		loginInput  dto.LoginInput
 		expectedErr error
-		expected    *domain.Account
+		expected    *model.Account
 	}
 
 	loginInput := dto.LoginInput{
 		Email:    "daniel@example.com",
 		Password: "abc1234!",
 	}
-	expectedAccount := &domain.Account{
+	expectedAccount := &model.Account{
 		ID:       mockbuilder.FakeAccountID,
 		Email:    mockbuilder.FakeEmail,
 		IsActive: true,
@@ -72,7 +72,7 @@ func TestLogin(t *testing.T) {
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput:  loginInput,
-			expectedErr: domain.ErrAccountDisabled,
+			expectedErr: model.ErrAccountDisabled,
 			expected:    nil,
 		},
 		{
@@ -239,7 +239,7 @@ func TestLogout(t *testing.T) {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewAuthUseCaseUT(t, builders)
 			},
-			expectErr: domain.ErrInvalidSessionID,
+			expectErr: model.ErrInvalidSessionID,
 		},
 		{
 			name:      "failed to update session expires at",

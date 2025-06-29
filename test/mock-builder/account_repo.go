@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/test/mocks"
 	"github.com/stretchr/testify/mock"
 )
@@ -41,7 +41,7 @@ func (b *mockAccountRepoBuilder) CreateAccountError() {
 }
 
 func (b *mockAccountRepoBuilder) CreateAccountSuccess() {
-	mockAccount := &domain.Account{
+	mockAccount := &model.Account{
 		ID:       FakeAccountID,
 		Email:    FakeEmail,
 		IsActive: true,
@@ -58,7 +58,7 @@ func (b *mockAccountRepoBuilder) FindByEmailError() {
 }
 
 func (b *mockAccountRepoBuilder) FindByEmailHasResult() {
-	activeAccount := &domain.Account{
+	activeAccount := &model.Account{
 		ID:       FakeAccountID,
 		Email:    FakeEmail,
 		IsActive: true,
@@ -70,7 +70,7 @@ func (b *mockAccountRepoBuilder) FindByEmailHasResult() {
 }
 
 func (b *mockAccountRepoBuilder) FindByEmailAccountInactive() {
-	mockAccount := &domain.Account{
+	mockAccount := &model.Account{
 		ID:       FakeAccountID,
 		Email:    FakeEmail,
 		IsActive: false,
@@ -94,7 +94,7 @@ func (b *mockAccountRepoBuilder) FindByIDFailed() {
 }
 
 func (b *mockAccountRepoBuilder) FindByIDSuccess() {
-	mockAccount := &domain.Account{
+	mockAccount := &model.Account{
 		ID:           FakeAccountID,
 		Email:        FakeEmail,
 		PasswordHash: FakeOldPass,
