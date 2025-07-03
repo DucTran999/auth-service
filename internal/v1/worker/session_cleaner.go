@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/handler/background"
+	"github.com/DucTran999/auth-service/internal/v1/handler/background"
 	"github.com/DucTran999/shared-pkg/logger"
 )
 

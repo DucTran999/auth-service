@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/v1/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"

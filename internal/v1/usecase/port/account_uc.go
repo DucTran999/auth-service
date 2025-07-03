@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/v1/usecase/dto"
 )
 
 // AccountUseCase defines the business logic for managing user accounts.

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase/dto"
-	"github.com/DucTran999/auth-service/internal/usecase/port"
+	"github.com/DucTran999/auth-service/internal/v1/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/v1/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/google/uuid"
