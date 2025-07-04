@@ -16,14 +16,14 @@ type AccountHandler interface {
 	ChangePassword(ctx *gin.Context)
 }
 
-type apiHandler struct {
+type RestHandler struct {
 	AuthHandler
 	AccountHandler
 	HealthHandler
 }
 
-func (c *container) initAPIHandler() {
-	c.apiHandler = &apiHandler{
+func (c *Container) initRestHandler() {
+	c.RestHandler = &RestHandler{
 		AuthHandler:    c.handlers.auth,
 		AccountHandler: c.handlers.account,
 		HealthHandler:  c.handlers.health,

@@ -8,10 +8,10 @@ type handlers struct {
 	health  HealthHandler
 }
 
-func (c *container) initHandlers() {
+func (c *Container) initHandlers() {
 	c.handlers = &handlers{
-		auth:    rest.NewAuthHandler(c.logger, c.useCases.auth),
-		account: rest.NewAccountHandler(c.logger, c.useCases.account, c.useCases.restSession),
-		health:  rest.NewHealthHandler(c.appConfig.ServiceEnv),
+		auth:    rest.NewAuthHandler(c.Logger, c.useCases.auth),
+		account: rest.NewAccountHandler(c.Logger, c.useCases.account, c.useCases.restSession),
+		health:  rest.NewHealthHandler(c.AppConfig.ServiceEnv),
 	}
 }

@@ -13,34 +13,27 @@ import (
 	"github.com/DucTran999/shared-pkg/logger"
 )
 
-type Container interface {
-	APIHandler() gen.ServerInterface
-	SessionCleaner() background.SessionCleaner
-	Logger() logger.ILogger
-	Close()
-}
+type Container struct {
+	AppConfig *config.EnvConfiguration
 
-type container struct {
-	appConfig *config.EnvConfiguration
+	Logger logger.ILogger
+	Hasher hasher.Hasher
 
-	logger logger.ILogger
-	hasher hasher.Hasher
+	AuthDB dbkit.Connection
+	Cache  cache.Cache
 
-	authDBConn dbkit.Connection
-	cache      cache.Cache
-
-	useCases     *useCases
 	repositories *repositories
+	useCases     *useCases
 	handlers     *handlers
-	jobs         *jobs
 
-	apiHandler gen.ServerInterface
+	RestHandler           gen.ServerInterface
+	CleanupSessionHandler background.SessionCleaner
 }
 
 // NewContainer initializes and wires together all core dependencies of the application,
 // including logger, database, cache, repositories, usecases, and handlers.
 // It returns a fully constructed container instance ready for use in the application.
-func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
+func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 	// Initialize application logger
 	logger, err := newLogger(cfg)
 	if err != nil {
@@ -63,42 +56,30 @@ func NewContainer(cfg *config.EnvConfiguration) (*container, error) {
 	log.Println("[INFO] connection redis successfully")
 
 	// Construct the container with base-level services
-	c := &container{
-		authDBConn: conn,
-		cache:      cache,
-		logger:     logger,
-		appConfig:  cfg,
-		hasher:     hasher.NewHasher(), // Utility for password hashing and similar needs
+	c := &Container{
+		AppConfig: cfg,
+		AuthDB:    conn,
+		Cache:     cache,
+		Logger:    logger,
+		Hasher:    hasher.NewHasher(), // Utility for password hashing and similar needs
 	}
 
 	// Initialize layered application components in dependency order
 	c.initRepositories() // Data access layer (repositories)
 	c.initUseCases()     // Application business logic layer (usecases)
 	c.initHandlers()     // HTTP handlers for API endpoints
-	c.initAPIHandler()   // Adapter for generated OpenAPI ServerInterface implementation
+	c.initRestHandler()  // Adapter for generated OpenAPI ServerInterface implementation
 	c.initJobs()
 
 	return c, nil
 }
 
-func (c *container) APIHandler() gen.ServerInterface {
-	return c.apiHandler
-}
-
-func (c *container) SessionCleaner() background.SessionCleaner {
-	return c.jobs.SessionCleaner
-}
-
-func (c *container) Logger() logger.ILogger {
-	return c.logger
-}
-
-func (c *container) Close() {
-	if err := c.authDBConn.Close(); err != nil {
-		c.logger.Warnf("failed to close db connect: %v", err)
+func (c *Container) Close() {
+	if err := c.AuthDB.Close(); err != nil {
+		c.Logger.Warnf("failed to close db connect: %v", err)
 	}
-	if err := c.cache.Close(); err != nil {
-		c.logger.Warnf("failed to close cache connection: %v", err)
+	if err := c.Cache.Close(); err != nil {
+		c.Logger.Warnf("failed to close cache connection: %v", err)
 	}
-	c.logger.Info("db connection closed gracefully")
+	c.Logger.Info("db connection closed gracefully")
 }

@@ -1,28 +1,40 @@
 package main
 
 import (
+	"context"
 	"log"
-
-	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/app"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
+	appCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	// Load application configuration
-	appConf, err := config.LoadConfig(".env")
+	cfg, err := loadConfig()
 	if err != nil {
-		log.Fatalf("[FATAL] failed to load configuration: %v", err)
-	}
-	log.Println("[INFO] Configuration loaded successfully")
-
-	// Initialize application with dependencies
-	appInstance, err := app.NewApp(appConf)
-	if err != nil {
-		log.Fatalf("[FATAL] failed to initialize application: %v", err)
+		log.Printf("[ERROR] %v", err)
+		return
 	}
 
-	// Run the application (start server, wait for shutdown)
-	if err := appInstance.Run(); err != nil {
-		log.Fatalf("[FATAL] app got: %v", err)
+	// Initialize container
+	c, err := initContainer(cfg)
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		return
 	}
+	defer c.Close()
+
+	// start Rest server
+	restSrv, err := startHTTPServer(c)
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		return
+	}
+
+	workerDone := runSessionCleanupWorker(appCtx, c)
+
+	// gracefully shutdown
+	waitForShutdown(appCtx, restSrv, workerDone, c)
 }
