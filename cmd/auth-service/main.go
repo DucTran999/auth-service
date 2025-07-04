@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/DucTran999/auth-service/cmd/auth-service/app"
 	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/app"
 )
 
 func main() {

@@ -9,11 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/DucTran999/auth-service/cmd/auth-service/container"
-	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/server"
-	"github.com/DucTran999/auth-service/internal/worker"
+	httpServer "github.com/DucTran999/auth-service/internal/server/http"
 	pkgServer "github.com/DucTran999/shared-pkg/server"
+
+	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/internal/container"
+	"github.com/DucTran999/auth-service/internal/worker"
 )
 
 type App struct {
@@ -30,7 +31,7 @@ func NewApp(appConf *config.EnvConfiguration) (*App, error) {
 		return nil, err
 	}
 
-	httpServer, err := server.NewHTTPServer(appConf, c.APIHandler())
+	httpServer, err := httpServer.NewHTTPServer(appConf, c.APIHandler())
 	if err != nil {
 		return nil, err
 	}
