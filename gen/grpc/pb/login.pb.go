@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: pb/login.proto
 
-package gen
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -128,9 +128,9 @@ const file_pb_login_proto_rawDesc = "" +
 	"\rLoginResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken2;\n" +
 	"\vAuthService\x12,\n" +
-	"\x05Login\x12\x10.pb.LoginRequest\x1a\x11.pb.LoginResponseBd\n" +
+	"\x05Login\x12\x10.pb.LoginRequest\x1a\x11.pb.LoginResponseBc\n" +
 	"\x06com.pbB\n" +
-	"LoginProtoP\x01Z&github.com/DucTran999/auth-service/gen\xa2\x02\x03PXX\xaa\x02\x02Pb\xca\x02\x02Pb\xe2\x02\x0ePb\\GPBMetadata\xea\x02\x02Pbb\x06proto3"
+	"LoginProtoP\x01Z%github.com/DucTran999/auth-service/pb\xa2\x02\x03PXX\xaa\x02\x02Pb\xca\x02\x02Pb\xe2\x02\x0ePb\\GPBMetadata\xea\x02\x02Pbb\x06proto3"
 
 var (
 	file_pb_login_proto_rawDescOnce sync.Once

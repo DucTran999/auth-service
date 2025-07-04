@@ -17,6 +17,9 @@ type EnvConfiguration struct {
 	Host string `mapstructure:"HOST" validate:"required"`
 	Port int    `mapstructure:"PORT" validate:"required,min=1,max=65535"`
 
+	GRPCHost string `mapstructure:"GRPC_HOST" validate:"required"`
+	GRPCPort int    `mapstructure:"GRPC_PORT" validate:"required"`
+
 	LogToFile   bool   `mapstructure:"LOG_TO_FILE"`
 	LogFilePath string `mapstructure:"LOG_FILE_PATH"` // validate if LogToFile is true (custom)
 

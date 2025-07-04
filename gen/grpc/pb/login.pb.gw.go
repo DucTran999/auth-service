@@ -2,11 +2,11 @@
 // source: pb/login.proto
 
 /*
-Package gen is a reverse proxy.
+Package pb is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package gen
+package pb
 
 import (
 	"context"

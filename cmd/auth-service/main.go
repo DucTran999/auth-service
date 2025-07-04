@@ -33,8 +33,15 @@ func main() {
 		return
 	}
 
+	// start grpc server
+	grpcSrv, err := startGRPCServer(c)
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		return
+	}
+
 	workerDone := runSessionCleanupWorker(appCtx, c)
 
 	// gracefully shutdown
-	waitForShutdown(appCtx, restSrv, workerDone, c)
+	waitForShutdown(appCtx, restSrv, grpcSrv, workerDone, c)
 }

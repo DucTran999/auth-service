@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
+	"github.com/DucTran999/auth-service/gen/grpc/pb"
 	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/pkg/cache"
@@ -27,6 +28,7 @@ type Container struct {
 	handlers     *handlers
 
 	RestHandler           gen.ServerInterface
+	GRPCHandler           pb.AuthServiceServer
 	CleanupSessionHandler background.SessionCleaner
 }
 
@@ -69,6 +71,7 @@ func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 	c.initUseCases()     // Application business logic layer (usecases)
 	c.initHandlers()     // HTTP handlers for API endpoints
 	c.initRestHandler()  // Adapter for generated OpenAPI ServerInterface implementation
+	c.initGRPCHandler()
 	c.initJobs()
 
 	return c, nil

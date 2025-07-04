@@ -18,7 +18,7 @@
 // 	protoc        (unknown)
 // source: google/api/http.proto
 
-package gen
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -651,8 +651,8 @@ const file_google_api_http_proto_rawDesc = "" +
 	"\apattern\";\n" +
 	"\x11CustomHttpPattern\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
-	"\x04path\x18\x02 \x01(\tR\x04pathB\x8c\x01\n" +
-	"\x0ecom.google.apiB\tHttpProtoP\x01Z&github.com/DucTran999/auth-service/gen\xa2\x02\x03GAX\xaa\x02\n" +
+	"\x04path\x18\x02 \x01(\tR\x04pathB\x8b\x01\n" +
+	"\x0ecom.google.apiB\tHttpProtoP\x01Z%github.com/DucTran999/auth-service/pb\xa2\x02\x03GAX\xaa\x02\n" +
 	"Google.Api\xca\x02\n" +
 	"Google\\Api\xe2\x02\x16Google\\Api\\GPBMetadata\xea\x02\vGoogle::Apib\x06proto3"
 

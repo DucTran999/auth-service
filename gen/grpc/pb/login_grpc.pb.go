@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: pb/login.proto
 
-package gen
+package pb
 
 import (
 	context "context"

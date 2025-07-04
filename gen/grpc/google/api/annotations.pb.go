@@ -18,7 +18,7 @@
 // 	protoc        (unknown)
 // source: google/api/annotations.proto
 
-package gen
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -60,8 +60,8 @@ const file_google_api_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x1cgoogle/api/annotations.proto\x12\n" +
 	"google.api\x1a\x15google/api/http.proto\x1a google/protobuf/descriptor.proto:K\n" +
-	"\x04http\x12\x1e.google.protobuf.MethodOptions\x18\xb0ʼ\" \x01(\v2\x14.google.api.HttpRuleR\x04httpB\x93\x01\n" +
-	"\x0ecom.google.apiB\x10AnnotationsProtoP\x01Z&github.com/DucTran999/auth-service/gen\xa2\x02\x03GAX\xaa\x02\n" +
+	"\x04http\x12\x1e.google.protobuf.MethodOptions\x18\xb0ʼ\" \x01(\v2\x14.google.api.HttpRuleR\x04httpB\x92\x01\n" +
+	"\x0ecom.google.apiB\x10AnnotationsProtoP\x01Z%github.com/DucTran999/auth-service/pb\xa2\x02\x03GAX\xaa\x02\n" +
 	"Google.Api\xca\x02\n" +
 	"Google\\Api\xe2\x02\x16Google\\Api\\GPBMetadata\xea\x02\vGoogle::Apib\x06proto3"
 
