@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/google/uuid"
@@ -64,9 +64,9 @@ func (uc *SessionUCImpl) MarkExpiredSessions(ctx context.Context) error {
 	return nil
 }
 
-func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) (*domain.Session, error) {
+func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return nil, fmt.Errorf("%w: %w", domain.ErrInvalidSessionID, err)
+		return nil, fmt.Errorf("%w: %w", model.ErrInvalidSessionID, err)
 	}
 
 	session, err := uc.findSessionByID(ctx, sessionID)
@@ -79,7 +79,7 @@ func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) 
 
 // findSessionTimeout returns the IDs of sessions that are not found in the cache.
 // These sessions are considered "timed out" and may need to be expired.
-func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions []domain.Session) ([]string, error) {
+func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions []model.Session) ([]string, error) {
 	cacheKeys := make([]string, len(activeSessions))
 	for i, session := range activeSessions {
 		cacheKeys[i] = cache.KeyFromSessionID(session.ID.String())
@@ -98,8 +98,8 @@ func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions 
 	return timedOutSessionIDs, nil
 }
 
-func (uc *SessionUCImpl) findSessionByID(ctx context.Context, sessionID string) (*domain.Session, error) {
-	var session domain.Session
+func (uc *SessionUCImpl) findSessionByID(ctx context.Context, sessionID string) (*model.Session, error) {
+	var session model.Session
 
 	// Try lookup in cache first
 	if err := uc.cache.GetInto(ctx, cache.KeyFromSessionID(sessionID), &session); err == nil {
@@ -114,7 +114,7 @@ func (uc *SessionUCImpl) findSessionByID(ctx context.Context, sessionID string) 
 
 	// Session is expired or not existed
 	if found == nil || found.IsExpired() {
-		return nil, domain.ErrSessionNotFound
+		return nil, model.ErrSessionNotFound
 	}
 
 	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(sessionID), found, sessionDuration)

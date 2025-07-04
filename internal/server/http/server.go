@@ -1,8 +1,8 @@
-package server
+package http
 
 import (
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/gen"
+	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/shared-pkg/server"
 )
 

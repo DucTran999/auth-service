@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Directories
-PKG_GEN_PATH="internal/gen"
+PKG_GEN_PATH="gen/http"
 
 echo -e "${GREEN}🚀 Starting API generation...${NC}"
 

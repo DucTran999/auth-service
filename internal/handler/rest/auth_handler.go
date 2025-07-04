@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/DucTran999/auth-service/internal/domain"
-	"github.com/DucTran999/auth-service/internal/gen"
+	gen "github.com/DucTran999/auth-service/gen/http"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -17,20 +17,20 @@ const (
 	sessionKey = "session_id"
 )
 
-type AuthHandlerImpl struct {
+type AuthHandler struct {
 	BaseHandler
 	logger logger.ILogger
 	authUC port.AuthUseCase
 }
 
-func NewAuthHandler(logger logger.ILogger, authUC port.AuthUseCase) *AuthHandlerImpl {
-	return &AuthHandlerImpl{
+func NewAuthHandler(logger logger.ILogger, authUC port.AuthUseCase) *AuthHandler {
+	return &AuthHandler{
 		logger: logger,
 		authUC: authUC,
 	}
 }
 
-func (hdl *AuthHandlerImpl) LoginAccount(ctx *gin.Context) {
+func (hdl *AuthHandler) LoginAccount(ctx *gin.Context) {
 	// Parse request body
 	payload, err := ParseAndValidateJSON[gen.LoginAccountJSONRequestBody](ctx)
 	if err != nil {
@@ -44,7 +44,7 @@ func (hdl *AuthHandlerImpl) LoginAccount(ctx *gin.Context) {
 		currentSessionID = ""
 	}
 
-	// Convert request to domain model
+	// Convert request to model
 	loginInput := dto.LoginInput{
 		CurrentSessionID: currentSessionID,
 		Email:            string(payload.Email),
@@ -69,7 +69,7 @@ func (hdl *AuthHandlerImpl) LoginAccount(ctx *gin.Context) {
 	hdl.responseLoginSuccess(ctx, session)
 }
 
-func (hdl *AuthHandlerImpl) LogoutAccount(ctx *gin.Context) {
+func (hdl *AuthHandler) LogoutAccount(ctx *gin.Context) {
 	// Try to get session ID from cookie
 	sessionID, err := ctx.Cookie(sessionKey)
 	if err == nil {
@@ -86,7 +86,7 @@ func (hdl *AuthHandlerImpl) LogoutAccount(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
-func (hdl *AuthHandlerImpl) responseLoginSuccess(ctx *gin.Context, session *domain.Session) {
+func (hdl *AuthHandler) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 

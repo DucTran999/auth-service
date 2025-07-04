@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/google/uuid"
@@ -143,7 +143,7 @@ func TestValidateSession(t *testing.T) {
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
-			expectedErr: domain.ErrInvalidSessionID,
+			expectedErr: model.ErrInvalidSessionID,
 		},
 		{
 			name: "session found in cache",
@@ -176,7 +176,7 @@ func TestValidateSession(t *testing.T) {
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   mockbuilder.FakeSessionID.String(),
-			expectedErr: domain.ErrSessionNotFound,
+			expectedErr: model.ErrSessionNotFound,
 		},
 		{
 			name: "session already expired",
@@ -187,7 +187,7 @@ func TestValidateSession(t *testing.T) {
 				return NewSessionUseCaseUT(t, builders)
 			},
 			sessionID:   mockbuilder.FakeSessionID.String(),
-			expectedErr: domain.ErrSessionNotFound,
+			expectedErr: model.ErrSessionNotFound,
 		},
 		{
 			name: "failed when set cache",

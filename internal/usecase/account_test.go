@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
@@ -28,7 +28,7 @@ func TestRegisterAccount(t *testing.T) {
 		setup       func(t *testing.T) *usecase.AccountUseCaseImpl
 		accountInfo dto.RegisterInput
 		expectedErr error
-		expected    *domain.Account
+		expected    *model.Account
 	}
 
 	userSample := dto.RegisterInput{
@@ -56,7 +56,7 @@ func TestRegisterAccount(t *testing.T) {
 				return NewAccountUseCaseUT(t, b)
 			},
 			accountInfo: userSample,
-			expectedErr: domain.ErrEmailExisted,
+			expectedErr: model.ErrEmailExisted,
 			expected:    nil,
 		},
 		{
@@ -95,7 +95,7 @@ func TestRegisterAccount(t *testing.T) {
 			},
 			accountInfo: userSample,
 			expectedErr: nil,
-			expected: &domain.Account{
+			expected: &model.Account{
 				Email: "daniel@example.com",
 			},
 		},

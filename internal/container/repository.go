@@ -10,9 +10,9 @@ type repositories struct {
 	session port.SessionRepository
 }
 
-func (c *container) initRepositories() {
+func (c *Container) initRepositories() {
 	c.repositories = &repositories{
-		account: repository.NewAccountRepo(c.authDBConn.DB()),
-		session: repository.NewSessionRepository(c.authDBConn.DB()),
+		account: repository.NewAccountRepo(c.AuthDB.DB()),
+		session: repository.NewSessionRepository(c.AuthDB.DB()),
 	}
 }

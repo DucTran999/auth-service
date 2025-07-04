@@ -4,23 +4,23 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DucTran999/auth-service/internal/gen"
+	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/gin-gonic/gin"
 )
 
-type HealthHandlerImpl struct {
+type HealthHandler struct {
 	serviceVersion string // version release
 	startTime      time.Time
 }
 
-func NewHealthHandler(serviceVersion string) *HealthHandlerImpl {
-	return &HealthHandlerImpl{
+func NewHealthHandler(serviceVersion string) *HealthHandler {
+	return &HealthHandler{
 		serviceVersion: serviceVersion,
 		startTime:      time.Now(),
 	}
 }
 
-func (h *HealthHandlerImpl) CheckLiveness(ctx *gin.Context) {
+func (h *HealthHandler) CheckLiveness(ctx *gin.Context) {
 	uptime := int64(time.Since(h.startTime).Seconds())
 
 	response := gen.HealthResponse{

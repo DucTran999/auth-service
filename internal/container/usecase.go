@@ -13,20 +13,20 @@ type useCases struct {
 	backgroundSession background.SessionUsecase
 }
 
-func (c *container) initUseCases() {
+func (c *Container) initUseCases() {
 	accountUC := usecase.NewAccountUseCase(
-		c.hasher,
+		c.Hasher,
 		c.repositories.account,
 	)
 
 	authUC := usecase.NewAuthUseCase(
-		c.hasher,
-		c.cache,
+		c.Hasher,
+		c.Cache,
 		c.repositories.account,
 		c.repositories.session,
 	)
 
-	sessionUC := usecase.NewSessionUC(c.cache, c.repositories.session)
+	sessionUC := usecase.NewSessionUC(c.Cache, c.repositories.session)
 
 	c.useCases = &useCases{
 		account:           accountUC,

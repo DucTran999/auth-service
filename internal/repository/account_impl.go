@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/DucTran999/auth-service/internal/domain"
+	"github.com/DucTran999/auth-service/internal/model"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,7 @@ func NewAccountRepo(db *gorm.DB) *accountRepoImpl {
 }
 
 // Create inserts a new account record into the database.
-func (r *accountRepoImpl) Create(ctx context.Context, account domain.Account) (*domain.Account, error) {
+func (r *accountRepoImpl) Create(ctx context.Context, account model.Account) (*model.Account, error) {
 	if err := r.db.WithContext(ctx).Create(&account).Error; err != nil {
 		return nil, err
 	}
@@ -28,8 +28,8 @@ func (r *accountRepoImpl) Create(ctx context.Context, account domain.Account) (*
 }
 
 // FindByEmail looks up an account by its email address.
-func (r *accountRepoImpl) FindByEmail(ctx context.Context, email string) (*domain.Account, error) {
-	var account domain.Account
+func (r *accountRepoImpl) FindByEmail(ctx context.Context, email string) (*model.Account, error) {
+	var account model.Account
 
 	err := r.db.WithContext(ctx).First(&account, "email = ?", email).Error
 	if err != nil {
@@ -42,8 +42,8 @@ func (r *accountRepoImpl) FindByEmail(ctx context.Context, email string) (*domai
 	return &account, nil
 }
 
-func (r *accountRepoImpl) FindByID(ctx context.Context, id string) (*domain.Account, error) {
-	var account domain.Account
+func (r *accountRepoImpl) FindByID(ctx context.Context, id string) (*model.Account, error) {
+	var account model.Account
 
 	err := r.db.WithContext(ctx).First(&account, "id = ?", id).Error
 	if err != nil {
@@ -58,7 +58,7 @@ func (r *accountRepoImpl) FindByID(ctx context.Context, id string) (*domain.Acco
 
 func (r *accountRepoImpl) UpdatePasswordHash(ctx context.Context, id, passwordHash string) error {
 	return r.db.WithContext(ctx).
-		Model(&domain.Account{}).
+		Model(&model.Account{}).
 		Where("id = ?", id).
 		Update("password_hash", passwordHash).
 		Error
