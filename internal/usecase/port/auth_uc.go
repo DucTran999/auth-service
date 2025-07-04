@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/v1/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
 )
 
 // AuthUseCase defines the authentication-related business logic.

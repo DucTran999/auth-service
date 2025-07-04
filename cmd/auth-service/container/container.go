@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/internal/gen"
+	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"

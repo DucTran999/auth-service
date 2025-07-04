@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/v1/usecase/port"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/google/uuid"
 )

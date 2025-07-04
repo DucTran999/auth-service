@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/v1/usecase"
-	"github.com/DucTran999/auth-service/internal/v1/usecase/dto"
+	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
