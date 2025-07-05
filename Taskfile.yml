@@ -51,7 +51,6 @@ tasks:
     desc: generate API code from OpenAPI specification
     cmds:
       - ./scripts/gen-api.sh
-      - task: mock
     deps: [deps]
     preconditions:
       - test -f api.spec.yml

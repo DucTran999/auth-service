@@ -21,6 +21,7 @@ func (c *Container) initUseCases() {
 
 	authUC := usecase.NewAuthUseCase(
 		c.Hasher,
+		c.Signer,
 		c.Cache,
 		c.repositories.account,
 		c.repositories.session,

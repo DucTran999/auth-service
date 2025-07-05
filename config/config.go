@@ -17,9 +17,6 @@ type EnvConfiguration struct {
 	Host string `mapstructure:"HOST" validate:"required"`
 	Port int    `mapstructure:"PORT" validate:"required,min=1,max=65535"`
 
-	GRPCHost string `mapstructure:"GRPC_HOST" validate:"required"`
-	GRPCPort int    `mapstructure:"GRPC_PORT" validate:"required"`
-
 	LogToFile   bool   `mapstructure:"LOG_TO_FILE"`
 	LogFilePath string `mapstructure:"LOG_FILE_PATH"` // validate if LogToFile is true (custom)
 
@@ -42,6 +39,9 @@ type EnvConfiguration struct {
 
 	PurgeIntervalInDays  int `mapstructure:"PURGE_INTERVAL_IN_DAYS" validate:"gte=0"`
 	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS" validate:"gte=0"`
+
+	SignMethod string `mapstructure:"SIGN_METHOD" validate:"required"`
+	SignKey    string `mapstructure:"SIGN_KEY" validate:"required"`
 }
 
 func (cfg *EnvConfiguration) Normalize() {
@@ -63,6 +63,9 @@ func (cfg *EnvConfiguration) Normalize() {
 
 	cfg.RedisHost = strings.TrimSpace(cfg.RedisHost)
 	cfg.RedisPasswd = strings.TrimSpace(cfg.RedisPasswd)
+
+	cfg.SignMethod = strings.TrimSpace(cfg.SignMethod)
+	cfg.SignKey = strings.TrimSpace(cfg.SignKey)
 }
 
 func (cfg *EnvConfiguration) Validate() error {
