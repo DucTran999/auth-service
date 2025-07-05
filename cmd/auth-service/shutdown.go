@@ -5,14 +5,12 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/container"
-	"github.com/DucTran999/auth-service/internal/server/grpc"
 	"github.com/DucTran999/shared-pkg/server"
 )
 
 func waitForShutdown(
 	appCtx context.Context,
 	srv server.HttpServer,
-	grpcSrv grpc.GRPCServer,
 	workerDone <-chan struct{},
 	c *container.Container,
 ) {
@@ -26,9 +24,6 @@ func waitForShutdown(
 	if err := srv.Stop(ctx); err != nil {
 		c.Logger.Errorf("failed to stop http server: %v", err)
 	}
-
-	grpcSrv.GracefulStop()
-	c.Logger.Info("grpc server shutdown gracefully")
 
 	select {
 	case <-workerDone:

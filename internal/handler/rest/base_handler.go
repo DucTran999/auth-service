@@ -12,6 +12,7 @@ import (
 
 const (
 	ApiVersion1 = "v1.0"
+	APIVersion2 = "v2.0"
 
 	// General Errors.
 	InternalErrorCode      = "INTERNAL_ERROR"

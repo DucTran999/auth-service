@@ -26,6 +26,11 @@ const (
 	HealthResponseStatusUnhealthy HealthResponseStatus = "unhealthy"
 )
 
+// AccessToken defines model for AccessToken.
+type AccessToken struct {
+	AccessToken string `json:"access_token"`
+}
+
 // Account defines model for Account.
 type Account struct {
 	Id        openapi_types.UUID `json:"id"`
@@ -109,6 +114,13 @@ type Conflict = ErrorResponse
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = ErrorResponse
 
+// LoginJWTResponse defines model for LoginJWTResponse.
+type LoginJWTResponse struct {
+	Version string      `json:"version"`
+	Success bool        `json:"success"`
+	Data    AccessToken `json:"data"`
+}
+
 // LoginResponse defines model for LoginResponse.
 type LoginResponse struct {
 	Version string  `json:"version"`
@@ -134,3 +146,6 @@ type LoginAccountJSONRequestBody = LoginRequest
 
 // CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
 type CreateAccountJSONRequestBody = CreateAccountRequest
+
+// LoginAccountJWTJSONRequestBody defines body for LoginAccountJWT for application/json ContentType.
+type LoginAccountJWTJSONRequestBody = LoginRequest

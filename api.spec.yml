@@ -71,7 +71,7 @@ paths:
 
   /api/v1/login:
     post:
-      security: [] # Registration doesn't require auth
+      security: []
       summary: User login
       description: Authenticate a user and create a session. Sets a session cookie and returns account info.
       tags:
@@ -132,6 +132,28 @@ paths:
           description: Forbidden (old password incorrect)
         "500":
           description: Internal server error
+
+  /api/v2/login:
+    post:
+      security: []
+      summary: User login
+      description: Authenticate a user and create JWT token.
+      tags:
+        - Auth
+      operationId: loginAccountJWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginJWTResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
 components:
   securitySchemes:
@@ -243,6 +265,15 @@ components:
           x-omitempty: true
           x-order: 5
           example: "2024-01-15T10:30:00Z"
+
+    AccessToken:
+      type: object
+      required:
+        - access_token
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
 
     LoginRequest:
       type: object
@@ -370,6 +401,24 @@ components:
                 properties:
                   data:
                     $ref: "#/components/schemas/Account"
+
+    LoginJWTResponse:
+      description: Successfully authenticated
+      headers:
+        Set-Cookie:
+          description: refresh token cookie
+          schema:
+            type: string
+            example: refresh_token=abc123xyz; HttpOnly; Secure; Path=/refresh-token; SameSite=Strict
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/SuccessResponse"
+              - type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/AccessToken"
 
     BadRequest:
       description: Bad request - invalid input

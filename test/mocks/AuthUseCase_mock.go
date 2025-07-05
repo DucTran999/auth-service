@@ -107,6 +107,74 @@ func (_c *AuthUseCase_Login_Call) RunAndReturn(run func(ctx context.Context, inp
 	return _c
 }
 
+// LoginJWT provides a mock function for the type AuthUseCase
+func (_mock *AuthUseCase) LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
+	ret := _mock.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for LoginJWT")
+	}
+
+	var r0 *dto.TokenPairs
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, dto.LoginJWTInput) (*dto.TokenPairs, error)); ok {
+		return returnFunc(ctx, input)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, dto.LoginJWTInput) *dto.TokenPairs); ok {
+		r0 = returnFunc(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.TokenPairs)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, dto.LoginJWTInput) error); ok {
+		r1 = returnFunc(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// AuthUseCase_LoginJWT_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'LoginJWT'
+type AuthUseCase_LoginJWT_Call struct {
+	*mock.Call
+}
+
+// LoginJWT is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input dto.LoginJWTInput
+func (_e *AuthUseCase_Expecter) LoginJWT(ctx interface{}, input interface{}) *AuthUseCase_LoginJWT_Call {
+	return &AuthUseCase_LoginJWT_Call{Call: _e.mock.On("LoginJWT", ctx, input)}
+}
+
+func (_c *AuthUseCase_LoginJWT_Call) Run(run func(ctx context.Context, input dto.LoginJWTInput)) *AuthUseCase_LoginJWT_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 dto.LoginJWTInput
+		if args[1] != nil {
+			arg1 = args[1].(dto.LoginJWTInput)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *AuthUseCase_LoginJWT_Call) Return(tokenPairs *dto.TokenPairs, err error) *AuthUseCase_LoginJWT_Call {
+	_c.Call.Return(tokenPairs, err)
+	return _c
+}
+
+func (_c *AuthUseCase_LoginJWT_Call) RunAndReturn(run func(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error)) *AuthUseCase_LoginJWT_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Logout provides a mock function for the type AuthUseCase
 func (_mock *AuthUseCase) Logout(ctx context.Context, sessionID string) error {
 	ret := _mock.Called(ctx, sessionID)

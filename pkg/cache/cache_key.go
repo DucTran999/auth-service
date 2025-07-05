@@ -1,9 +1,12 @@
 package cache
 
-import "strings"
+import (
+	"strings"
+)
 
 const (
-	SessionKeyPrefix = "auth:session:"
+	SessionKeyPrefix      = "auth:session:"
+	RefreshTokenKeyPrefix = "auth:refresh"
 )
 
 // KeyFromSessionID returns the Redis cache key for the given session ID.
@@ -16,4 +19,12 @@ func KeyFromSessionID(sessionID string) string {
 // e.g. "auth:session:abc123" → "abc123".
 func SessionIDFromKey(key string) string {
 	return strings.TrimPrefix(key, SessionKeyPrefix)
+}
+
+// KeyRefreshToken returns the Redis key for a specific refresh token.
+//
+//   - format: "auth:refresh:<user_id>:<jti>"
+//   - example: "auth:refresh:42:b7f3-xyz"
+func KeyRefreshToken(userID, jti string) string {
+	return RefreshTokenKeyPrefix + ":" + userID + ":" + jti
 }

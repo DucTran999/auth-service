@@ -8,6 +8,7 @@ type HealthHandler interface {
 
 type AuthHandler interface {
 	LoginAccount(ctx *gin.Context)
+	LoginAccountJWT(ctx *gin.Context)
 	LogoutAccount(ctx *gin.Context)
 }
 

@@ -17,4 +17,6 @@ type AuthUseCase interface {
 	// It removes the session from cache (best-effort) and marks it as expired in the database.
 	// Returns an error only if the database update fails.
 	Logout(ctx context.Context, sessionID string) error
+
+	LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error)
 }
