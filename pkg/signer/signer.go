@@ -54,8 +54,9 @@ func (ts *tokenSigner) SignRefreshToken(claims jwt.Claims) (string, error) {
 
 func (ts *tokenSigner) Parse(tokenStr string) (*jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		// Validate that the token's algorithm matches our signer's algorithm
+		if t.Method.Alg() != ts.method.Alg() {
+			return nil, fmt.Errorf("unexpected signing method: got %v, expected %v", t.Header["alg"], ts.method.Alg())
 		}
 		return ts.key, nil
 	})
@@ -166,7 +167,8 @@ func (ts *tokenSigner) buildPath(path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to resolve base dir: %w", err)
 	}
-	absPath, err := filepath.Abs(cleanPath)
+	joinedPath := filepath.Join(baseDir, cleanPath)
+	absPath, err := filepath.Abs(joinedPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to resolve absolute path: %w", err)
 	}
