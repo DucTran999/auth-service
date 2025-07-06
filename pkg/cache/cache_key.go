@@ -6,7 +6,7 @@ import (
 
 const (
 	SessionKeyPrefix      = "auth:session:"
-	RefreshTokenKeyPrefix = "auth:refresh"
+	RefreshTokenKeyPrefix = "auth:refresh:"
 )
 
 // KeyFromSessionID returns the Redis cache key for the given session ID.
@@ -26,5 +26,5 @@ func SessionIDFromKey(key string) string {
 //   - format: "auth:refresh:<user_id>:<jti>"
 //   - example: "auth:refresh:42:b7f3-xyz"
 func KeyRefreshToken(userID, jti string) string {
-	return RefreshTokenKeyPrefix + ":" + userID + ":" + jti
+	return RefreshTokenKeyPrefix + userID + ":" + jti
 }

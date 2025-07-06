@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	mock "github.com/stretchr/testify/mock"
 )
 

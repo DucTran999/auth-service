@@ -40,7 +40,7 @@ type EnvConfiguration struct {
 	PurgeIntervalInDays  int `mapstructure:"PURGE_INTERVAL_IN_DAYS" validate:"gte=0"`
 	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS" validate:"gte=0"`
 
-	SignMethod string `mapstructure:"SIGN_METHOD" validate:"required"`
+	SignMethod string `mapstructure:"SIGN_METHOD" validate:"required,oneof=HS256 HS384 HS512 RS256 RS384 RS512 ES256 ES384 ES512"`
 	SignKey    string `mapstructure:"SIGN_KEY" validate:"required"`
 }
 
