@@ -47,11 +47,15 @@ tasks:
     cmds:
       - go install github.com/vektra/mockery/v3@v3.4.0
 
+  keys:
+    desc: generate keys
+    cmds:
+      - ./scripts/gen-key.sh
+
   generate:
     desc: generate API code from OpenAPI specification
     cmds:
       - ./scripts/gen-api.sh
-      - task: mock
     deps: [deps]
     preconditions:
       - test -f api.spec.yml

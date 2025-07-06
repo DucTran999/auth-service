@@ -35,9 +35,11 @@ auth-service/
 ├── cmd/                    # Entry point: DI container, HTTP server
 │   └── main.go
 │
+├── config/                 # Viper/env config loading
+│   └── config.go
+│   └── loader.go
+│
 ├── internal/
-│   ├── config/             # Viper/env config loading
-│   │   └── config.go
 │   │
 │   ├── gen/                # OpenAPI generated code
 │   │   ├── server.gen.go
@@ -82,6 +84,10 @@ auth-service/
 
 ### 🔐 Auth Endpoints
 
+#### 🧾 Session-Based Auth (session_id cookie)
+
+Sessions are stored as secure, HTTP-only cookies.
+
 | Method | Endpoint                   | Description            | Auth Required |
 | ------ | -------------------------- | ---------------------- | ------------- |
 | POST   | `/api/v1/register`         | Register a new account | ❌ No         |
@@ -89,7 +95,13 @@ auth-service/
 | DELETE | `/api/v1/logout`           | Logout current session | ✅ Yes        |
 | PATCH  | `/api/v1/account/password` | User change password   | ✅ Yes        |
 
-Sessions are stored as secure, HTTP-only cookies (`session_id`).
+#### 🔑 JWT-Based Auth (access_token + refresh_token)
+
+JWT-based flow using Authorization: Bearer <access_token> and refresh_token via secure cookie.
+
+| Method | Endpoint        | Description              | Auth Required |
+| ------ | --------------- | ------------------------ | ------------- |
+| POST   | `/api/v2/login` | Login and get token pair | ✅ Yes        |
 
 ---
 
@@ -128,7 +140,13 @@ cp .env.example .env
 task testenv
 ```
 
-3. Run the auth service:
+3. Generate RSA keys:
+
+```bash
+task keys
+```
+
+4. Run the auth service:
 
 ```bash
 task run

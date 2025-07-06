@@ -13,9 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) *usecase.AuthUseCaseImpl {
+func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) *usecase.AuthUseCase {
 	return usecase.NewAuthUseCase(
 		builders.HasherBuilder.GetInstance(),
+		nil,
 		builders.CacheBuilder.GetInstance(),
 		builders.AccountRepoBuilder.GetInstance(),
 		builders.SessionRepoBuilder.GetInstance(),
@@ -25,7 +26,7 @@ func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) *use
 func TestLogin(t *testing.T) {
 	type testCase struct {
 		name        string
-		setup       func(t *testing.T) *usecase.AuthUseCaseImpl
+		setup       func(t *testing.T) *usecase.AuthUseCase
 		loginInput  dto.LoginInput
 		expectedErr error
 		expected    *model.Account
@@ -44,7 +45,7 @@ func TestLogin(t *testing.T) {
 	testTable := []testCase{
 		{
 			name: "failed to find email in db",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailError()
 				return NewAuthUseCaseUT(t, builders)
@@ -55,7 +56,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "failed email not existed",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailNoResult()
 				return NewAuthUseCaseUT(t, builders)
@@ -66,7 +67,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "account inactive",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailAccountInactive()
 				return NewAuthUseCaseUT(t, builders)
@@ -77,7 +78,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "password not match",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordNotMatch()
@@ -89,7 +90,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "compare password unexpected error",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.CompareHashPasswordGotError()
@@ -101,7 +102,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "find session in db got error",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.GetCacheErr()
 				builders.SessionRepoBuilder.FindByIdFailed()
@@ -117,7 +118,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "session miss cache still valid in db",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSuccess()
@@ -134,7 +135,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "extend expires time in cache failed",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSuccess()
@@ -151,7 +152,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "expired session create new one",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSessionExpired()
@@ -171,7 +172,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "expired session create new one failed",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSessionExpired()
@@ -190,7 +191,7 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name: "reuse session in cache",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.ValidSessionCached()
 				builders.CacheBuilder.GetTTLSuccess()
@@ -227,7 +228,7 @@ func TestLogout(t *testing.T) {
 	type testcase struct {
 		name      string
 		sessionID string
-		setup     func(t *testing.T) *usecase.AuthUseCaseImpl
+		setup     func(t *testing.T) *usecase.AuthUseCase
 		expectErr error
 	}
 
@@ -235,7 +236,7 @@ func TestLogout(t *testing.T) {
 		{
 			name:      "invalid session id",
 			sessionID: "98f0fc0ec6d13b7b9c6b04d62e3de8bd4acdc2e5e7e017fc6fa3a1c8a36c9f4a",
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewAuthUseCaseUT(t, builders)
 			},
@@ -244,7 +245,7 @@ func TestLogout(t *testing.T) {
 		{
 			name:      "failed to update session expires at",
 			sessionID: mockbuilder.FakeSessionID.String(),
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.DelKeySuccess()
 				builders.SessionRepoBuilder.UpdateExpiresAtFailed()
@@ -255,7 +256,7 @@ func TestLogout(t *testing.T) {
 		{
 			name:      "logout success",
 			sessionID: mockbuilder.FakeSessionID.String(),
-			setup: func(t *testing.T) *usecase.AuthUseCaseImpl {
+			setup: func(t *testing.T) *usecase.AuthUseCase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.DelKeySuccess()
 				builders.SessionRepoBuilder.UpdateExpiresAtSuccess()

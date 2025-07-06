@@ -29,5 +29,6 @@ coverage
 
 # ide
 .vscode
+*.pem
 
 logs

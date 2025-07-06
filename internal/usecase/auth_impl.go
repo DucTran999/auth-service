@@ -10,15 +10,19 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
+	"github.com/DucTran999/auth-service/pkg/signer"
 	"github.com/google/uuid"
 )
 
 const (
-	sessionDuration = 60 * time.Minute
+	sessionDuration      = 60 * time.Minute
+	AccessTokenLifetime  = 15 * time.Minute
+	RefreshTokenLifetime = 7 * 24 * time.Hour
 )
 
-type AuthUseCaseImpl struct {
+type AuthUseCase struct {
 	hasher      hasher.Hasher
+	signer      signer.TokenSigner
 	cache       cache.Cache
 	accountRepo port.AccountRepo
 	sessionRepo port.SessionRepository
@@ -26,12 +30,14 @@ type AuthUseCaseImpl struct {
 
 func NewAuthUseCase(
 	hasher hasher.Hasher,
+	signer signer.TokenSigner,
 	cache cache.Cache,
 	accountRepo port.AccountRepo,
 	sessionRepo port.SessionRepository,
-) *AuthUseCaseImpl {
-	return &AuthUseCaseImpl{
+) *AuthUseCase {
+	return &AuthUseCase{
 		hasher:      hasher,
+		signer:      signer,
 		cache:       cache,
 		accountRepo: accountRepo,
 		sessionRepo: sessionRepo,
@@ -40,7 +46,7 @@ func NewAuthUseCase(
 
 // Login authenticates a user using email and password.
 // It verifies credentials, checks account status, and creates a new session on success.
-func (uc *AuthUseCaseImpl) Login(ctx context.Context, input dto.LoginInput) (*model.Session, error) {
+func (uc *AuthUseCase) Login(ctx context.Context, input dto.LoginInput) (*model.Session, error) {
 	session, err := uc.tryReuseSession(ctx, input.CurrentSessionID)
 	if err != nil {
 		return nil, err
@@ -65,7 +71,7 @@ func (uc *AuthUseCaseImpl) Login(ctx context.Context, input dto.LoginInput) (*mo
 	return uc.createSession(ctx, account, input)
 }
 
-func (uc *AuthUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
+func (uc *AuthUseCase) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
 		return fmt.Errorf("logout: %w session=%s error=%w", model.ErrInvalidSessionID, sessionID, err)
@@ -83,9 +89,39 @@ func (uc *AuthUseCaseImpl) Logout(ctx context.Context, sessionID string) error {
 	return nil
 }
 
+func (uc *AuthUseCase) LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
+	account, err := uc.findAccountByEmail(ctx, input.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := uc.checkAccountActive(account); err != nil {
+		return nil, err
+	}
+
+	if err := uc.verifyPassword(input.Password, account.PasswordHash); err != nil {
+		return nil, err
+	}
+
+	jti := uuid.NewString()
+	signAt := time.Now()
+
+	tokens, err := uc.signTokenPairs(jti, signAt, account)
+	if err != nil {
+		return nil, err
+	}
+
+	sessionDevice := uc.newDeviceSession(jti, account.ID.String(), signAt, input)
+	if err := uc.cacheRefreshToken(ctx, sessionDevice); err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
+}
+
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
-func (uc *AuthUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
+func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
 	if sessionID == "" || sessionID == uuid.Nil.String() {
 		return nil, nil
 	}
@@ -117,7 +153,7 @@ func (uc *AuthUseCaseImpl) tryReuseSession(ctx context.Context, sessionID string
 	return session, nil
 }
 
-func (uc *AuthUseCaseImpl) findAccountByEmail(
+func (uc *AuthUseCase) findAccountByEmail(
 	ctx context.Context,
 	email string,
 ) (*model.Account, error) {
@@ -132,14 +168,14 @@ func (uc *AuthUseCaseImpl) findAccountByEmail(
 	return account, nil
 }
 
-func (uc *AuthUseCaseImpl) checkAccountActive(account *model.Account) error {
+func (uc *AuthUseCase) checkAccountActive(account *model.Account) error {
 	if !account.IsActive {
 		return model.ErrAccountDisabled
 	}
 	return nil
 }
 
-func (uc *AuthUseCaseImpl) verifyPassword(plain, hashed string) error {
+func (uc *AuthUseCase) verifyPassword(plain, hashed string) error {
 	match, err := uc.hasher.ComparePasswordAndHash(plain, hashed)
 	if err != nil {
 		return err
@@ -150,7 +186,7 @@ func (uc *AuthUseCaseImpl) verifyPassword(plain, hashed string) error {
 	return nil
 }
 
-func (uc *AuthUseCaseImpl) createSession(
+func (uc *AuthUseCase) createSession(
 	ctx context.Context,
 	account *model.Account,
 	input dto.LoginInput,
@@ -176,7 +212,7 @@ func (uc *AuthUseCaseImpl) createSession(
 	return session, nil
 }
 
-func (uc *AuthUseCaseImpl) getSessionFromCache(
+func (uc *AuthUseCase) getSessionFromCache(
 	ctx context.Context,
 	sessionKey string,
 ) *model.Session {
@@ -188,4 +224,64 @@ func (uc *AuthUseCaseImpl) getSessionFromCache(
 	}
 
 	return &session
+}
+
+func (uc *AuthUseCase) signTokenPairs(
+	jti string,
+	signAt time.Time,
+	account *model.Account,
+) (*dto.TokenPairs, error) {
+	// Access token claims
+	accessClaims := model.TokenClaims{
+		ID:        account.ID,
+		Email:     account.Email,
+		Role:      account.Role,
+		IssuedAt:  signAt.Unix(),
+		ExpiresAt: signAt.Add(AccessTokenLifetime).Unix(),
+	}
+
+	accessToken, err := uc.signer.SignAccessToken(accessClaims.ToMapClaims())
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign access token: %w", err)
+	}
+
+	// Refresh token claims
+	refreshClaims := model.TokenClaims{
+		ID:        account.ID,
+		Email:     account.Email,
+		Role:      account.Role,
+		IssuedAt:  signAt.Unix(),
+		ExpiresAt: signAt.Add(RefreshTokenLifetime).Unix(),
+		JTI:       jti,
+	}
+
+	refreshToken, err := uc.signer.SignRefreshToken(refreshClaims.ToMapClaims())
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign refresh token: %w", err)
+	}
+
+	return &dto.TokenPairs{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (uc *AuthUseCase) cacheRefreshToken(ctx context.Context, dev model.SessionDevice) error {
+	key := cache.KeyRefreshToken(dev.AccountID, dev.JTI)
+	return uc.cache.Set(ctx, key, dev, RefreshTokenLifetime)
+}
+
+func (uc *AuthUseCase) newDeviceSession(
+	jti, accountID string,
+	signAt time.Time,
+	input dto.LoginJWTInput,
+) model.SessionDevice {
+	return model.SessionDevice{
+		JTI:       jti,
+		AccountID: accountID,
+		UserAgent: input.UserAgent,
+		IP:        input.IP,
+		CreatedAt: signAt,
+		ExpiresAt: signAt.Add(RefreshTokenLifetime),
+	}
 }

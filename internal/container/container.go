@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/DucTran999/auth-service/config"
-	"github.com/DucTran999/auth-service/gen/grpc/pb"
 	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
+	"github.com/DucTran999/auth-service/pkg/signer"
 	"github.com/DucTran999/dbkit"
 	"github.com/DucTran999/shared-pkg/logger"
 )
@@ -19,6 +19,7 @@ type Container struct {
 
 	Logger logger.ILogger
 	Hasher hasher.Hasher
+	Signer signer.TokenSigner
 
 	AuthDB dbkit.Connection
 	Cache  cache.Cache
@@ -28,7 +29,6 @@ type Container struct {
 	handlers     *handlers
 
 	RestHandler           gen.ServerInterface
-	GRPCHandler           pb.AuthServiceServer
 	CleanupSessionHandler background.SessionCleaner
 }
 
@@ -57,6 +57,12 @@ func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 	}
 	log.Println("[INFO] connection redis successfully")
 
+	signer, err := signer.NewTokenSigner(signer.SigningAlgorithm(cfg.SignMethod), cfg.SignKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init jwt signer: %w", err)
+	}
+	log.Println("[INFO] signer jwt initialized")
+
 	// Construct the container with base-level services
 	c := &Container{
 		AppConfig: cfg,
@@ -64,6 +70,7 @@ func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 		Cache:     cache,
 		Logger:    logger,
 		Hasher:    hasher.NewHasher(), // Utility for password hashing and similar needs
+		Signer:    signer,
 	}
 
 	// Initialize layered application components in dependency order
@@ -71,7 +78,6 @@ func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 	c.initUseCases()     // Application business logic layer (usecases)
 	c.initHandlers()     // HTTP handlers for API endpoints
 	c.initRestHandler()  // Adapter for generated OpenAPI ServerInterface implementation
-	c.initGRPCHandler()
 	c.initJobs()
 
 	return c, nil

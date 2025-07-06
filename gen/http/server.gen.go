@@ -21,6 +21,9 @@ type ServerInterface interface {
 	// Create a new account
 	// (POST /api/v1/register)
 	CreateAccount(c *gin.Context)
+	// User login
+	// (POST /api/v2/login)
+	LoginAccountJWT(c *gin.Context)
 	// Liveness probe endpoint
 	// (GET /livez)
 	CheckLiveness(c *gin.Context)
@@ -91,6 +94,19 @@ func (siw *ServerInterfaceWrapper) CreateAccount(c *gin.Context) {
 	siw.Handler.CreateAccount(c)
 }
 
+// LoginAccountJWT operation middleware
+func (siw *ServerInterfaceWrapper) LoginAccountJWT(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.LoginAccountJWT(c)
+}
+
 // CheckLiveness operation middleware
 func (siw *ServerInterfaceWrapper) CheckLiveness(c *gin.Context) {
 
@@ -135,5 +151,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/api/v1/login", wrapper.LoginAccount)
 	router.POST(options.BaseURL+"/api/v1/logout", wrapper.LogoutAccount)
 	router.POST(options.BaseURL+"/api/v1/register", wrapper.CreateAccount)
+	router.POST(options.BaseURL+"/api/v2/login", wrapper.LoginAccountJWT)
 	router.GET(options.BaseURL+"/livez", wrapper.CheckLiveness)
 }

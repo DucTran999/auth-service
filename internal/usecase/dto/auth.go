@@ -11,3 +11,15 @@ type LoginInput struct {
 	IP        string `json:"-"`        // Client IP address (injected by handler, not from JSON)
 	UserAgent string `json:"-"`        // User-Agent header string (injected by handler)
 }
+
+type LoginJWTInput struct {
+	Email     string
+	Password  string
+	IP        string
+	UserAgent string
+}
+
+type TokenPairs struct {
+	AccessToken  string
+	RefreshToken string
+}
