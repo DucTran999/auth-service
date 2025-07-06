@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
@@ -29,4 +31,19 @@ func (c TokenClaims) ToMapClaims() jwt.MapClaims {
 		claims["jti"] = c.JTI
 	}
 	return claims
+}
+
+// MapClaimsToTokenClaims converts jwt.MapClaims into your TokenClaims struct.
+func MapClaimsToTokenClaims(mc jwt.MapClaims) (*TokenClaims, error) {
+	data, err := json.Marshal(mc)
+	if err != nil {
+		return nil, err
+	}
+
+	var claims TokenClaims
+	if err := json.Unmarshal(data, &claims); err != nil {
+		return nil, err
+	}
+
+	return &claims, nil
 }

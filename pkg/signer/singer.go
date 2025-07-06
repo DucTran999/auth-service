@@ -3,6 +3,7 @@ package signer
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
@@ -11,7 +12,7 @@ import (
 type TokenSigner interface {
 	SignAccessToken(claims jwt.Claims) (string, error)
 	SignRefreshToken(claims jwt.Claims) (string, error)
-	// Parse(token string) (*jwt.Claims, error)
+	Parse(token string) (*jwt.MapClaims, error)
 }
 
 type tokenSigner struct {
@@ -51,6 +52,29 @@ func (ts *tokenSigner) SignRefreshToken(claims jwt.Claims) (string, error) {
 	return token.SignedString(ts.key)
 }
 
+func (ts *tokenSigner) Parse(tokenStr string) (*jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		return ts.key, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, ErrInvalidTokenClaimType
+	}
+
+	if !token.Valid {
+		return nil, ErrInvalidTokenSignature
+	}
+
+	return &claims, nil
+}
+
 func (ts *tokenSigner) loadKey(keyIdentifier string) error {
 	switch ts.method.Alg() {
 	case jwt.SigningMethodHS256.Alg(),
@@ -76,7 +100,13 @@ func (ts *tokenSigner) loadKey(keyIdentifier string) error {
 }
 
 func (ts *tokenSigner) loadRSAKey(path string) error {
-	pemData, err := os.ReadFile(path)
+	absPath, err := ts.buildPath(path)
+	if err != nil {
+		return err
+	}
+
+	// #nosec G304 -- path is sanitized and restricted to baseDir
+	pemData, err := os.ReadFile(absPath)
 	if err != nil {
 		return fmt.Errorf("read RSA key: %w", err)
 	}
@@ -89,7 +119,13 @@ func (ts *tokenSigner) loadRSAKey(path string) error {
 }
 
 func (ts *tokenSigner) loadECDSAKey(path string) error {
-	pemData, err := os.ReadFile(path)
+	absPath, err := ts.buildPath(path)
+	if err != nil {
+		return err
+	}
+
+	// #nosec G304 -- path is sanitized and restricted to baseDir
+	pemData, err := os.ReadFile(absPath)
 	if err != nil {
 		return fmt.Errorf("read ECDSA key: %w", err)
 	}
@@ -102,7 +138,13 @@ func (ts *tokenSigner) loadECDSAKey(path string) error {
 }
 
 func (ts *tokenSigner) loadEdDSAKey(path string) error {
-	keyData, err := os.ReadFile(path)
+	absPath, err := ts.buildPath(path)
+	if err != nil {
+		return err
+	}
+
+	// #nosec G304 -- path is sanitized and restricted to baseDir
+	keyData, err := os.ReadFile(absPath)
 	if err != nil {
 		return fmt.Errorf("read EdDSA key: %w", err)
 	}
@@ -112,4 +154,23 @@ func (ts *tokenSigner) loadEdDSAKey(path string) error {
 	}
 	ts.key = privateKey
 	return nil
+}
+
+func (ts *tokenSigner) buildPath(path string) (string, error) {
+	const baseDir = "./keys/"
+
+	cleanPath := filepath.Clean(path)
+	absBase, err := filepath.Abs(baseDir)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve base dir: %w", err)
+	}
+	absPath, err := filepath.Abs(cleanPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve absolute path: %w", err)
+	}
+	if !strings.HasPrefix(absPath, absBase) {
+		return "", fmt.Errorf("unauthorized path access: %s", path)
+	}
+
+	return absPath, nil
 }

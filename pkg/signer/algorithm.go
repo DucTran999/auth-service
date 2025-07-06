@@ -25,30 +25,23 @@ const (
 	EdDSA SigningAlgorithm = "EdDSA"
 )
 
+var jwtMethods = map[SigningAlgorithm]jwt.SigningMethod{
+	HS256: jwt.SigningMethodHS256,
+	HS384: jwt.SigningMethodHS384,
+	HS512: jwt.SigningMethodHS512,
+	RS256: jwt.SigningMethodRS256,
+	RS384: jwt.SigningMethodRS384,
+	RS512: jwt.SigningMethodRS512,
+	ES256: jwt.SigningMethodES256,
+	ES384: jwt.SigningMethodES384,
+	ES512: jwt.SigningMethodES512,
+	EdDSA: jwt.SigningMethodEdDSA,
+}
+
 func (a SigningAlgorithm) ToJWTMethod() (jwt.SigningMethod, error) {
-	cleaned := strings.ToUpper(strings.TrimSpace(string(a)))
-	switch SigningAlgorithm(cleaned) {
-	case HS256:
-		return jwt.SigningMethodHS256, nil
-	case HS384:
-		return jwt.SigningMethodHS384, nil
-	case HS512:
-		return jwt.SigningMethodHS512, nil
-	case RS256:
-		return jwt.SigningMethodRS256, nil
-	case RS384:
-		return jwt.SigningMethodRS384, nil
-	case RS512:
-		return jwt.SigningMethodRS512, nil
-	case ES256:
-		return jwt.SigningMethodES256, nil
-	case ES384:
-		return jwt.SigningMethodES384, nil
-	case ES512:
-		return jwt.SigningMethodES512, nil
-	case EdDSA:
-		return jwt.SigningMethodEdDSA, nil
-	default:
-		return nil, fmt.Errorf("%w: %s", ErrInvalidAlgorithm, cleaned)
+	cleaned := SigningAlgorithm(strings.ToUpper(strings.TrimSpace(string(a))))
+	if method, ok := jwtMethods[cleaned]; ok {
+		return method, nil
 	}
+	return nil, fmt.Errorf("%w: %s", ErrInvalidAlgorithm, cleaned)
 }
