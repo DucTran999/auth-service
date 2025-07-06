@@ -36,3 +36,7 @@ run: ## start the app locally
 .PHONY: deps
 deps: ## install library
 	go install github.com/vektra/mockery/v3@v3.4.0
+
+.PHONY: keys
+keys: ## generate rsa keys
+	${PKG_SCRIPTS}/gen-key.sh
