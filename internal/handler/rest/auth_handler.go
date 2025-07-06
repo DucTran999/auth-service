@@ -76,7 +76,7 @@ func (hdl *AuthHandler) LoginAccountJWT(ctx *gin.Context) {
 	// Parse request body
 	payload, err := ParseAndValidateJSON[gen.LoginAccountJSONRequestBody](ctx)
 	if err != nil {
-		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+		hdl.BadRequestResponse(ctx, APIVersion2, err.Error())
 		return
 	}
 

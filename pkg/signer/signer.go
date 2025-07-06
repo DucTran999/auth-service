@@ -93,9 +93,11 @@ func (ts *tokenSigner) loadKey(keyIdentifier string) error {
 		jwt.SigningMethodES384.Alg(),
 		jwt.SigningMethodES512.Alg():
 		return ts.loadECDSAKey(keyIdentifier)
+	case jwt.SigningMethodEdDSA.Alg():
+		return ts.loadEdDSAKey(keyIdentifier)
 
 	default:
-		return ts.loadEdDSAKey(keyIdentifier)
+		return fmt.Errorf("unsupported signing algorithm: %s", ts.method.Alg())
 	}
 }
 

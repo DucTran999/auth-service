@@ -271,7 +271,7 @@ func (uc *AuthUseCase) cacheRefreshToken(ctx context.Context, dev model.SessionD
 	return uc.cache.Set(ctx, key, dev, RefreshTokenLifetime)
 }
 
-func (ud *AuthUseCase) newDeviceSession(
+func (uc *AuthUseCase) newDeviceSession(
 	jti, accountID string,
 	signAt time.Time,
 	input dto.LoginJWTInput,
