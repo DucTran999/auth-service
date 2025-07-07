@@ -11,6 +11,7 @@ type AuthHandler interface {
 	LoginAccountJWT(ctx *gin.Context)
 	LogoutAccount(ctx *gin.Context)
 	RefreshToken(ctx *gin.Context)
+	LogoutAccountJWT(ctx *gin.Context)
 }
 
 type AccountHandler interface {

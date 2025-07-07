@@ -134,6 +134,25 @@ func (hdl *AuthHandler) RefreshToken(ctx *gin.Context) {
 	hdl.responseLoginJWTSuccess(ctx, tokens)
 }
 
+func (hdl *AuthHandler) LogoutAccountJWT(ctx *gin.Context) {
+	refreshToken, err := ctx.Cookie(refreshTokenKey)
+	if err != nil {
+		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	if err := hdl.authUC.RevokeRefreshToken(ctx, refreshToken); err != nil {
+		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	// Always clear the cookie
+	ctx.SetCookie(refreshTokenKey, "", -1, "/", "", true, true)
+
+	// Always respond with 204 No Content
+	hdl.NoContentResponse(ctx)
+}
+
 func (hdl *AuthHandler) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil

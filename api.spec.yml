@@ -161,7 +161,7 @@ paths:
       summary: Refresh tokens
       description: Verify user refresh token and return new access token.
       tags:
-        - Auth
+        - Token
       operationId: refreshToken
       responses:
         "200":
@@ -170,6 +170,27 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+
+  /api/v2/logout:
+    post:
+      security: []
+      summary: Logout Account
+      tags:
+        - Auth
+      description: >
+        Logs the user out by revoking the server-side session (if applicable)
+        and clearing the refresh token cookie.
+      operationId: logoutAccountJWT
+      responses:
+        "204":
+          description: Logout successful; no content returned.
+          headers:
+            Set-Cookie:
+              description: >
+                Clears the HttpOnly refresh token cookie to complete logout.
+              schema:
+                type: string
+                example: refresh_token=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None
 
 components:
   securitySchemes:

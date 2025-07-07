@@ -152,6 +152,27 @@ func (uc *AuthUseCase) RefreshToken(ctx context.Context, refreshToken string) (*
 	return tokens, nil
 }
 
+func (uc *AuthUseCase) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
+	if refreshToken == "" {
+		return ErrInvalidCredentials
+	}
+
+	claims, err := uc.signer.Parse(refreshToken)
+	if err != nil {
+		return err
+	}
+
+	tokenClaim, err := model.MapClaimsToTokenClaims(*claims)
+	if err != nil {
+		return err
+	}
+
+	key := cache.KeyRefreshToken(tokenClaim.ID.String(), tokenClaim.JTI)
+	_ = uc.cache.Del(ctx, key)
+
+	return nil
+}
+
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
 func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
