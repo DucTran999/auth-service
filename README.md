@@ -88,20 +88,22 @@ auth-service/
 
 Sessions are stored as secure, HTTP-only cookies.
 
-| Method | Endpoint                   | Description            | Auth Required |
-| ------ | -------------------------- | ---------------------- | ------------- |
-| POST   | `/api/v1/register`         | Register a new account | ❌ No         |
-| POST   | `/api/v1/login`            | Login with credentials | ❌ No         |
-| DELETE | `/api/v1/logout`           | Logout current session | ✅ Yes        |
-| PATCH  | `/api/v1/account/password` | User change password   | ✅ Yes        |
+| Method | Endpoint                   | Description                     | Auth Required           |
+| ------ | -------------------------- | ------------------------------- | ----------------------- |
+| POST   | `/api/v1/register`         | Register a new user account     | ❌ No                   |
+| POST   | `/api/v1/login`            | Authenticate and create session | ❌ No                   |
+| DELETE | `/api/v1/logout`           | Destroy the session and logout  | ❌ No _(uses cookie)_   |
+| PATCH  | `/api/v1/account/password` | Change account password         | ✅ Yes (session cookie) |
 
 #### 🔑 JWT-Based Auth (access_token + refresh_token)
 
 JWT-based flow using Authorization: Bearer <access_token> and refresh_token via secure cookie.
 
-| Method | Endpoint        | Description              | Auth Required |
-| ------ | --------------- | ------------------------ | ------------- |
-| POST   | `/api/v2/login` | Login and get token pair | ✅ Yes        |
+| Method | Endpoint                | Description                               | Auth Required              |
+| ------ | ----------------------- | ----------------------------------------- | -------------------------- |
+| POST   | `/api/v2/login`         | Login and receive access + refresh tokens | ❌ No                      |
+| POST   | `/api/v2/token/refresh` | Refresh tokens                            | ❌ No _(relies on cookie)_ |
+| POST   | `/api/v2/logout`        | Logout and revoke refresh token           | ❌ No _(relies on cookie)_ |
 
 ---
 
