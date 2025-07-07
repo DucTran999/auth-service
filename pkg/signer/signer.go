@@ -15,18 +15,21 @@ type TokenSigner interface {
 	Parse(token string) (*jwt.MapClaims, error)
 }
 
-type tokenSigner struct {
-	method jwt.SigningMethod
-	key    any
+type Config struct {
+	Alg     SigningAlgorithm
+	PrivPem string
+	PubPem  string
+	HashKey string
 }
 
-func NewTokenSigner(alg SigningAlgorithm, keyIdentifier string) (TokenSigner, error) {
-	keyIdentifier = strings.TrimSpace(keyIdentifier)
-	if keyIdentifier == "" {
-		return nil, ErrMissingKey
-	}
+type tokenSigner struct {
+	method  jwt.SigningMethod
+	privKey any
+	pubKey  any
+}
 
-	method, err := alg.ToJWTMethod()
+func NewTokenSigner(config Config) (TokenSigner, error) {
+	method, err := config.Alg.ToJWTMethod()
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +38,7 @@ func NewTokenSigner(alg SigningAlgorithm, keyIdentifier string) (TokenSigner, er
 		method: method,
 	}
 
-	if err := ts.loadKey(keyIdentifier); err != nil {
+	if err := ts.loadKey(config); err != nil {
 		return nil, err
 	}
 
@@ -44,12 +47,12 @@ func NewTokenSigner(alg SigningAlgorithm, keyIdentifier string) (TokenSigner, er
 
 func (ts *tokenSigner) SignAccessToken(claims jwt.Claims) (string, error) {
 	token := jwt.NewWithClaims(ts.method, claims)
-	return token.SignedString(ts.key)
+	return token.SignedString(ts.privKey)
 }
 
 func (ts *tokenSigner) SignRefreshToken(claims jwt.Claims) (string, error) {
 	token := jwt.NewWithClaims(ts.method, claims)
-	return token.SignedString(ts.key)
+	return token.SignedString(ts.privKey)
 }
 
 func (ts *tokenSigner) Parse(tokenStr string) (*jwt.MapClaims, error) {
@@ -58,7 +61,10 @@ func (ts *tokenSigner) Parse(tokenStr string) (*jwt.MapClaims, error) {
 		if t.Method.Alg() != ts.method.Alg() {
 			return nil, fmt.Errorf("unexpected signing method: got %v, expected %v", t.Header["alg"], ts.method.Alg())
 		}
-		return ts.key, nil
+		if strings.HasPrefix(ts.method.Alg(), "HS") {
+			return ts.privKey, nil
+		}
+		return ts.pubKey, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
@@ -76,48 +82,68 @@ func (ts *tokenSigner) Parse(tokenStr string) (*jwt.MapClaims, error) {
 	return &claims, nil
 }
 
-func (ts *tokenSigner) loadKey(keyIdentifier string) error {
+func (ts *tokenSigner) loadKey(config Config) error {
 	switch ts.method.Alg() {
 	case jwt.SigningMethodHS256.Alg(),
 		jwt.SigningMethodHS384.Alg(),
 		jwt.SigningMethodHS512.Alg():
 		// HMAC uses raw secret
-		ts.key = []byte(keyIdentifier)
+		ts.privKey = []byte(config.HashKey)
 		return nil
 
 	case jwt.SigningMethodRS256.Alg(),
 		jwt.SigningMethodRS384.Alg(),
 		jwt.SigningMethodRS512.Alg():
-		return ts.loadRSAKey(keyIdentifier)
+		return ts.loadRSAKey(config.PrivPem, config.PubPem)
 
 	case jwt.SigningMethodES256.Alg(),
 		jwt.SigningMethodES384.Alg(),
 		jwt.SigningMethodES512.Alg():
-		return ts.loadECDSAKey(keyIdentifier)
+		return ts.loadECDSAKey(config.HashKey)
 	case jwt.SigningMethodEdDSA.Alg():
-		return ts.loadEdDSAKey(keyIdentifier)
+		return ts.loadEdDSAKey(config.HashKey)
 
 	default:
 		return fmt.Errorf("unsupported signing algorithm: %s", ts.method.Alg())
 	}
 }
 
-func (ts *tokenSigner) loadRSAKey(path string) error {
-	absPath, err := ts.buildPath(path)
+func (ts *tokenSigner) loadRSAKey(privPemFilename, pubPemFilename string) error {
+	privPemPath, err := ts.buildPath(privPemFilename)
 	if err != nil {
 		return err
 	}
 
 	// #nosec G304 -- path is sanitized and restricted to baseDir
-	pemData, err := os.ReadFile(absPath)
+	privPem, err := os.ReadFile(privPemPath)
 	if err != nil {
-		return fmt.Errorf("read RSA key: %w", err)
+		return fmt.Errorf("read private RSA key: %w", err)
 	}
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(pemData)
+
+	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(privPem)
 	if err != nil {
-		return fmt.Errorf("parse RSA key: %w", err)
+		return fmt.Errorf("parse private RSA key: %w", err)
 	}
-	ts.key = key
+	ts.privKey = privKey
+
+	pubPemPath, err := ts.buildPath(pubPemFilename)
+	if err != nil {
+		return err
+	}
+
+	// #nosec G304 -- path is sanitized and restricted to baseDir
+	pubPem, err := os.ReadFile(pubPemPath)
+	if err != nil {
+		return fmt.Errorf("read public RSA key: %w", err)
+	}
+
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPem)
+	if err != nil {
+		return fmt.Errorf("parse public RSA key: %w", err)
+	}
+
+	ts.pubKey = pubKey
+
 	return nil
 }
 
@@ -136,7 +162,7 @@ func (ts *tokenSigner) loadECDSAKey(path string) error {
 	if err != nil {
 		return fmt.Errorf("parse ECDSA key: %w", err)
 	}
-	ts.key = key
+	ts.privKey = key
 	return nil
 }
 
@@ -155,7 +181,7 @@ func (ts *tokenSigner) loadEdDSAKey(path string) error {
 	if err != nil {
 		return fmt.Errorf("parse EdDSA key: %w", err)
 	}
-	ts.key = privateKey
+	ts.privKey = privateKey
 	return nil
 }
 
