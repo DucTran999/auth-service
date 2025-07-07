@@ -231,3 +231,71 @@ func (_c *AuthUseCase_Logout_Call) RunAndReturn(run func(ctx context.Context, se
 	_c.Call.Return(run)
 	return _c
 }
+
+// RefreshToken provides a mock function for the type AuthUseCase
+func (_mock *AuthUseCase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
+	ret := _mock.Called(ctx, refreshToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RefreshToken")
+	}
+
+	var r0 *dto.TokenPairs
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*dto.TokenPairs, error)); ok {
+		return returnFunc(ctx, refreshToken)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *dto.TokenPairs); ok {
+		r0 = returnFunc(ctx, refreshToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dto.TokenPairs)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, refreshToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// AuthUseCase_RefreshToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RefreshToken'
+type AuthUseCase_RefreshToken_Call struct {
+	*mock.Call
+}
+
+// RefreshToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - refreshToken string
+func (_e *AuthUseCase_Expecter) RefreshToken(ctx interface{}, refreshToken interface{}) *AuthUseCase_RefreshToken_Call {
+	return &AuthUseCase_RefreshToken_Call{Call: _e.mock.On("RefreshToken", ctx, refreshToken)}
+}
+
+func (_c *AuthUseCase_RefreshToken_Call) Run(run func(ctx context.Context, refreshToken string)) *AuthUseCase_RefreshToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *AuthUseCase_RefreshToken_Call) Return(tokenPairs *dto.TokenPairs, err error) *AuthUseCase_RefreshToken_Call {
+	_c.Call.Return(tokenPairs, err)
+	return _c
+}
+
+func (_c *AuthUseCase_RefreshToken_Call) RunAndReturn(run func(ctx context.Context, refreshToken string) (*dto.TokenPairs, error)) *AuthUseCase_RefreshToken_Call {
+	_c.Call.Return(run)
+	return _c
+}

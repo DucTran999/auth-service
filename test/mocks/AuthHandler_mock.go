@@ -155,3 +155,43 @@ func (_c *AuthHandler_LogoutAccount_Call) RunAndReturn(run func(ctx *gin.Context
 	_c.Run(run)
 	return _c
 }
+
+// RefreshToken provides a mock function for the type AuthHandler
+func (_mock *AuthHandler) RefreshToken(ctx *gin.Context) {
+	_mock.Called(ctx)
+	return
+}
+
+// AuthHandler_RefreshToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RefreshToken'
+type AuthHandler_RefreshToken_Call struct {
+	*mock.Call
+}
+
+// RefreshToken is a helper method to define mock.On call
+//   - ctx *gin.Context
+func (_e *AuthHandler_Expecter) RefreshToken(ctx interface{}) *AuthHandler_RefreshToken_Call {
+	return &AuthHandler_RefreshToken_Call{Call: _e.mock.On("RefreshToken", ctx)}
+}
+
+func (_c *AuthHandler_RefreshToken_Call) Run(run func(ctx *gin.Context)) *AuthHandler_RefreshToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *gin.Context
+		if args[0] != nil {
+			arg0 = args[0].(*gin.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *AuthHandler_RefreshToken_Call) Return() *AuthHandler_RefreshToken_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *AuthHandler_RefreshToken_Call) RunAndReturn(run func(ctx *gin.Context)) *AuthHandler_RefreshToken_Call {
+	_c.Run(run)
+	return _c
+}
