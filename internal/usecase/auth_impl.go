@@ -119,6 +119,39 @@ func (uc *AuthUseCase) LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*
 	return tokens, nil
 }
 
+func (uc *AuthUseCase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
+	if refreshToken == "" {
+		return nil, ErrInvalidCredentials
+	}
+
+	claims, err := uc.signer.Parse(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenClaim, err := model.MapClaimsToTokenClaims(*claims)
+	if err != nil {
+		return nil, err
+	}
+
+	key := cache.KeyRefreshToken(tokenClaim.ID.String(), tokenClaim.JTI)
+	ok, err := uc.cache.Has(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, ErrInvalidCredentials
+	}
+
+	tokens, err := uc.resignTokenPairs(ctx, *tokenClaim)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
+}
+
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
 func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
@@ -258,6 +291,43 @@ func (uc *AuthUseCase) signTokenPairs(
 	refreshToken, err := uc.signer.SignRefreshToken(refreshClaims.ToMapClaims())
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign refresh token: %w", err)
+	}
+
+	return &dto.TokenPairs{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (uc *AuthUseCase) resignTokenPairs(ctx context.Context, oldClaims model.TokenClaims) (*dto.TokenPairs, error) {
+	jti := uuid.NewString()
+	now := time.Now()
+
+	// Access token claims
+	accessClaims := oldClaims
+	accessClaims.JTI = ""
+	accessClaims.IssuedAt = now.Unix()
+	accessClaims.ExpiresAt = now.Add(AccessTokenLifetime).Unix()
+
+	accessToken, err := uc.signer.SignAccessToken(accessClaims.ToMapClaims())
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign access token: %w", err)
+	}
+
+	// Refresh token claims (rotate JTI and extend lifetime)
+	refreshClaims := oldClaims
+	refreshClaims.JTI = jti
+	refreshClaims.IssuedAt = now.Unix()
+	refreshClaims.ExpiresAt = now.Add(RefreshTokenLifetime).Unix()
+
+	refreshToken, err := uc.signer.SignRefreshToken(refreshClaims.ToMapClaims())
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign refresh token: %w", err)
+	}
+
+	key := cache.KeyRefreshToken(refreshClaims.ID.String(), jti)
+	if err = uc.cache.Set(ctx, key, refreshClaims, RefreshTokenLifetime); err != nil {
+		return nil, err
 	}
 
 	return &dto.TokenPairs{

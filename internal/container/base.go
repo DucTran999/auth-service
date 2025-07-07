@@ -6,6 +6,7 @@ import (
 
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/pkg/cache"
+	"github.com/DucTran999/auth-service/pkg/signer"
 	"github.com/DucTran999/cachekit"
 	"github.com/DucTran999/dbkit"
 	dbConfig "github.com/DucTran999/dbkit/config"
@@ -44,6 +45,16 @@ func newAuthDBConnection(config *config.EnvConfiguration) (dbkit.Connection, err
 	}
 
 	return conn, nil
+}
+
+func newSigner(config *config.EnvConfiguration) (signer.TokenSigner, error) {
+	cfg := signer.Config{
+		Alg:     signer.SigningAlgorithm(config.SignMethod),
+		PrivPem: config.PrivPem,
+		PubPem:  config.PubPem,
+	}
+
+	return signer.NewTokenSigner(cfg)
 }
 
 type loggingCache struct {
@@ -120,6 +131,14 @@ func (lc *loggingCache) Del(ctx context.Context, key string) error {
 		lc.logger.Warnf("cache: failed to delete key=%s err=%v", key, err)
 	}
 	return err
+}
+
+func (lc *loggingCache) Has(ctx context.Context, key string) (bool, error) {
+	existed, err := lc.inner.Has(ctx, key)
+	if err != nil {
+		lc.logger.Warnf("cache: failed to check exist key=%s err=%v", key, err)
+	}
+	return existed, err
 }
 
 // Close client connection.

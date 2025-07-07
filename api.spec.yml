@@ -155,6 +155,22 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/v2/token/refresh:
+    post:
+      security: []
+      summary: Refresh tokens
+      description: Verify user refresh token and return new access token.
+      tags:
+        - Auth
+      operationId: refreshToken
+      responses:
+        "200":
+          $ref: "#/components/responses/LoginJWTResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
 components:
   securitySchemes:
     BearerAuth:

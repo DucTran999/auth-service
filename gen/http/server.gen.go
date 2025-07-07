@@ -24,6 +24,9 @@ type ServerInterface interface {
 	// User login
 	// (POST /api/v2/login)
 	LoginAccountJWT(c *gin.Context)
+	// Refresh tokens
+	// (POST /api/v2/token/refresh)
+	RefreshToken(c *gin.Context)
 	// Liveness probe endpoint
 	// (GET /livez)
 	CheckLiveness(c *gin.Context)
@@ -107,6 +110,19 @@ func (siw *ServerInterfaceWrapper) LoginAccountJWT(c *gin.Context) {
 	siw.Handler.LoginAccountJWT(c)
 }
 
+// RefreshToken operation middleware
+func (siw *ServerInterfaceWrapper) RefreshToken(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.RefreshToken(c)
+}
+
 // CheckLiveness operation middleware
 func (siw *ServerInterfaceWrapper) CheckLiveness(c *gin.Context) {
 
@@ -152,5 +168,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/api/v1/logout", wrapper.LogoutAccount)
 	router.POST(options.BaseURL+"/api/v1/register", wrapper.CreateAccount)
 	router.POST(options.BaseURL+"/api/v2/login", wrapper.LoginAccountJWT)
+	router.POST(options.BaseURL+"/api/v2/token/refresh", wrapper.RefreshToken)
 	router.GET(options.BaseURL+"/livez", wrapper.CheckLiveness)
 }

@@ -19,4 +19,6 @@ type AuthUseCase interface {
 	Logout(ctx context.Context, sessionID string) error
 
 	LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error)
+
+	RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error)
 }

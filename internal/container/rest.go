@@ -10,6 +10,7 @@ type AuthHandler interface {
 	LoginAccount(ctx *gin.Context)
 	LoginAccountJWT(ctx *gin.Context)
 	LogoutAccount(ctx *gin.Context)
+	RefreshToken(ctx *gin.Context)
 }
 
 type AccountHandler interface {
