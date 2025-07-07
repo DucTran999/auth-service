@@ -36,6 +36,68 @@ func (_m *TokenSigner) EXPECT() *TokenSigner_Expecter {
 	return &TokenSigner_Expecter{mock: &_m.Mock}
 }
 
+// Parse provides a mock function for the type TokenSigner
+func (_mock *TokenSigner) Parse(token string) (*jwt.MapClaims, error) {
+	ret := _mock.Called(token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Parse")
+	}
+
+	var r0 *jwt.MapClaims
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*jwt.MapClaims, error)); ok {
+		return returnFunc(token)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *jwt.MapClaims); ok {
+		r0 = returnFunc(token)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*jwt.MapClaims)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(token)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// TokenSigner_Parse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Parse'
+type TokenSigner_Parse_Call struct {
+	*mock.Call
+}
+
+// Parse is a helper method to define mock.On call
+//   - token string
+func (_e *TokenSigner_Expecter) Parse(token interface{}) *TokenSigner_Parse_Call {
+	return &TokenSigner_Parse_Call{Call: _e.mock.On("Parse", token)}
+}
+
+func (_c *TokenSigner_Parse_Call) Run(run func(token string)) *TokenSigner_Parse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *TokenSigner_Parse_Call) Return(mapClaims *jwt.MapClaims, err error) *TokenSigner_Parse_Call {
+	_c.Call.Return(mapClaims, err)
+	return _c
+}
+
+func (_c *TokenSigner_Parse_Call) RunAndReturn(run func(token string) (*jwt.MapClaims, error)) *TokenSigner_Parse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SignAccessToken provides a mock function for the type TokenSigner
 func (_mock *TokenSigner) SignAccessToken(claims jwt.Claims) (string, error) {
 	ret := _mock.Called(claims)

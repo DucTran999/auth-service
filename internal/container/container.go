@@ -57,7 +57,7 @@ func NewContainer(cfg *config.EnvConfiguration) (*Container, error) {
 	}
 	log.Println("[INFO] connection redis successfully")
 
-	signer, err := signer.NewTokenSigner(signer.SigningAlgorithm(cfg.SignMethod), cfg.SignKey)
+	signer, err := newSigner(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init jwt signer: %w", err)
 	}

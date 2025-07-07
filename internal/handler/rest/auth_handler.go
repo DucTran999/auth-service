@@ -118,6 +118,22 @@ func (hdl *AuthHandler) LogoutAccount(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
+func (hdl *AuthHandler) RefreshToken(ctx *gin.Context) {
+	refreshToken, err := ctx.Cookie(refreshTokenKey)
+	if err != nil {
+		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	tokens, err := hdl.authUC.RefreshToken(ctx, refreshToken)
+	if err != nil {
+		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, err.Error())
+		return
+	}
+
+	hdl.responseLoginJWTSuccess(ctx, tokens)
+}
+
 func (hdl *AuthHandler) responseLoginSuccess(ctx *gin.Context, session *model.Session) {
 	// Determine environment is secure or not
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
@@ -150,7 +166,7 @@ func (hdl *AuthHandler) responseLoginJWTSuccess(ctx *gin.Context, tokens *dto.To
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:     refreshTokenKey,
 		Value:    tokens.RefreshToken,
-		Path:     "/refresh-token",
+		Path:     "/",
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteStrictMode,

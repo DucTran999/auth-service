@@ -265,6 +265,72 @@ func (_c *Cache_GetInto_Call) RunAndReturn(run func(ctx context.Context, key str
 	return _c
 }
 
+// Has provides a mock function for the type Cache
+func (_mock *Cache) Has(ctx context.Context, key string) (bool, error) {
+	ret := _mock.Called(ctx, key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Has")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return returnFunc(ctx, key)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = returnFunc(ctx, key)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, key)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// Cache_Has_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Has'
+type Cache_Has_Call struct {
+	*mock.Call
+}
+
+// Has is a helper method to define mock.On call
+//   - ctx context.Context
+//   - key string
+func (_e *Cache_Expecter) Has(ctx interface{}, key interface{}) *Cache_Has_Call {
+	return &Cache_Has_Call{Call: _e.mock.On("Has", ctx, key)}
+}
+
+func (_c *Cache_Has_Call) Run(run func(ctx context.Context, key string)) *Cache_Has_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *Cache_Has_Call) Return(b bool, err error) *Cache_Has_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *Cache_Has_Call) RunAndReturn(run func(ctx context.Context, key string) (bool, error)) *Cache_Has_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MissingKeys provides a mock function for the type Cache
 func (_mock *Cache) MissingKeys(ctx context.Context, keys ...string) ([]string, error) {
 	var tmpRet mock.Arguments

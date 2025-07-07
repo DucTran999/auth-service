@@ -3,6 +3,9 @@ package usecase
 import "errors"
 
 var (
-	ErrInvalidCredentials     = errors.New("invalid credentials")
+	// message: invalid credentials.
+	ErrInvalidCredentials = errors.New("invalid credentials")
+
+	// message: new password must be different.
 	ErrNewPasswordMustChanged = errors.New("new password must be different")
 )

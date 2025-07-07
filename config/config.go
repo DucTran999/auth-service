@@ -41,7 +41,8 @@ type EnvConfiguration struct {
 	ExpireIntervalInMins int `mapstructure:"EXPIRE_INTERVAL_IN_MINS" validate:"gte=0"`
 
 	SignMethod string `mapstructure:"SIGN_METHOD" validate:"required,oneof=HS256 HS384 HS512 RS256 RS384 RS512 ES256 ES384 ES512"`
-	SignKey    string `mapstructure:"SIGN_KEY" validate:"required"`
+	PrivPem    string `mapstructure:"SIGN_PRIV_KEY" validate:"required"`
+	PubPem     string `mapstructure:"SIGN_PUB_KEY" validate:"required"`
 }
 
 func (cfg *EnvConfiguration) Normalize() {
@@ -65,7 +66,8 @@ func (cfg *EnvConfiguration) Normalize() {
 	cfg.RedisPasswd = strings.TrimSpace(cfg.RedisPasswd)
 
 	cfg.SignMethod = strings.TrimSpace(cfg.SignMethod)
-	cfg.SignKey = strings.TrimSpace(cfg.SignKey)
+	cfg.PrivPem = strings.TrimSpace(cfg.PrivPem)
+	cfg.PubPem = strings.TrimSpace(cfg.PubPem)
 }
 
 func (cfg *EnvConfiguration) Validate() error {

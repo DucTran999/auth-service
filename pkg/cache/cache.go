@@ -23,6 +23,9 @@ type Cache interface {
 	// Delete key
 	Del(ctx context.Context, key string) error
 
+	// Check key existed
+	Has(ctx context.Context, key string) (bool, error)
+
 	// Close client connection
 	Close() error
 }
