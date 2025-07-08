@@ -8,6 +8,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
+	"github.com/DucTran999/auth-service/internal/usecase/shared"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/DucTran999/auth-service/pkg/signer"
@@ -15,32 +16,33 @@ import (
 )
 
 const (
-	sessionDuration      = 60 * time.Minute
-	AccessTokenLifetime  = 15 * time.Minute
-	RefreshTokenLifetime = 7 * 24 * time.Hour
+	sessionDuration = 60 * time.Minute
 )
 
 type AuthUseCase struct {
-	hasher      hasher.Hasher
-	signer      signer.TokenSigner
-	cache       cache.Cache
-	accountRepo port.AccountRepo
-	sessionRepo port.SessionRepository
+	hasher          hasher.Hasher
+	signer          signer.TokenSigner
+	cache           cache.Cache
+	accountVerifier shared.AccountVerifier
+	accountRepo     port.AccountRepo
+	sessionRepo     port.SessionRepository
 }
 
 func NewAuthUseCase(
 	hasher hasher.Hasher,
 	signer signer.TokenSigner,
 	cache cache.Cache,
+	accountVerifier shared.AccountVerifier,
 	accountRepo port.AccountRepo,
 	sessionRepo port.SessionRepository,
 ) *AuthUseCase {
 	return &AuthUseCase{
-		hasher:      hasher,
-		signer:      signer,
-		cache:       cache,
-		accountRepo: accountRepo,
-		sessionRepo: sessionRepo,
+		hasher:          hasher,
+		signer:          signer,
+		cache:           cache,
+		accountVerifier: accountVerifier,
+		accountRepo:     accountRepo,
+		sessionRepo:     sessionRepo,
 	}
 }
 
@@ -55,16 +57,8 @@ func (uc *AuthUseCase) Login(ctx context.Context, input dto.LoginInput) (*model.
 		return session, nil
 	}
 
-	account, err := uc.findAccountByEmail(ctx, input.Email)
+	account, err := uc.accountVerifier.Verify(ctx, input.Email, input.Password)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := uc.checkAccountActive(account); err != nil {
-		return nil, err
-	}
-
-	if err := uc.verifyPassword(input.Password, account.PasswordHash); err != nil {
 		return nil, err
 	}
 
@@ -90,16 +84,8 @@ func (uc *AuthUseCase) Logout(ctx context.Context, sessionID string) error {
 }
 
 func (uc *AuthUseCase) LoginJWT(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
-	account, err := uc.findAccountByEmail(ctx, input.Email)
+	account, err := uc.accountVerifier.Verify(ctx, input.Email, input.Password)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := uc.checkAccountActive(account); err != nil {
-		return nil, err
-	}
-
-	if err := uc.verifyPassword(input.Password, account.PasswordHash); err != nil {
 		return nil, err
 	}
 
@@ -205,39 +191,6 @@ func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*
 	// Re-cache the session after extend ttl
 	_ = uc.cache.Set(ctx, sessionKey, session, sessionDuration)
 	return session, nil
-}
-
-func (uc *AuthUseCase) findAccountByEmail(
-	ctx context.Context,
-	email string,
-) (*model.Account, error) {
-	account, err := uc.accountRepo.FindByEmail(ctx, email)
-	if err != nil {
-		return nil, err
-	}
-	if account == nil {
-		return nil, ErrInvalidCredentials
-	}
-
-	return account, nil
-}
-
-func (uc *AuthUseCase) checkAccountActive(account *model.Account) error {
-	if !account.IsActive {
-		return model.ErrAccountDisabled
-	}
-	return nil
-}
-
-func (uc *AuthUseCase) verifyPassword(plain, hashed string) error {
-	match, err := uc.hasher.ComparePasswordAndHash(plain, hashed)
-	if err != nil {
-		return err
-	}
-	if !match {
-		return ErrInvalidCredentials
-	}
-	return nil
 }
 
 func (uc *AuthUseCase) createSession(

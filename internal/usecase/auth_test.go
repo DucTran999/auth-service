@@ -18,6 +18,7 @@ func NewAuthUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) *use
 		builders.HasherBuilder.GetInstance(),
 		nil,
 		builders.CacheBuilder.GetInstance(),
+		nil,
 		builders.AccountRepoBuilder.GetInstance(),
 		builders.SessionRepoBuilder.GetInstance(),
 	)
