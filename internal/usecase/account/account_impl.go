@@ -1,4 +1,4 @@
-package usecase
+package account
 
 import (
 	"context"
@@ -96,7 +96,7 @@ func (uc *AccountUseCaseImpl) validatePassword(password, hashed string) error {
 		return err
 	}
 	if !match {
-		return ErrInvalidCredentials
+		return model.ErrInvalidCredentials
 	}
 
 	return nil
@@ -104,7 +104,7 @@ func (uc *AccountUseCaseImpl) validatePassword(password, hashed string) error {
 
 func (uc *AccountUseCaseImpl) hashIfChanged(oldPassword, newPassword string) (string, error) {
 	if oldPassword == newPassword {
-		return "", ErrNewPasswordMustChanged
+		return "", model.ErrNewPasswordMustChanged
 	}
 
 	return uc.hasher.HashPassword(newPassword)

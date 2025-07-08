@@ -6,7 +6,6 @@ import (
 
 	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
@@ -125,9 +124,9 @@ func (hdl *AccountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.S
 
 func (hdl *AccountHandler) handleChangePasswordError(ctx *gin.Context, err error) {
 	switch {
-	case errors.Is(err, usecase.ErrInvalidCredentials):
+	case errors.Is(err, model.ErrInvalidCredentials):
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
-	case errors.Is(err, usecase.ErrNewPasswordMustChanged):
+	case errors.Is(err, model.ErrNewPasswordMustChanged):
 		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
 	default:
 		hdl.logger.Errorf("failed to change password: %v", err)

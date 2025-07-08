@@ -8,7 +8,7 @@ import (
 )
 
 // AuthUseCase defines the authentication-related business logic.
-type AuthUseCase interface {
+type SessionAuthUseCase interface {
 	// Login verifies the provided credentials and returns the authenticated account.
 	// Returns an error if authentication fails.
 	Login(ctx context.Context, input dto.LoginInput) (*model.Session, error)

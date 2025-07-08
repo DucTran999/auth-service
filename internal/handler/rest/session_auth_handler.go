@@ -6,7 +6,6 @@ import (
 
 	gen "github.com/DucTran999/auth-service/gen/http"
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
@@ -25,10 +24,10 @@ type SessionAuthHandler interface {
 type sessionAuthHandler struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC port.AuthUseCase
+	authUC port.SessionAuthUseCase
 }
 
-func NewSessionAuthHandler(logger logger.ILogger, authUC port.AuthUseCase) SessionAuthHandler {
+func NewSessionAuthHandler(logger logger.ILogger, authUC port.SessionAuthUseCase) SessionAuthHandler {
 	return &sessionAuthHandler{
 		logger: logger,
 		authUC: authUC,
@@ -61,7 +60,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 	// Authenticate user and create session
 	session, err := hdl.authUC.Login(ctx.Request.Context(), loginInput)
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidCredentials) {
+		if errors.Is(err, model.ErrInvalidCredentials) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
 			return
 		}
