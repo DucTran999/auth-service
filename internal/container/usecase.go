@@ -1,7 +1,6 @@
 package container
 
 import (
-	"github.com/DucTran999/auth-service/internal/handler/background"
 	"github.com/DucTran999/auth-service/internal/usecase/account"
 	"github.com/DucTran999/auth-service/internal/usecase/auth"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -10,13 +9,13 @@ import (
 )
 
 type useCases struct {
-	jwtAuth     port.JWTAuthUsecase
-	sessionAuth port.SessionAuthUseCase
+	jwtAuth     port.AuthJWTUsecase
+	sessionAuth port.AuthSessionUsecase
 
-	account     port.AccountUseCase
-	restSession port.SessionUsecase
+	account port.AccountUsecase
+	session port.SessionUsecase
 
-	backgroundSession background.SessionUsecase
+	backgroundSession port.SessionMaintenanceUsecase
 }
 
 func (c *Container) initUseCases() {
@@ -29,8 +28,7 @@ func (c *Container) initUseCases() {
 		c.repositories.account,
 	)
 
-	sessionAuthUC := auth.NewAuthUseCase(
-		c.Hasher,
+	sessionAuthUC := auth.NewAuthSessionUsecase(
 		c.Cache,
 		accountVerifier,
 		c.repositories.account,
@@ -44,7 +42,7 @@ func (c *Container) initUseCases() {
 		account:           accountUC,
 		jwtAuth:           jwtAuthUC,
 		sessionAuth:       sessionAuthUC,
-		restSession:       sessionUC,
+		session:           sessionUC,
 		backgroundSession: sessionUC,
 	}
 }

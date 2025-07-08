@@ -7,8 +7,8 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 )
 
-// AuthUseCase defines the authentication-related business logic.
-type SessionAuthUseCase interface {
+// AuthSessionUsecase defines the authentication-related business logic based on user sessions.
+type AuthSessionUsecase interface {
 	// Login verifies the provided credentials and returns the authenticated account.
 	// Returns an error if authentication fails.
 	Login(ctx context.Context, input dto.LoginInput) (*model.Session, error)

@@ -10,31 +10,27 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/internal/usecase/shared"
 	"github.com/DucTran999/auth-service/pkg/cache"
-	"github.com/DucTran999/auth-service/pkg/hasher"
 	"github.com/google/uuid"
 )
 
 const (
-	sessionDuration = 60 * time.Minute
+	SessionLifetime = 60 * time.Minute
 )
 
-type AuthUseCase struct {
-	hasher          hasher.Hasher
+type authSessionUsecase struct {
 	cache           cache.Cache
 	accountVerifier shared.AccountVerifier
 	accountRepo     port.AccountRepo
 	sessionRepo     port.SessionRepository
 }
 
-func NewAuthUseCase(
-	hasher hasher.Hasher,
+func NewAuthSessionUsecase(
 	cache cache.Cache,
 	accountVerifier shared.AccountVerifier,
 	accountRepo port.AccountRepo,
 	sessionRepo port.SessionRepository,
-) *AuthUseCase {
-	return &AuthUseCase{
-		hasher:          hasher,
+) port.AuthSessionUsecase {
+	return &authSessionUsecase{
 		cache:           cache,
 		accountVerifier: accountVerifier,
 		accountRepo:     accountRepo,
@@ -44,7 +40,7 @@ func NewAuthUseCase(
 
 // Login authenticates a user using email and password.
 // It verifies credentials, checks account status, and creates a new session on success.
-func (uc *AuthUseCase) Login(ctx context.Context, input dto.LoginInput) (*model.Session, error) {
+func (uc *authSessionUsecase) Login(ctx context.Context, input dto.LoginInput) (*model.Session, error) {
 	session, err := uc.tryReuseSession(ctx, input.CurrentSessionID)
 	if err != nil {
 		return nil, err
@@ -61,7 +57,7 @@ func (uc *AuthUseCase) Login(ctx context.Context, input dto.LoginInput) (*model.
 	return uc.createSession(ctx, account, input)
 }
 
-func (uc *AuthUseCase) Logout(ctx context.Context, sessionID string) error {
+func (uc *authSessionUsecase) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
 		return fmt.Errorf("logout: %w session=%s error=%w", model.ErrInvalidSessionID, sessionID, err)
@@ -81,7 +77,7 @@ func (uc *AuthUseCase) Logout(ctx context.Context, sessionID string) error {
 
 // tryReuseSession checks if the current session is valid and updates its expiration.
 // Returns the updated session if reusable; otherwise, returns nil.
-func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
+func (uc *authSessionUsecase) tryReuseSession(ctx context.Context, sessionID string) (*model.Session, error) {
 	if sessionID == "" || sessionID == uuid.Nil.String() {
 		return nil, nil
 	}
@@ -92,9 +88,9 @@ func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*
 	if cachedSession != nil {
 		ttl, _ := uc.cache.TTL(ctx, sessionKey)
 
-		// Example: Refresh TTL if less than 30% of sessionDuration remains
-		if ttl < int64(sessionDuration.Seconds())/3 {
-			_ = uc.cache.Expire(ctx, sessionKey, sessionDuration)
+		// Example: Refresh TTL if less than 30% of SessionLifetime remains
+		if ttl < int64(SessionLifetime.Seconds())/3 {
+			_ = uc.cache.Expire(ctx, sessionKey, SessionLifetime)
 		}
 		return cachedSession, nil
 	}
@@ -109,11 +105,11 @@ func (uc *AuthUseCase) tryReuseSession(ctx context.Context, sessionID string) (*
 	}
 
 	// Re-cache the session after extend ttl
-	_ = uc.cache.Set(ctx, sessionKey, session, sessionDuration)
+	_ = uc.cache.Set(ctx, sessionKey, session, SessionLifetime)
 	return session, nil
 }
 
-func (uc *AuthUseCase) createSession(
+func (uc *authSessionUsecase) createSession(
 	ctx context.Context,
 	account *model.Account,
 	input dto.LoginInput,
@@ -134,12 +130,12 @@ func (uc *AuthUseCase) createSession(
 		return nil, err
 	}
 
-	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(session.ID.String()), session, sessionDuration)
+	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(session.ID.String()), session, SessionLifetime)
 
 	return session, nil
 }
 
-func (uc *AuthUseCase) getSessionFromCache(
+func (uc *authSessionUsecase) getSessionFromCache(
 	ctx context.Context,
 	sessionKey string,
 ) *model.Session {

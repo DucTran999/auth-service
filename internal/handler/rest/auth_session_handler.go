@@ -24,10 +24,10 @@ type SessionAuthHandler interface {
 type sessionAuthHandler struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC port.SessionAuthUseCase
+	authUC port.AuthSessionUsecase
 }
 
-func NewSessionAuthHandler(logger logger.ILogger, authUC port.SessionAuthUseCase) SessionAuthHandler {
+func NewSessionAuthHandler(logger logger.ILogger, authUC port.AuthSessionUsecase) SessionAuthHandler {
 	return &sessionAuthHandler{
 		logger: logger,
 		authUC: authUC,

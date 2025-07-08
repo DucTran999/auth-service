@@ -19,7 +19,7 @@ const (
 	RefreshTokenLifetime = 7 * 24 * time.Hour
 )
 
-type jwtAuthUsecase struct {
+type authJWTUsecase struct {
 	signer signer.TokenSigner
 	cache  cache.Cache
 
@@ -30,15 +30,15 @@ func NewAuthJWTUsecase(
 	signer signer.TokenSigner,
 	cache cache.Cache,
 	accountVerifier shared.AccountVerifier,
-) port.JWTAuthUsecase {
-	return &jwtAuthUsecase{
+) port.AuthJWTUsecase {
+	return &authJWTUsecase{
 		signer:          signer,
 		cache:           cache,
 		accountVerifier: accountVerifier,
 	}
 }
 
-func (uc *jwtAuthUsecase) Login(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
+func (uc *authJWTUsecase) Login(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
 	account, err := uc.accountVerifier.Verify(ctx, input.Email, input.Password)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (uc *jwtAuthUsecase) Login(ctx context.Context, input dto.LoginJWTInput) (*
 	return tokens, nil
 }
 
-func (uc *jwtAuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
+func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
 	if refreshToken == "" {
 		return nil, model.ErrInvalidCredentials
 	}
@@ -93,7 +93,7 @@ func (uc *jwtAuthUsecase) RefreshToken(ctx context.Context, refreshToken string)
 	return tokens, nil
 }
 
-func (uc *jwtAuthUsecase) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
+func (uc *authJWTUsecase) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
 	if refreshToken == "" {
 		return model.ErrInvalidCredentials
 	}
@@ -114,7 +114,7 @@ func (uc *jwtAuthUsecase) RevokeRefreshToken(ctx context.Context, refreshToken s
 	return nil
 }
 
-func (uc *jwtAuthUsecase) signTokenPairs(
+func (uc *authJWTUsecase) signTokenPairs(
 	jti string,
 	signAt time.Time,
 	account *model.Account,
@@ -154,7 +154,7 @@ func (uc *jwtAuthUsecase) signTokenPairs(
 	}, nil
 }
 
-func (uc *jwtAuthUsecase) resignTokenPairs(ctx context.Context, oldClaims model.TokenClaims) (*dto.TokenPairs, error) {
+func (uc *authJWTUsecase) resignTokenPairs(ctx context.Context, oldClaims model.TokenClaims) (*dto.TokenPairs, error) {
 	jti := uuid.NewString()
 	now := time.Now()
 
@@ -191,12 +191,12 @@ func (uc *jwtAuthUsecase) resignTokenPairs(ctx context.Context, oldClaims model.
 	}, nil
 }
 
-func (uc *jwtAuthUsecase) cacheRefreshToken(ctx context.Context, dev model.SessionDevice) error {
+func (uc *authJWTUsecase) cacheRefreshToken(ctx context.Context, dev model.SessionDevice) error {
 	key := cache.KeyRefreshToken(dev.AccountID, dev.JTI)
 	return uc.cache.Set(ctx, key, dev, RefreshTokenLifetime)
 }
 
-func (uc *jwtAuthUsecase) newDeviceSession(
+func (uc *authJWTUsecase) newDeviceSession(
 	jti, accountID string,
 	signAt time.Time,
 	input dto.LoginJWTInput,

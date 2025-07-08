@@ -12,20 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AccountHandler struct {
-	logger logger.ILogger
+type AccountHandler interface {
+	CreateAccount(ctx *gin.Context)
+	ChangePassword(ctx *gin.Context)
+}
 
+type accountHandler struct {
 	BaseHandler
-	accountUC port.AccountUseCase
+
+	logger    logger.ILogger
+	accountUC port.AccountUsecase
 	sessionUC port.SessionUsecase
 }
 
 func NewAccountHandler(
 	logger logger.ILogger,
-	accountUC port.AccountUseCase,
+	accountUC port.AccountUsecase,
 	sessionUC port.SessionUsecase,
-) *AccountHandler {
-	return &AccountHandler{
+) AccountHandler {
+	return &accountHandler{
 		logger:    logger,
 		accountUC: accountUC,
 		sessionUC: sessionUC,
@@ -33,7 +38,7 @@ func NewAccountHandler(
 }
 
 // CreateAccount handles the HTTP request to register a new account.
-func (hdl *AccountHandler) CreateAccount(ctx *gin.Context) {
+func (hdl *accountHandler) CreateAccount(ctx *gin.Context) {
 	payload, err := ParseAndValidateJSON[gen.CreateAccountJSONRequestBody](ctx)
 	if err != nil {
 		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
@@ -53,7 +58,7 @@ func (hdl *AccountHandler) CreateAccount(ctx *gin.Context) {
 	hdl.sendRegisterSuccess(ctx, account)
 }
 
-func (hdl *AccountHandler) ChangePassword(ctx *gin.Context) {
+func (hdl *accountHandler) ChangePassword(ctx *gin.Context) {
 	payload, err := ParseAndValidateJSON[gen.ChangePasswordJSONRequestBody](ctx)
 	if err != nil {
 		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
@@ -78,7 +83,7 @@ func (hdl *AccountHandler) ChangePassword(ctx *gin.Context) {
 	hdl.NoContentResponse(ctx)
 }
 
-func (hdl *AccountHandler) handleRegisterError(ctx *gin.Context, err error) {
+func (hdl *accountHandler) handleRegisterError(ctx *gin.Context, err error) {
 	if errors.Is(err, model.ErrEmailExisted) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
@@ -86,7 +91,7 @@ func (hdl *AccountHandler) handleRegisterError(ctx *gin.Context, err error) {
 	hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 }
 
-func (hdl *AccountHandler) sendRegisterSuccess(ctx *gin.Context, account *model.Account) {
+func (hdl *accountHandler) sendRegisterSuccess(ctx *gin.Context, account *model.Account) {
 	resp := gen.RegisterResponse{
 		Version: ApiVersion1,
 		Success: true,
@@ -101,14 +106,14 @@ func (hdl *AccountHandler) sendRegisterSuccess(ctx *gin.Context, account *model.
 	ctx.JSON(http.StatusCreated, resp)
 }
 
-func (hdl *AccountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
+func (hdl *accountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
 	sessionID, err := ctx.Cookie("session_id")
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
 		return nil, false
 	}
 
-	session, err := hdl.sessionUC.ValidateSession(ctx.Request.Context(), sessionID)
+	session, err := hdl.sessionUC.Validate(ctx.Request.Context(), sessionID)
 	if err != nil {
 		if errors.Is(err, model.ErrInvalidSessionID) || errors.Is(err, model.ErrSessionNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
@@ -122,7 +127,7 @@ func (hdl *AccountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.S
 	return session, true
 }
 
-func (hdl *AccountHandler) handleChangePasswordError(ctx *gin.Context, err error) {
+func (hdl *accountHandler) handleChangePasswordError(ctx *gin.Context, err error) {
 	switch {
 	case errors.Is(err, model.ErrInvalidCredentials):
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())

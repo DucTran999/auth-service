@@ -8,7 +8,7 @@ import (
 )
 
 // AccountUseCase defines the business logic for managing user accounts.
-type AccountUseCase interface {
+type AccountUsecase interface {
 	// Register creates a new user account with the provided information.
 	// It typically includes validation, password hashing, and persistence logic.
 	Register(ctx context.Context, input dto.RegisterInput) (*model.Account, error)

@@ -30,11 +30,11 @@ type JWTAuthHandler interface {
 type jwtAuthHandler struct {
 	BaseHandler
 	logger logger.ILogger
-	authUC port.JWTAuthUsecase
+	authUC port.AuthJWTUsecase
 }
 
 // NewJWTAuthHandler creates a new JWT authentication handler.
-func NewJWTAuthHandler(logger logger.ILogger, authUC port.JWTAuthUsecase) JWTAuthHandler {
+func NewJWTAuthHandler(logger logger.ILogger, authUC port.AuthJWTUsecase) JWTAuthHandler {
 	return &jwtAuthHandler{
 		logger: logger,
 		authUC: authUC,
