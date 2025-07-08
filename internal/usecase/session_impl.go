@@ -11,6 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	sessionDuration = 60 * time.Minute
+)
+
 type SessionUCImpl struct {
 	sessionRepo port.SessionRepository
 	cache       cache.Cache
