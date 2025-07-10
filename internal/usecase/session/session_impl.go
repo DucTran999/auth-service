@@ -1,4 +1,4 @@
-package usecase
+package session
 
 import (
 	"context"
@@ -11,13 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type SessionUCImpl struct {
+const (
+	sessionDuration = 60 * time.Minute
+)
+
+type sessionUC struct {
 	sessionRepo port.SessionRepository
 	cache       cache.Cache
 }
 
-func NewSessionUC(cache cache.Cache, sessionRepo port.SessionRepository) *SessionUCImpl {
-	return &SessionUCImpl{
+func NewSessionUC(cache cache.Cache, sessionRepo port.SessionRepository) *sessionUC {
+	return &sessionUC{
 		sessionRepo: sessionRepo,
 		cache:       cache,
 	}
@@ -25,14 +29,14 @@ func NewSessionUC(cache cache.Cache, sessionRepo port.SessionRepository) *Sessio
 
 // DeleteExpiredBefore removes all sessions from the repository that expired before the given cutoff time.
 // Useful for periodic cleanup of stale session data.
-func (uc *SessionUCImpl) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
+func (uc *sessionUC) DeleteExpiredBefore(ctx context.Context, cutoff time.Time) error {
 	if err := uc.sessionRepo.DeleteExpiredBefore(ctx, cutoff); err != nil {
 		return fmt.Errorf("failed to delete sessions expired before %s: %w", cutoff.Format(time.RFC3339), err)
 	}
 	return nil
 }
 
-func (uc *SessionUCImpl) MarkExpiredSessions(ctx context.Context) error {
+func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 	// Fetch all active sessions from the DB
 	activeSessions, err := uc.sessionRepo.FindAllActiveSession(ctx)
 	if err != nil {
@@ -64,7 +68,7 @@ func (uc *SessionUCImpl) MarkExpiredSessions(ctx context.Context) error {
 	return nil
 }
 
-func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
+func (uc *sessionUC) Validate(ctx context.Context, sessionID string) (*model.Session, error) {
 	if _, err := uuid.Parse(sessionID); err != nil {
 		return nil, fmt.Errorf("%w: %w", model.ErrInvalidSessionID, err)
 	}
@@ -79,7 +83,7 @@ func (uc *SessionUCImpl) ValidateSession(ctx context.Context, sessionID string) 
 
 // findSessionTimeout returns the IDs of sessions that are not found in the cache.
 // These sessions are considered "timed out" and may need to be expired.
-func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions []model.Session) ([]string, error) {
+func (uc *sessionUC) findSessionTimeout(ctx context.Context, activeSessions []model.Session) ([]string, error) {
 	cacheKeys := make([]string, len(activeSessions))
 	for i, session := range activeSessions {
 		cacheKeys[i] = cache.KeyFromSessionID(session.ID.String())
@@ -98,7 +102,7 @@ func (uc *SessionUCImpl) findSessionTimeout(ctx context.Context, activeSessions 
 	return timedOutSessionIDs, nil
 }
 
-func (uc *SessionUCImpl) findSessionByID(ctx context.Context, sessionID string) (*model.Session, error) {
+func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*model.Session, error) {
 	var session model.Session
 
 	// Try lookup in cache first

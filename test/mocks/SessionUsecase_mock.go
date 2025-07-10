@@ -38,12 +38,12 @@ func (_m *SessionUsecase) EXPECT() *SessionUsecase_Expecter {
 	return &SessionUsecase_Expecter{mock: &_m.Mock}
 }
 
-// ValidateSession provides a mock function for the type SessionUsecase
-func (_mock *SessionUsecase) ValidateSession(ctx context.Context, sessionID string) (*model.Session, error) {
+// Validate provides a mock function for the type SessionUsecase
+func (_mock *SessionUsecase) Validate(ctx context.Context, sessionID string) (*model.Session, error) {
 	ret := _mock.Called(ctx, sessionID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ValidateSession")
+		panic("no return value specified for Validate")
 	}
 
 	var r0 *model.Session
@@ -66,19 +66,19 @@ func (_mock *SessionUsecase) ValidateSession(ctx context.Context, sessionID stri
 	return r0, r1
 }
 
-// SessionUsecase_ValidateSession_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ValidateSession'
-type SessionUsecase_ValidateSession_Call struct {
+// SessionUsecase_Validate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Validate'
+type SessionUsecase_Validate_Call struct {
 	*mock.Call
 }
 
-// ValidateSession is a helper method to define mock.On call
+// Validate is a helper method to define mock.On call
 //   - ctx context.Context
 //   - sessionID string
-func (_e *SessionUsecase_Expecter) ValidateSession(ctx interface{}, sessionID interface{}) *SessionUsecase_ValidateSession_Call {
-	return &SessionUsecase_ValidateSession_Call{Call: _e.mock.On("ValidateSession", ctx, sessionID)}
+func (_e *SessionUsecase_Expecter) Validate(ctx interface{}, sessionID interface{}) *SessionUsecase_Validate_Call {
+	return &SessionUsecase_Validate_Call{Call: _e.mock.On("Validate", ctx, sessionID)}
 }
 
-func (_c *SessionUsecase_ValidateSession_Call) Run(run func(ctx context.Context, sessionID string)) *SessionUsecase_ValidateSession_Call {
+func (_c *SessionUsecase_Validate_Call) Run(run func(ctx context.Context, sessionID string)) *SessionUsecase_Validate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -96,12 +96,12 @@ func (_c *SessionUsecase_ValidateSession_Call) Run(run func(ctx context.Context,
 	return _c
 }
 
-func (_c *SessionUsecase_ValidateSession_Call) Return(session *model.Session, err error) *SessionUsecase_ValidateSession_Call {
+func (_c *SessionUsecase_Validate_Call) Return(session *model.Session, err error) *SessionUsecase_Validate_Call {
 	_c.Call.Return(session, err)
 	return _c
 }
 
-func (_c *SessionUsecase_ValidateSession_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionUsecase_ValidateSession_Call {
+func (_c *SessionUsecase_Validate_Call) RunAndReturn(run func(ctx context.Context, sessionID string) (*model.Session, error)) *SessionUsecase_Validate_Call {
 	_c.Call.Return(run)
 	return _c
 }

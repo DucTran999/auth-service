@@ -1,4 +1,4 @@
-package usecase_test
+package session_test
 
 import (
 	"context"
@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/DucTran999/auth-service/internal/model"
-	"github.com/DucTran999/auth-service/internal/usecase"
+	"github.com/DucTran999/auth-service/internal/usecase/port"
+	"github.com/DucTran999/auth-service/internal/usecase/session"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
-func NewSessionUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) *usecase.SessionUCImpl {
-	return usecase.NewSessionUC(
+func NewSessionUseCaseBackgroundUT(t *testing.T, builders *mockbuilder.BuilderContainer) port.SessionMaintenanceUsecase {
+	return session.NewSessionUC(
 		builders.CacheBuilder.GetInstance(),
 		builders.SessionRepoBuilder.GetInstance(),
 	)
@@ -23,7 +24,7 @@ func TestDeleteExpiredBefore(t *testing.T) {
 	t.Run("delete got db error", func(t *testing.T) {
 		builders := mockbuilder.NewBuilderContainer(t)
 		builders.SessionRepoBuilder.DeleteExpiredBeforeFailed()
-		sut := NewSessionUseCaseUT(t, builders)
+		sut := NewSessionUseCaseBackgroundUT(t, builders)
 		cutoff := time.Now().AddDate(0, 0, -30)
 		ctx := context.Background()
 
@@ -35,7 +36,7 @@ func TestDeleteExpiredBefore(t *testing.T) {
 	t.Run("delete got db success", func(t *testing.T) {
 		builders := mockbuilder.NewBuilderContainer(t)
 		builders.SessionRepoBuilder.DeleteExpiredBeforeSuccess()
-		sut := NewSessionUseCaseUT(t, builders)
+		sut := NewSessionUseCaseBackgroundUT(t, builders)
 		cutoff := time.Now().AddDate(0, 0, -30)
 		ctx := context.Background()
 
@@ -48,68 +49,68 @@ func TestDeleteExpiredBefore(t *testing.T) {
 func TestMarkExpiredSessions(t *testing.T) {
 	type testcase struct {
 		name        string
-		setup       func(t *testing.T) *usecase.SessionUCImpl
+		setup       func(t *testing.T) port.SessionMaintenanceUsecase
 		expectedErr error
 	}
 
 	testTable := []testcase{
 		{
 			name: "failed to get list active session from db",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionFailed()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: mockbuilder.ErrFindActiveSession,
 		},
 		{
 			name: "failed when try to find sessionID key expired",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysFailed()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: mockbuilder.ErrMissingKeys,
 		},
 		{
 			name: "failed when trying to mark session expires time",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysSuccess()
 				builders.SessionRepoBuilder.MarkSessionsExpiredFailed()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: mockbuilder.ErrMarkSessionsExpired,
 		},
 		{
 			name: "no session are active",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindNoActiveSession()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: nil,
 		},
 		{
 			name: "no session expire yet",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.NoMissingKeysFound()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: nil,
 		},
 		{
 			name: "mark session expires success",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionMaintenanceUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.SessionRepoBuilder.FindAllActiveSessionSuccess()
 				builders.CacheBuilder.CallMissingKeysSuccess()
 				builders.SessionRepoBuilder.MarkSessionsExpiredSuccess()
-				return NewSessionUseCaseUT(t, builders)
+				return NewSessionUseCaseBackgroundUT(t, builders)
 			},
 			expectedErr: nil,
 		},
@@ -126,10 +127,17 @@ func TestMarkExpiredSessions(t *testing.T) {
 	}
 }
 
+func NewSessionUseCaseUT(t *testing.T, builders *mockbuilder.BuilderContainer) port.SessionUsecase {
+	return session.NewSessionUC(
+		builders.CacheBuilder.GetInstance(),
+		builders.SessionRepoBuilder.GetInstance(),
+	)
+}
+
 func TestValidateSession(t *testing.T) {
 	type testcase struct {
 		name              string
-		setup             func(t *testing.T) *usecase.SessionUCImpl
+		setup             func(t *testing.T) port.SessionUsecase
 		sessionID         string
 		expectedAccountID uuid.UUID
 		expectedErr       error
@@ -138,7 +146,7 @@ func TestValidateSession(t *testing.T) {
 	testTable := []testcase{
 		{
 			name: "invalid session id",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewSessionUseCaseUT(t, builders)
 			},
@@ -147,7 +155,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "session found in cache",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.ValidSessionCached()
 				return NewSessionUseCaseUT(t, builders)
@@ -158,7 +166,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "miss cached but query db failed",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIdFailed()
@@ -169,7 +177,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "session not found",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDNotFound()
@@ -180,7 +188,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "session already expired",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSessionExpired()
@@ -191,7 +199,7 @@ func TestValidateSession(t *testing.T) {
 		},
 		{
 			name: "failed when set cache",
-			setup: func(t *testing.T) *usecase.SessionUCImpl {
+			setup: func(t *testing.T) port.SessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.CacheBuilder.SessionMissCache()
 				builders.SessionRepoBuilder.FindByIDSuccess()
@@ -209,7 +217,7 @@ func TestValidateSession(t *testing.T) {
 			sut := tc.setup(t)
 			ctx := context.Background()
 
-			session, err := sut.ValidateSession(ctx, tc.sessionID)
+			session, err := sut.Validate(ctx, tc.sessionID)
 
 			if err != nil {
 				require.ErrorIs(t, err, tc.expectedErr)
