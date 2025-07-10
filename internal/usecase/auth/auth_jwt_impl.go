@@ -158,6 +158,12 @@ func (uc *authJWTUsecase) resignTokenPairs(ctx context.Context, oldClaims model.
 	jti := uuid.NewString()
 	now := time.Now()
 
+	// Invalidate the old refresh token
+	oldKey := cache.KeyRefreshToken(oldClaims.ID.String(), oldClaims.JTI)
+	if err := uc.cache.Del(ctx, oldKey); err != nil {
+		return nil, fmt.Errorf("failed to invalidate old refresh token: %w", err)
+	}
+
 	// Access token claims
 	accessClaims := oldClaims
 	accessClaims.JTI = ""
