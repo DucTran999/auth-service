@@ -12,7 +12,11 @@ func LoadConfig(configFile string) (*EnvConfiguration, error) {
 	// Locate the directory containing go.mod
 	goModDir, err := findGoModDir()
 	if err != nil {
-		return nil, fmt.Errorf("go.mod not found: %w", err)
+		// If go.mod is not found, use the current working directory
+		goModDir, err = os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get current working directory: %w", err)
+		}
 	}
 
 	// Build the full path to the config file (e.g., .env)
