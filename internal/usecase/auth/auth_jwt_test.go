@@ -50,7 +50,7 @@ func TestLoginWithJWT(t *testing.T) {
 			expectedErr: mockbuilder.ErrSigningToken,
 		},
 		{
-			name: "sign access token failed",
+			name: "sign refresh token failed",
 			setup: func(t *testing.T) port.AuthJWTUsecase {
 				t.Helper()
 				builder := mockbuilder.NewBuilderContainer(t)
