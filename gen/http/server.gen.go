@@ -23,10 +23,10 @@ type ServerInterface interface {
 	CreateAccount(c *gin.Context)
 	// User login
 	// (POST /api/v2/login)
-	LoginAccountJWT(c *gin.Context)
+	LoginWithJWT(c *gin.Context)
 	// Logout Account
 	// (POST /api/v2/logout)
-	LogoutAccountJWT(c *gin.Context)
+	LogoutJWT(c *gin.Context)
 	// Refresh tokens
 	// (POST /api/v2/token/refresh)
 	RefreshToken(c *gin.Context)
@@ -100,8 +100,8 @@ func (siw *ServerInterfaceWrapper) CreateAccount(c *gin.Context) {
 	siw.Handler.CreateAccount(c)
 }
 
-// LoginAccountJWT operation middleware
-func (siw *ServerInterfaceWrapper) LoginAccountJWT(c *gin.Context) {
+// LoginWithJWT operation middleware
+func (siw *ServerInterfaceWrapper) LoginWithJWT(c *gin.Context) {
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -110,11 +110,11 @@ func (siw *ServerInterfaceWrapper) LoginAccountJWT(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.LoginAccountJWT(c)
+	siw.Handler.LoginWithJWT(c)
 }
 
-// LogoutAccountJWT operation middleware
-func (siw *ServerInterfaceWrapper) LogoutAccountJWT(c *gin.Context) {
+// LogoutJWT operation middleware
+func (siw *ServerInterfaceWrapper) LogoutJWT(c *gin.Context) {
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -123,7 +123,7 @@ func (siw *ServerInterfaceWrapper) LogoutAccountJWT(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.LogoutAccountJWT(c)
+	siw.Handler.LogoutJWT(c)
 }
 
 // RefreshToken operation middleware
@@ -183,8 +183,8 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.POST(options.BaseURL+"/api/v1/login", wrapper.LoginAccount)
 	router.POST(options.BaseURL+"/api/v1/logout", wrapper.LogoutAccount)
 	router.POST(options.BaseURL+"/api/v1/register", wrapper.CreateAccount)
-	router.POST(options.BaseURL+"/api/v2/login", wrapper.LoginAccountJWT)
-	router.POST(options.BaseURL+"/api/v2/logout", wrapper.LogoutAccountJWT)
+	router.POST(options.BaseURL+"/api/v2/login", wrapper.LoginWithJWT)
+	router.POST(options.BaseURL+"/api/v2/logout", wrapper.LogoutJWT)
 	router.POST(options.BaseURL+"/api/v2/token/refresh", wrapper.RefreshToken)
 	router.GET(options.BaseURL+"/livez", wrapper.CheckLiveness)
 }

@@ -140,7 +140,7 @@ paths:
       description: Authenticate a user and create JWT token.
       tags:
         - Auth
-      operationId: loginAccountJWT
+      operationId: loginWithJWT
       requestBody:
         required: true
         content:
@@ -180,7 +180,7 @@ paths:
       description: >
         Logs the user out by revoking the server-side session (if applicable)
         and clearing the refresh token cookie.
-      operationId: logoutAccountJWT
+      operationId: logoutJWT
       responses:
         "204":
           description: Logout successful; no content returned.

@@ -11,6 +11,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase/shared"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/signer"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -18,6 +19,14 @@ const (
 	AccessTokenLifetime  = 15 * time.Minute
 	RefreshTokenLifetime = 7 * 24 * time.Hour
 )
+
+type tokenClaimsParams struct {
+	signAt     time.Time
+	exp        time.Duration
+	jti        string
+	account    *model.Account
+	includeJTI bool
+}
 
 type authJWTUsecase struct {
 	signer signer.TokenSigner
@@ -38,26 +47,31 @@ func NewAuthJWTUsecase(
 	}
 }
 
+// Login authenticates the user and returns a pair of JWT tokens (access + refresh).
 func (uc *authJWTUsecase) Login(ctx context.Context, input dto.LoginJWTInput) (*dto.TokenPairs, error) {
+	// Verify user credentials
 	account, err := uc.accountVerifier.Verify(ctx, input.Email, input.Password)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("auth: failed to verify credentials: %w", err)
 	}
 
+	// Prepare token metadata
 	jti := uuid.NewString()
-	signAt := time.Now()
+	issuedAt := time.Now()
 
-	tokens, err := uc.signTokenPairs(jti, signAt, account)
+	// Generate access and refresh tokens
+	tokenPairs, err := uc.signTokenPairs(jti, issuedAt, account)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("auth: failed to sign token pairs: %w", err)
 	}
 
-	sessionDevice := uc.newDeviceSession(jti, account.ID.String(), signAt, input)
-	if err := uc.cacheRefreshToken(ctx, sessionDevice); err != nil {
-		return nil, err
+	// Store refresh token in cache/session store
+	deviceSession := uc.newDeviceSession(jti, account.ID.String(), issuedAt, input)
+	if err := uc.cacheRefreshToken(ctx, deviceSession); err != nil {
+		return nil, fmt.Errorf("auth: failed to cache refresh token: %w", err)
 	}
 
-	return tokens, nil
+	return tokenPairs, nil
 }
 
 func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
@@ -65,17 +79,12 @@ func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string)
 		return nil, model.ErrInvalidCredentials
 	}
 
-	claims, err := uc.signer.Parse(refreshToken)
-	if err != nil {
+	claims := new(model.TokenClaims)
+	if err := uc.signer.ParseInto(refreshToken, claims); err != nil {
 		return nil, err
 	}
 
-	tokenClaim, err := model.MapClaimsToTokenClaims(*claims)
-	if err != nil {
-		return nil, err
-	}
-
-	key := cache.KeyRefreshToken(tokenClaim.ID.String(), tokenClaim.JTI)
+	key := cache.KeyRefreshToken(claims.Subject, claims.ID)
 	ok, err := uc.cache.Has(ctx, key)
 	if err != nil {
 		return nil, err
@@ -85,7 +94,7 @@ func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string)
 		return nil, model.ErrInvalidCredentials
 	}
 
-	tokens, err := uc.resignTokenPairs(ctx, *tokenClaim)
+	tokens, err := uc.resignTokenPairs(ctx, *claims)
 	if err != nil {
 		return nil, err
 	}
@@ -98,17 +107,12 @@ func (uc *authJWTUsecase) RevokeRefreshToken(ctx context.Context, refreshToken s
 		return model.ErrInvalidCredentials
 	}
 
-	claims, err := uc.signer.Parse(refreshToken)
-	if err != nil {
+	claims := new(model.TokenClaims)
+	if err := uc.signer.ParseInto(refreshToken, claims); err != nil {
 		return err
 	}
 
-	tokenClaim, err := model.MapClaimsToTokenClaims(*claims)
-	if err != nil {
-		return err
-	}
-
-	key := cache.KeyRefreshToken(tokenClaim.ID.String(), tokenClaim.JTI)
+	key := cache.KeyRefreshToken(claims.Subject, claims.ID)
 	_ = uc.cache.Del(ctx, key)
 
 	return nil
@@ -120,30 +124,27 @@ func (uc *authJWTUsecase) signTokenPairs(
 	account *model.Account,
 ) (*dto.TokenPairs, error) {
 	// Access token claims
-	accessClaims := model.TokenClaims{
-		ID:        account.ID,
-		Email:     account.Email,
-		Role:      account.Role,
-		IssuedAt:  signAt.Unix(),
-		ExpiresAt: signAt.Add(AccessTokenLifetime).Unix(),
-	}
+	accessClaims := uc.buildClaims(tokenClaimsParams{
+		signAt:  signAt,
+		exp:     AccessTokenLifetime,
+		account: account,
+	})
 
-	accessToken, err := uc.signer.SignAccessToken(accessClaims.ToMapClaims())
+	accessToken, err := uc.signer.Sign(accessClaims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign access token: %w", err)
 	}
 
 	// Refresh token claims
-	refreshClaims := model.TokenClaims{
-		ID:        account.ID,
-		Email:     account.Email,
-		Role:      account.Role,
-		IssuedAt:  signAt.Unix(),
-		ExpiresAt: signAt.Add(RefreshTokenLifetime).Unix(),
-		JTI:       jti,
-	}
+	refreshClaims := uc.buildClaims(tokenClaimsParams{
+		signAt:     signAt,
+		jti:        jti,
+		exp:        RefreshTokenLifetime,
+		account:    account,
+		includeJTI: true,
+	})
 
-	refreshToken, err := uc.signer.SignRefreshToken(refreshClaims.ToMapClaims())
+	refreshToken, err := uc.signer.Sign(refreshClaims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign refresh token: %w", err)
 	}
@@ -154,41 +155,53 @@ func (uc *authJWTUsecase) signTokenPairs(
 	}, nil
 }
 
-func (uc *authJWTUsecase) resignTokenPairs(ctx context.Context, oldClaims model.TokenClaims) (*dto.TokenPairs, error) {
-	jti := uuid.NewString()
+func (uc *authJWTUsecase) resignTokenPairs(ctx context.Context, old model.TokenClaims) (*dto.TokenPairs, error) {
 	now := time.Now()
+	jti := uuid.NewString()
 
-	// Invalidate the old refresh token
-	oldKey := cache.KeyRefreshToken(oldClaims.ID.String(), oldClaims.JTI)
+	// Step 1: Revoke old refresh token
+	oldKey := cache.KeyRefreshToken(old.Subject, old.ID)
 	if err := uc.cache.Del(ctx, oldKey); err != nil {
 		return nil, fmt.Errorf("failed to invalidate old refresh token: %w", err)
 	}
 
-	// Access token claims
-	accessClaims := oldClaims
-	accessClaims.JTI = ""
-	accessClaims.IssuedAt = now.Unix()
-	accessClaims.ExpiresAt = now.Add(AccessTokenLifetime).Unix()
+	// Step 2: Build access token claims (no JTI)
+	accessClaims := model.TokenClaims{
+		Email: old.Email,
+		Role:  old.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   old.Subject,
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenLifetime)),
+		},
+	}
 
-	accessToken, err := uc.signer.SignAccessToken(accessClaims.ToMapClaims())
+	accessToken, err := uc.signer.Sign(accessClaims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign access token: %w", err)
 	}
 
-	// Refresh token claims (rotate JTI and extend lifetime)
-	refreshClaims := oldClaims
-	refreshClaims.JTI = jti
-	refreshClaims.IssuedAt = now.Unix()
-	refreshClaims.ExpiresAt = now.Add(RefreshTokenLifetime).Unix()
+	// Step 3: Build refresh token claims (new JTI)
+	refreshClaims := model.TokenClaims{
+		Email: old.Email,
+		Role:  old.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   old.ID,
+			ID:        jti,
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(RefreshTokenLifetime)),
+		},
+	}
 
-	refreshToken, err := uc.signer.SignRefreshToken(refreshClaims.ToMapClaims())
+	refreshToken, err := uc.signer.Sign(refreshClaims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign refresh token: %w", err)
 	}
 
-	key := cache.KeyRefreshToken(refreshClaims.ID.String(), jti)
-	if err = uc.cache.Set(ctx, key, refreshClaims, RefreshTokenLifetime); err != nil {
-		return nil, err
+	// Step 4: Store new refresh token session
+	newKey := cache.KeyRefreshToken(old.Subject, jti)
+	if err := uc.cache.Set(ctx, newKey, refreshClaims, RefreshTokenLifetime); err != nil {
+		return nil, fmt.Errorf("failed to store refresh token: %w", err)
 	}
 
 	return &dto.TokenPairs{
@@ -215,4 +228,22 @@ func (uc *authJWTUsecase) newDeviceSession(
 		CreatedAt: signAt,
 		ExpiresAt: signAt.Add(RefreshTokenLifetime),
 	}
+}
+
+func (uc *authJWTUsecase) buildClaims(params tokenClaimsParams) model.TokenClaims {
+	claims := model.TokenClaims{
+		Email: params.account.Email,
+		Role:  params.account.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   params.account.ID.String(),
+			IssuedAt:  jwt.NewNumericDate(params.signAt),
+			ExpiresAt: jwt.NewNumericDate(params.signAt.Add(params.exp)),
+		},
+	}
+
+	if params.includeJTI {
+		claims.ID = params.jti
+	}
+
+	return claims
 }

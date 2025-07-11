@@ -2,6 +2,8 @@ github.com/DucTran999/cachekit v0.1.0 h1:NSzrqPDzF3RU5NjwmV2tQkvNtMzYdNMVpGh75RM
 github.com/DucTran999/cachekit v0.1.0/go.mod h1:49HYGgiH58eGjKs73VwhcsR02QnZNM9XzV+LZnU35to=
 github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f h1:vbWKG4lWsFLkbJrkIt42ciB0RsXNWs+ICR2wwuN1DuA=
 github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f/go.mod h1:nFIdXUGHjeXjxfVlMJ088dtxxSP9xOvR4LZZEUIpkXU=
+github.com/DucTran999/jwtkit v1.0.0 h1:5QifRAu1wwNs7+dXFo5gOSWxwF6pW8bAXj6UTI/guLE=
+github.com/DucTran999/jwtkit v1.0.0/go.mod h1:+Zq9T3hPQ4YvzxIcAT9Jy8wELGwlSIK28RA4DOC3mrs=
 github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4 h1:jdaSZyXyj7k/ayLAfQKzB/tNLiZSbZrwVVumcHDsZ+s=
 github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4/go.mod h1:n6W8Q7wbkkAYmhQdc0Y0R/xLOgGUakg8iqa5Hd2n/NY=
 github.com/alexedwards/argon2id v1.0.0 h1:wJzDx66hqWX7siL/SRUmgz3F8YMrd/nfX/xHHcQQP0w=

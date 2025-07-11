@@ -1,10 +1,11 @@
 module github.com/DucTran999/auth-service
 
-go 1.23.1
+go 1.24.5
 
 require (
 	github.com/DucTran999/cachekit v0.1.0
 	github.com/DucTran999/dbkit v0.0.0-20250615061522-b3ee3697517f
+	github.com/DucTran999/jwtkit v1.0.0
 	github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/gin-gonic/gin v1.10.0

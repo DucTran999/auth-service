@@ -20,11 +20,9 @@ const (
 )
 
 type JWTAuthHandler interface {
-	LoginAccountJWT(ctx *gin.Context)
-
+	LoginWithJWT(ctx *gin.Context)
 	RefreshToken(ctx *gin.Context)
-
-	LogoutAccountJWT(ctx *gin.Context)
+	LogoutJWT(ctx *gin.Context)
 }
 
 type jwtAuthHandler struct {
@@ -41,7 +39,7 @@ func NewJWTAuthHandler(logger logger.ILogger, authUC port.AuthJWTUsecase) JWTAut
 	}
 }
 
-func (hdl *jwtAuthHandler) LoginAccountJWT(ctx *gin.Context) {
+func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 	// Parse request body
 	payload, err := ParseAndValidateJSON[gen.LoginAccountJSONRequestBody](ctx)
 	if err != nil {
@@ -49,6 +47,7 @@ func (hdl *jwtAuthHandler) LoginAccountJWT(ctx *gin.Context) {
 		return
 	}
 
+	// Prepare input
 	input := dto.LoginJWTInput{
 		Email:     string(payload.Email),
 		Password:  payload.Password,
@@ -56,6 +55,7 @@ func (hdl *jwtAuthHandler) LoginAccountJWT(ctx *gin.Context) {
 		UserAgent: ctx.Request.UserAgent(),
 	}
 
+	// Authenticate
 	tokens, err := hdl.authUC.Login(ctx, input)
 	if err != nil {
 		if errors.Is(err, model.ErrInvalidCredentials) {
@@ -86,7 +86,7 @@ func (hdl *jwtAuthHandler) RefreshToken(ctx *gin.Context) {
 	hdl.responseLoginJWTSuccess(ctx, tokens)
 }
 
-func (hdl *jwtAuthHandler) LogoutAccountJWT(ctx *gin.Context) {
+func (hdl *jwtAuthHandler) LogoutJWT(ctx *gin.Context) {
 	refreshToken, err := ctx.Cookie(refreshTokenKey)
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))

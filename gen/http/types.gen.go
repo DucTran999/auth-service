@@ -147,5 +147,5 @@ type LoginAccountJSONRequestBody = LoginRequest
 // CreateAccountJSONRequestBody defines body for CreateAccount for application/json ContentType.
 type CreateAccountJSONRequestBody = CreateAccountRequest
 
-// LoginAccountJWTJSONRequestBody defines body for LoginAccountJWT for application/json ContentType.
-type LoginAccountJWTJSONRequestBody = LoginRequest
+// LoginWithJWTJSONRequestBody defines body for LoginWithJWT for application/json ContentType.
+type LoginWithJWTJSONRequestBody = LoginRequest
