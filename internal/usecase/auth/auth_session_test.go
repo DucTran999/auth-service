@@ -182,6 +182,7 @@ func TestLogin(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			ctx := t.Context()
 
@@ -243,6 +244,7 @@ func TestLogout(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			ctx := t.Context()
 

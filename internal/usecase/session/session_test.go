@@ -21,6 +21,7 @@ func NewSessionUseCaseBackgroundUT(t *testing.T, builders *mockbuilder.BuilderCo
 
 func TestDeleteExpiredBefore(t *testing.T) {
 	t.Run("delete got db error", func(t *testing.T) {
+		t.Parallel()
 		builders := mockbuilder.NewBuilderContainer(t)
 		builders.SessionRepoBuilder.DeleteExpiredBeforeFailed()
 		sut := NewSessionUseCaseBackgroundUT(t, builders)
@@ -33,6 +34,7 @@ func TestDeleteExpiredBefore(t *testing.T) {
 	})
 
 	t.Run("delete got db success", func(t *testing.T) {
+		t.Parallel()
 		builders := mockbuilder.NewBuilderContainer(t)
 		builders.SessionRepoBuilder.DeleteExpiredBeforeSuccess()
 		sut := NewSessionUseCaseBackgroundUT(t, builders)
@@ -117,6 +119,7 @@ func TestMarkExpiredSessions(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			ctx := t.Context()
 
@@ -213,6 +216,7 @@ func TestValidateSession(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			session, err := sut.Validate(t.Context(), tc.sessionID)
 
