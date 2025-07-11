@@ -186,8 +186,8 @@ func (uc *authJWTUsecase) resignTokenPairs(ctx context.Context, old model.TokenC
 		Email: old.Email,
 		Role:  old.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   old.ID,
 			ID:        jti,
+			Subject:   old.Subject,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(RefreshTokenLifetime)),
 		},
