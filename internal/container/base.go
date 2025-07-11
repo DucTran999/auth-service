@@ -2,14 +2,20 @@ package container
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	dbConfig "github.com/DucTran999/dbkit/config"
 
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/pkg/cache"
 	"github.com/DucTran999/auth-service/pkg/signer"
 	"github.com/DucTran999/cachekit"
 	"github.com/DucTran999/dbkit"
-	dbConfig "github.com/DucTran999/dbkit/config"
+	"github.com/DucTran999/jwtkit"
 	"github.com/DucTran999/shared-pkg/logger"
 )
 
@@ -48,13 +54,37 @@ func newAuthDBConnection(config *config.EnvConfiguration) (dbkit.Connection, err
 }
 
 func newSigner(config *config.EnvConfiguration) (signer.TokenSigner, error) {
-	cfg := signer.Config{
-		Alg:     signer.SigningAlgorithm(config.SignMethod),
-		PrivPem: config.PrivPem,
-		PubPem:  config.PubPem,
+	// Read the private key PEM file
+	privPem, err := os.ReadFile("./keys/" + config.PrivPem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read private key: %w", err)
 	}
 
-	return signer.NewTokenSigner(cfg)
+	// Parse the private key
+	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(privPem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %w", err)
+	}
+
+	// Read the public key PEM file
+	pubPem, err := os.ReadFile("./keys/" + config.PubPem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read public key: %w", err)
+	}
+
+	// Parse the public key
+	verifyKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse public key: %w", err)
+	}
+
+	cfg := jwtkit.Config{
+		Alg:        jwtkit.SigningAlgorithm(config.SignMethod),
+		RSAPrivate: signKey,
+		RSAPublic:  verifyKey,
+	}
+
+	return jwtkit.NewJWT(cfg)
 }
 
 type loggingCache struct {

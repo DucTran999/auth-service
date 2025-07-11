@@ -36,74 +36,69 @@ func (_m *TokenSigner) EXPECT() *TokenSigner_Expecter {
 	return &TokenSigner_Expecter{mock: &_m.Mock}
 }
 
-// Parse provides a mock function for the type TokenSigner
-func (_mock *TokenSigner) Parse(token string) (*jwt.MapClaims, error) {
-	ret := _mock.Called(token)
+// ParseInto provides a mock function for the type TokenSigner
+func (_mock *TokenSigner) ParseInto(tokenStr string, dest jwt.Claims) error {
+	ret := _mock.Called(tokenStr, dest)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Parse")
+		panic("no return value specified for ParseInto")
 	}
 
-	var r0 *jwt.MapClaims
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*jwt.MapClaims, error)); ok {
-		return returnFunc(token)
-	}
-	if returnFunc, ok := ret.Get(0).(func(string) *jwt.MapClaims); ok {
-		r0 = returnFunc(token)
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(string, jwt.Claims) error); ok {
+		r0 = returnFunc(tokenStr, dest)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*jwt.MapClaims)
-		}
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(token)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
+	return r0
 }
 
-// TokenSigner_Parse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Parse'
-type TokenSigner_Parse_Call struct {
+// TokenSigner_ParseInto_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParseInto'
+type TokenSigner_ParseInto_Call struct {
 	*mock.Call
 }
 
-// Parse is a helper method to define mock.On call
-//   - token string
-func (_e *TokenSigner_Expecter) Parse(token interface{}) *TokenSigner_Parse_Call {
-	return &TokenSigner_Parse_Call{Call: _e.mock.On("Parse", token)}
+// ParseInto is a helper method to define mock.On call
+//   - tokenStr string
+//   - dest jwt.Claims
+func (_e *TokenSigner_Expecter) ParseInto(tokenStr interface{}, dest interface{}) *TokenSigner_ParseInto_Call {
+	return &TokenSigner_ParseInto_Call{Call: _e.mock.On("ParseInto", tokenStr, dest)}
 }
 
-func (_c *TokenSigner_Parse_Call) Run(run func(token string)) *TokenSigner_Parse_Call {
+func (_c *TokenSigner_ParseInto_Call) Run(run func(tokenStr string, dest jwt.Claims)) *TokenSigner_ParseInto_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 string
 		if args[0] != nil {
 			arg0 = args[0].(string)
 		}
+		var arg1 jwt.Claims
+		if args[1] != nil {
+			arg1 = args[1].(jwt.Claims)
+		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
 }
 
-func (_c *TokenSigner_Parse_Call) Return(mapClaims *jwt.MapClaims, err error) *TokenSigner_Parse_Call {
-	_c.Call.Return(mapClaims, err)
+func (_c *TokenSigner_ParseInto_Call) Return(err error) *TokenSigner_ParseInto_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *TokenSigner_Parse_Call) RunAndReturn(run func(token string) (*jwt.MapClaims, error)) *TokenSigner_Parse_Call {
+func (_c *TokenSigner_ParseInto_Call) RunAndReturn(run func(tokenStr string, dest jwt.Claims) error) *TokenSigner_ParseInto_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// SignAccessToken provides a mock function for the type TokenSigner
-func (_mock *TokenSigner) SignAccessToken(claims jwt.Claims) (string, error) {
+// Sign provides a mock function for the type TokenSigner
+func (_mock *TokenSigner) Sign(claims jwt.Claims) (string, error) {
 	ret := _mock.Called(claims)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SignAccessToken")
+		panic("no return value specified for Sign")
 	}
 
 	var r0 string
@@ -124,18 +119,18 @@ func (_mock *TokenSigner) SignAccessToken(claims jwt.Claims) (string, error) {
 	return r0, r1
 }
 
-// TokenSigner_SignAccessToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SignAccessToken'
-type TokenSigner_SignAccessToken_Call struct {
+// TokenSigner_Sign_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Sign'
+type TokenSigner_Sign_Call struct {
 	*mock.Call
 }
 
-// SignAccessToken is a helper method to define mock.On call
+// Sign is a helper method to define mock.On call
 //   - claims jwt.Claims
-func (_e *TokenSigner_Expecter) SignAccessToken(claims interface{}) *TokenSigner_SignAccessToken_Call {
-	return &TokenSigner_SignAccessToken_Call{Call: _e.mock.On("SignAccessToken", claims)}
+func (_e *TokenSigner_Expecter) Sign(claims interface{}) *TokenSigner_Sign_Call {
+	return &TokenSigner_Sign_Call{Call: _e.mock.On("Sign", claims)}
 }
 
-func (_c *TokenSigner_SignAccessToken_Call) Run(run func(claims jwt.Claims)) *TokenSigner_SignAccessToken_Call {
+func (_c *TokenSigner_Sign_Call) Run(run func(claims jwt.Claims)) *TokenSigner_Sign_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 jwt.Claims
 		if args[0] != nil {
@@ -148,72 +143,12 @@ func (_c *TokenSigner_SignAccessToken_Call) Run(run func(claims jwt.Claims)) *To
 	return _c
 }
 
-func (_c *TokenSigner_SignAccessToken_Call) Return(s string, err error) *TokenSigner_SignAccessToken_Call {
+func (_c *TokenSigner_Sign_Call) Return(s string, err error) *TokenSigner_Sign_Call {
 	_c.Call.Return(s, err)
 	return _c
 }
 
-func (_c *TokenSigner_SignAccessToken_Call) RunAndReturn(run func(claims jwt.Claims) (string, error)) *TokenSigner_SignAccessToken_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// SignRefreshToken provides a mock function for the type TokenSigner
-func (_mock *TokenSigner) SignRefreshToken(claims jwt.Claims) (string, error) {
-	ret := _mock.Called(claims)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SignRefreshToken")
-	}
-
-	var r0 string
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(jwt.Claims) (string, error)); ok {
-		return returnFunc(claims)
-	}
-	if returnFunc, ok := ret.Get(0).(func(jwt.Claims) string); ok {
-		r0 = returnFunc(claims)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	if returnFunc, ok := ret.Get(1).(func(jwt.Claims) error); ok {
-		r1 = returnFunc(claims)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// TokenSigner_SignRefreshToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SignRefreshToken'
-type TokenSigner_SignRefreshToken_Call struct {
-	*mock.Call
-}
-
-// SignRefreshToken is a helper method to define mock.On call
-//   - claims jwt.Claims
-func (_e *TokenSigner_Expecter) SignRefreshToken(claims interface{}) *TokenSigner_SignRefreshToken_Call {
-	return &TokenSigner_SignRefreshToken_Call{Call: _e.mock.On("SignRefreshToken", claims)}
-}
-
-func (_c *TokenSigner_SignRefreshToken_Call) Run(run func(claims jwt.Claims)) *TokenSigner_SignRefreshToken_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 jwt.Claims
-		if args[0] != nil {
-			arg0 = args[0].(jwt.Claims)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *TokenSigner_SignRefreshToken_Call) Return(s string, err error) *TokenSigner_SignRefreshToken_Call {
-	_c.Call.Return(s, err)
-	return _c
-}
-
-func (_c *TokenSigner_SignRefreshToken_Call) RunAndReturn(run func(claims jwt.Claims) (string, error)) *TokenSigner_SignRefreshToken_Call {
+func (_c *TokenSigner_Sign_Call) RunAndReturn(run func(claims jwt.Claims) (string, error)) *TokenSigner_Sign_Call {
 	_c.Call.Return(run)
 	return _c
 }

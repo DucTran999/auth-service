@@ -3,7 +3,6 @@ package mockbuilder
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -14,8 +13,11 @@ import (
 
 var (
 	ErrGetCache        = errors.New("failed to get cache")
+	ErrSetCache        = errors.New("failed to set cache")
 	ErrSetCacheSession = errors.New("failed to set cache session")
 	ErrMissingKeys     = errors.New("failed to get list missing keys")
+	ErrDelCacheDelete  = errors.New("failed to del cache key")
+	ErrHasCache        = errors.New("failed to check key in cache")
 )
 
 type mockCacheBuilder struct {
@@ -114,8 +116,42 @@ func (b *mockCacheBuilder) NoMissingKeysFound() {
 
 func (b *mockCacheBuilder) DelKeySuccess() {
 	b.inst.EXPECT().
-		Del(mock.Anything, mock.MatchedBy(func(key string) bool {
-			return strings.HasPrefix(key, cache.SessionKeyPrefix)
-		})).
+		Del(mock.Anything, mock.AnythingOfType("string")).
+		Return(nil)
+}
+
+func (b *mockCacheBuilder) DelKeyErr() {
+	b.inst.EXPECT().
+		Del(mock.Anything, mock.AnythingOfType("string")).
+		Return(ErrDelCacheDelete)
+}
+
+func (b *mockCacheBuilder) CheckRefreshTokenFailed() {
+	b.inst.EXPECT().
+		Has(mock.Anything, mock.AnythingOfType("string")).
+		Return(false, ErrHasCache)
+}
+
+func (b *mockCacheBuilder) RefreshTokenInvalidCache() {
+	b.inst.EXPECT().
+		Has(mock.Anything, mock.AnythingOfType("string")).
+		Return(false, nil)
+}
+
+func (b *mockCacheBuilder) RefreshTokenValidCache() {
+	b.inst.EXPECT().
+		Has(mock.Anything, mock.AnythingOfType("string")).
+		Return(true, nil)
+}
+
+func (b *mockCacheBuilder) SetRefreshTokenFailed() {
+	b.inst.EXPECT().
+		Set(mock.Anything, mock.AnythingOfType("string"), mock.Anything, mock.Anything).
+		Return(ErrSetCache)
+}
+
+func (b *mockCacheBuilder) SetRefreshTokenSuccess() {
+	b.inst.EXPECT().
+		Set(mock.Anything, mock.AnythingOfType("string"), mock.Anything, mock.Anything).
 		Return(nil)
 }

@@ -1,7 +1,6 @@
 package account_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -105,7 +104,7 @@ func TestRegisterAccount(t *testing.T) {
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			sut := tc.setup(t)
-			user, err := sut.Register(context.Background(), tc.accountInfo)
+			user, err := sut.Register(t.Context(), tc.accountInfo)
 
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {
@@ -224,7 +223,7 @@ func TestChangePassword(t *testing.T) {
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			sut := tc.setup(t)
-			ctx := context.Background()
+			ctx := t.Context()
 
 			err := sut.ChangePassword(ctx, tc.input)
 

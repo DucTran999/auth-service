@@ -1,7 +1,6 @@
 package shared_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -111,10 +110,9 @@ func TestVerify(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			ctx := t.Context()
 			sut := tc.setup(t)
 			account, err := sut.Verify(ctx, tc.loginInput.Email, tc.loginInput.Password)
 

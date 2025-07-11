@@ -1,8 +1,6 @@
 package auth_test
 
 import (
-	"context"
-	"log"
 	"testing"
 
 	"github.com/DucTran999/auth-service/internal/model"
@@ -182,12 +180,16 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
+			ctx := t.Context()
+
+			// Act
 			session, err := sut.Login(ctx, tc.loginInput)
-			log.Println(session)
+
+			// Assert
 			assert.Equal(t, tc.expectedErr, err)
 			if tc.expected != nil {
 				assert.Equal(t, tc.expected.ID, session.AccountID)
@@ -242,8 +244,9 @@ func TestLogout(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
-			ctx := context.Background()
+			ctx := t.Context()
 
 			err := sut.Logout(ctx, tc.sessionID)
 
