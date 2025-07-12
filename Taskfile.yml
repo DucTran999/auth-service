@@ -21,8 +21,18 @@ tasks:
     dir: "{{.USER_WORKING_DIR}}"
     preconditions:
       - test -f environment/docker-compose.yml
+      - test -f .test.env
     cmds:
       - scripts/testenv.sh
+
+  localenv:
+    desc: "do docker-compose file for setup test env"
+    dir: "{{.USER_WORKING_DIR}}"
+    preconditions:
+      - test -f environment/docker-compose.yml
+      - test -f .env
+    cmds:
+      - scripts/localenv.sh
 
   tidy:
     desc: install pkg listed in go.mod
@@ -59,3 +69,17 @@ tasks:
     deps: [deps]
     preconditions:
       - test -f api.spec.yml
+
+  unit_test:
+    desc: run unit test
+    cmds:
+      - ./scripts/unittest.sh
+    preconditions:
+      - test -f ./scripts/unittest.sh
+
+  integration_test:
+    desc: run integration test
+    cmds:
+      - ./scripts/integration.sh
+    preconditions:
+      - test -f ./scripts/integration.sh

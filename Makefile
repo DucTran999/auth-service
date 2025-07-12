@@ -14,6 +14,14 @@ help: ## Show help for each of the Makefile commands
 coverage: ## code coverage
 	${PKG_SCRIPTS}/coverage.sh
 
+.PHONY: unit_test 
+unit_test: ## run unit test
+	${PKG_SCRIPTS}/unittest.sh
+
+.PHONY: integration_test 
+integration_test: ## run integration test
+	${PKG_SCRIPTS}/integration.sh
+
 .PHONY: tidy
 tidy: ## Tidy up the go.mod
 	go mod tidy
@@ -24,6 +32,9 @@ lint: ## Run linters
 
 testenv: ## Setup testenv and migrate db
 	${PKG_SCRIPTS}/testenv.sh
+
+localenv: ## Setup testenv and migrate db
+	${PKG_SCRIPTS}/localenv.sh
 
 .PHONY: generate
 generate: ## generate api and mocks
