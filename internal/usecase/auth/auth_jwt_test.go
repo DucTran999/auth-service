@@ -3,7 +3,7 @@ package auth_test
 import (
 	"testing"
 
-	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/usecase/auth"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -33,10 +33,10 @@ func TestLoginWithJWT(t *testing.T) {
 			setup: func(t *testing.T) port.AuthJWTUsecase {
 				t.Helper()
 				builder := mockbuilder.NewBuilderContainer(t)
-				builder.AccountVerifier.VerifyFailed(model.ErrInvalidCredentials)
+				builder.AccountVerifier.VerifyFailed(errs.ErrInvalidCredentials)
 				return NewAuthJWTUsecaseUT(t, builder)
 			},
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name: "sign access token failed",
@@ -123,7 +123,7 @@ func TestRevokeRefreshToken(t *testing.T) {
 				builder := mockbuilder.NewBuilderContainer(t)
 				return NewAuthJWTUsecaseUT(t, builder)
 			},
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name:  "invalid token",
@@ -190,7 +190,7 @@ func TestRefreshToken(t *testing.T) {
 				builder := mockbuilder.NewBuilderContainer(t)
 				return NewAuthJWTUsecaseUT(t, builder)
 			},
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name:  "invalid token",
@@ -225,7 +225,7 @@ func TestRefreshToken(t *testing.T) {
 				builder.CacheBuilder.RefreshTokenInvalidCache()
 				return NewAuthJWTUsecaseUT(t, builder)
 			},
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name:  "revoke old token failed",

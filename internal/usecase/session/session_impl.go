@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/cache"
@@ -70,7 +71,7 @@ func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 
 func (uc *sessionUC) Validate(ctx context.Context, sessionID string) (*model.Session, error) {
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return nil, fmt.Errorf("%w: %w", model.ErrInvalidSessionID, err)
+		return nil, fmt.Errorf("%w: %w", errs.ErrInvalidSessionID, err)
 	}
 
 	session, err := uc.findSessionByID(ctx, sessionID)
@@ -118,7 +119,7 @@ func (uc *sessionUC) findSessionByID(ctx context.Context, sessionID string) (*mo
 
 	// Session is expired or not existed
 	if found == nil || found.IsExpired() {
-		return nil, model.ErrSessionNotFound
+		return nil, errs.ErrSessionNotFound
 	}
 
 	_ = uc.cache.Set(ctx, cache.KeyFromSessionID(sessionID), found, sessionDuration)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	gen "github.com/DucTran999/auth-service/gen/http"
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -60,7 +61,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 	// Authenticate user and create session
 	session, err := hdl.authUC.Login(ctx.Request.Context(), loginInput)
 	if err != nil {
-		if errors.Is(err, model.ErrInvalidCredentials) {
+		if errors.Is(err, errs.ErrInvalidCredentials) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
 			return
 		}

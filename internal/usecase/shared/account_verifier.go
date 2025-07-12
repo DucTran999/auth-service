@@ -3,6 +3,7 @@ package shared
 import (
 	"context"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/auth-service/pkg/hasher"
@@ -47,7 +48,7 @@ func (v *accountVerifier) findAccountByEmail(ctx context.Context, email string) 
 		return nil, err
 	}
 	if account == nil {
-		return nil, model.ErrInvalidCredentials
+		return nil, errs.ErrInvalidCredentials
 	}
 
 	return account, nil
@@ -55,7 +56,7 @@ func (v *accountVerifier) findAccountByEmail(ctx context.Context, email string) 
 
 func (uc *accountVerifier) checkAccountActive(account *model.Account) error {
 	if !account.IsActive {
-		return model.ErrAccountDisabled
+		return errs.ErrAccountDisabled
 	}
 	return nil
 }
@@ -66,7 +67,7 @@ func (uc *accountVerifier) verifyPassword(plain, hashed string) error {
 		return err
 	}
 	if !match {
-		return model.ErrInvalidCredentials
+		return errs.ErrInvalidCredentials
 	}
 	return nil
 }

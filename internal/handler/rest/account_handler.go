@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	gen "github.com/DucTran999/auth-service/gen/http"
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -84,7 +85,7 @@ func (hdl *accountHandler) ChangePassword(ctx *gin.Context) {
 }
 
 func (hdl *accountHandler) handleRegisterError(ctx *gin.Context, err error) {
-	if errors.Is(err, model.ErrEmailExisted) {
+	if errors.Is(err, errs.ErrEmailExisted) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
@@ -115,7 +116,7 @@ func (hdl *accountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.S
 
 	session, err := hdl.sessionUC.Validate(ctx.Request.Context(), sessionID)
 	if err != nil {
-		if errors.Is(err, model.ErrInvalidSessionID) || errors.Is(err, model.ErrSessionNotFound) {
+		if errors.Is(err, errs.ErrInvalidSessionID) || errors.Is(err, errs.ErrSessionNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
 		} else {
 			hdl.logger.Errorf("failed to validate session: %v", err)
@@ -129,9 +130,9 @@ func (hdl *accountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.S
 
 func (hdl *accountHandler) handleChangePasswordError(ctx *gin.Context, err error) {
 	switch {
-	case errors.Is(err, model.ErrInvalidCredentials):
+	case errors.Is(err, errs.ErrInvalidCredentials):
 		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
-	case errors.Is(err, model.ErrNewPasswordMustChanged):
+	case errors.Is(err, errs.ErrNewPasswordMustChanged):
 		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
 	default:
 		hdl.logger.Errorf("failed to change password: %v", err)

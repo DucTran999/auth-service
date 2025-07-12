@@ -3,6 +3,7 @@ package account_test
 import (
 	"testing"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/account"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
@@ -40,6 +41,7 @@ func TestRegisterAccount(t *testing.T) {
 		{
 			name: "failed to find email in db",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				b := mockbuilder.NewBuilderContainer(t)
 				b.AccountRepoBuilder.FindByEmailError()
 				return NewAccountUseCaseUT(t, b)
@@ -51,17 +53,19 @@ func TestRegisterAccount(t *testing.T) {
 		{
 			name: "failed caused email already taken",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				b := mockbuilder.NewBuilderContainer(t)
 				b.AccountRepoBuilder.FindByEmailHasResult()
 				return NewAccountUseCaseUT(t, b)
 			},
 			accountInfo: userSample,
-			expectedErr: model.ErrEmailExisted,
+			expectedErr: errs.ErrEmailExisted,
 			expected:    nil,
 		},
 		{
 			name: "failed when hash password",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				b := mockbuilder.NewBuilderContainer(t)
 				b.AccountRepoBuilder.FindByEmailNoResult()
 				b.HasherBuilder.HashingPasswordFailed()
@@ -74,6 +78,7 @@ func TestRegisterAccount(t *testing.T) {
 		{
 			name: "failed when persist to db",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				b := mockbuilder.NewBuilderContainer(t)
 				b.AccountRepoBuilder.FindByEmailNoResult()
 				b.HasherBuilder.HashingPasswordSuccess()
@@ -87,6 +92,7 @@ func TestRegisterAccount(t *testing.T) {
 		{
 			name: "register success",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				b := mockbuilder.NewBuilderContainer(t)
 				b.AccountRepoBuilder.FindByEmailNoResult()
 				b.HasherBuilder.HashingPasswordSuccess()
@@ -103,6 +109,7 @@ func TestRegisterAccount(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			user, err := sut.Register(t.Context(), tc.accountInfo)
 
@@ -140,6 +147,7 @@ func TestChangePassword(t *testing.T) {
 		{
 			name: "failed find account by id",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDFailed()
 				return NewAccountUseCaseUT(t, builders)
@@ -150,6 +158,7 @@ func TestChangePassword(t *testing.T) {
 		{
 			name: "failed to compare old password to hash",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.CompareHashPasswordGotError()
@@ -161,17 +170,19 @@ func TestChangePassword(t *testing.T) {
 		{
 			name: "old password not match",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordNotMatch()
 				return NewAccountUseCaseUT(t, builders)
 			},
 			input:       validInput,
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name: "failed to hashing password",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
@@ -184,6 +195,7 @@ func TestChangePassword(t *testing.T) {
 		{
 			name: "failed to update new password",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
@@ -197,17 +209,19 @@ func TestChangePassword(t *testing.T) {
 		{
 			name: "new password must same ass the old one",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
 				return NewAccountUseCaseUT(t, builders)
 			},
 			input:       samePassInput,
-			expectedErr: model.ErrNewPasswordMustChanged,
+			expectedErr: errs.ErrNewPasswordMustChanged,
 		},
 		{
 			name: "change password success",
 			setup: func(t *testing.T) port.AccountUsecase {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByIDSuccess()
 				builders.HasherBuilder.HashPasswordMatch()
@@ -222,6 +236,7 @@ func TestChangePassword(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			sut := tc.setup(t)
 			ctx := t.Context()
 

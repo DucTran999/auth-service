@@ -3,6 +3,7 @@ package shared_test
 import (
 	"testing"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/shared"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
@@ -55,7 +56,7 @@ func TestVerify(t *testing.T) {
 				return NewAccountVerifierUT(t, builders)
 			},
 			loginInput:  loginInput,
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 			expected:    nil,
 		},
 		{
@@ -66,7 +67,7 @@ func TestVerify(t *testing.T) {
 				return NewAccountVerifierUT(t, builders)
 			},
 			loginInput:  loginInput,
-			expectedErr: model.ErrAccountDisabled,
+			expectedErr: errs.ErrAccountDisabled,
 			expected:    nil,
 		},
 		{
@@ -78,7 +79,7 @@ func TestVerify(t *testing.T) {
 				return NewAccountVerifierUT(t, builders)
 			},
 			loginInput:  loginInput,
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 			expected:    nil,
 		},
 		{

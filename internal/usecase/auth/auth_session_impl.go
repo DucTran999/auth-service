@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -60,7 +61,7 @@ func (uc *authSessionUsecase) Login(ctx context.Context, input dto.LoginInput) (
 func (uc *authSessionUsecase) Logout(ctx context.Context, sessionID string) error {
 	// Fast check sessionID must uuid
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return fmt.Errorf("logout: %w session=%s error=%w", model.ErrInvalidSessionID, sessionID, err)
+		return fmt.Errorf("logout: %w session=%s error=%w", errs.ErrInvalidSessionID, sessionID, err)
 	}
 
 	// Remove session in cache
