@@ -1,14 +1,12 @@
-name: continuous-integration
+name: CI
 
 on:
   push:
     branches:
       - master
-      - dev
   pull_request:
     branches:
       - master
-      - dev
 
 jobs:
   lint-check:
@@ -43,8 +41,19 @@ jobs:
         run: task deps
       - name: Tidy Modules
         run: task tidy
+
+      - name: Run unit test
+        run: task unit_test
+
+      - name: Setup testenv
+        run: task testenv
+
+      - name: Run integration test
+        run: task integration_test
+
       - name: Run Coverage Tests
         run: task coverage
+
       - name: Upload to Codecov
         uses: codecov/codecov-action@v5
         with:
