@@ -6,7 +6,7 @@ import (
 	"time"
 
 	gen "github.com/DucTran999/auth-service/gen/http"
-	"github.com/DucTran999/auth-service/internal/model"
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/usecase/auth"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -58,7 +58,7 @@ func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 	// Authenticate
 	tokens, err := hdl.authUC.Login(ctx, input)
 	if err != nil {
-		if errors.Is(err, model.ErrInvalidCredentials) {
+		if errors.Is(err, errs.ErrInvalidCredentials) {
 			hdl.UnauthorizeErrorResponse(ctx, APIVersion2, err.Error())
 			return
 		}

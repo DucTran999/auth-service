@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -76,7 +77,7 @@ func (uc *authJWTUsecase) Login(ctx context.Context, input dto.LoginJWTInput) (*
 
 func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string) (*dto.TokenPairs, error) {
 	if refreshToken == "" {
-		return nil, model.ErrInvalidCredentials
+		return nil, errs.ErrInvalidCredentials
 	}
 
 	claims := new(model.TokenClaims)
@@ -91,7 +92,7 @@ func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string)
 	}
 
 	if !ok {
-		return nil, model.ErrInvalidCredentials
+		return nil, errs.ErrInvalidCredentials
 	}
 
 	tokens, err := uc.resignTokenPairs(ctx, *claims)
@@ -104,7 +105,7 @@ func (uc *authJWTUsecase) RefreshToken(ctx context.Context, refreshToken string)
 
 func (uc *authJWTUsecase) RevokeRefreshToken(ctx context.Context, refreshToken string) error {
 	if refreshToken == "" {
-		return model.ErrInvalidCredentials
+		return errs.ErrInvalidCredentials
 	}
 
 	claims := new(model.TokenClaims)

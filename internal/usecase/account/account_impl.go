@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
 	"github.com/DucTran999/auth-service/internal/usecase/port"
@@ -32,7 +33,7 @@ func (uc *accountUsecase) Register(ctx context.Context, input dto.RegisterInput)
 		return nil, err
 	}
 	if taken {
-		return nil, model.ErrEmailExisted
+		return nil, errs.ErrEmailExisted
 	}
 
 	// Hash the password
@@ -96,7 +97,7 @@ func (uc *accountUsecase) validatePassword(password, hashed string) error {
 		return err
 	}
 	if !match {
-		return model.ErrInvalidCredentials
+		return errs.ErrInvalidCredentials
 	}
 
 	return nil
@@ -104,7 +105,7 @@ func (uc *accountUsecase) validatePassword(password, hashed string) error {
 
 func (uc *accountUsecase) hashIfChanged(oldPassword, newPassword string) (string, error) {
 	if oldPassword == newPassword {
-		return "", model.ErrNewPasswordMustChanged
+		return "", errs.ErrNewPasswordMustChanged
 	}
 
 	return uc.hasher.HashPassword(newPassword)

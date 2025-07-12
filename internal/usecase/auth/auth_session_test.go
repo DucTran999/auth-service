@@ -3,6 +3,7 @@ package auth_test
 import (
 	"testing"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/usecase/auth"
 	"github.com/DucTran999/auth-service/internal/usecase/dto"
@@ -63,7 +64,7 @@ func TestLogin(t *testing.T) {
 			name: "verify account failed",
 			setup: func(t *testing.T) port.AuthSessionUsecase {
 				builders := mockbuilder.NewBuilderContainer(t)
-				builders.AccountVerifier.VerifyFailed(model.ErrInvalidCredentials)
+				builders.AccountVerifier.VerifyFailed(errs.ErrInvalidCredentials)
 				return NewAuthUseCaseUT(t, builders)
 			},
 			loginInput: dto.LoginInput{
@@ -71,7 +72,7 @@ func TestLogin(t *testing.T) {
 				Email:            loginInput.Email,
 				Password:         loginInput.Password,
 			},
-			expectedErr: model.ErrInvalidCredentials,
+			expectedErr: errs.ErrInvalidCredentials,
 			expected:    nil,
 		},
 		{
@@ -216,7 +217,7 @@ func TestLogout(t *testing.T) {
 				builders := mockbuilder.NewBuilderContainer(t)
 				return NewAuthUseCaseUT(t, builders)
 			},
-			expectErr: model.ErrInvalidSessionID,
+			expectErr: errs.ErrInvalidSessionID,
 		},
 		{
 			name:      "failed to update session expires at",
