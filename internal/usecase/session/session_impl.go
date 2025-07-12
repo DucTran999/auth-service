@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -71,7 +72,7 @@ func (uc *sessionUC) MarkExpiredSessions(ctx context.Context) error {
 
 func (uc *sessionUC) Validate(ctx context.Context, sessionID string) (*model.Session, error) {
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return nil, fmt.Errorf("%w: %w", errs.ErrInvalidSessionID, err)
+		return nil, errors.Join(errs.ErrInvalidSessionID, err)
 	}
 
 	session, err := uc.findSessionByID(ctx, sessionID)
