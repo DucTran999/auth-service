@@ -26,7 +26,7 @@ func NewAccountVerifier(hasher hasher.Hasher, accountRepo port.AccountRepo) Acco
 }
 
 func (v *accountVerifier) Verify(ctx context.Context, email, password string) (*model.Account, error) {
-	account, err := v.findAccountByEmail(ctx, email)
+	account, err := v.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -37,18 +37,6 @@ func (v *accountVerifier) Verify(ctx context.Context, email, password string) (*
 
 	if err := v.verifyPassword(password, account.PasswordHash); err != nil {
 		return nil, err
-	}
-
-	return account, nil
-}
-
-func (v *accountVerifier) findAccountByEmail(ctx context.Context, email string) (*model.Account, error) {
-	account, err := v.accountRepo.FindByEmail(ctx, email)
-	if err != nil {
-		return nil, err
-	}
-	if account == nil {
-		return nil, errs.ErrInvalidCredentials
 	}
 
 	return account, nil

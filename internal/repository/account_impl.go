@@ -44,7 +44,7 @@ func (r *accountRepo) FindByID(ctx context.Context, id string) (*model.Account, 
 	err := r.db.WithContext(ctx).First(&account, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return nil, errs.ErrAccountNotFound
 		}
 		return nil, err
 	}

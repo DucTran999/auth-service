@@ -1,16 +1,16 @@
 services:
   db:
     image: postgres:16.4-alpine
-    container_name: pg_${SERVICE_NAME}
+    container_name: ${SERVICE_ENV}_pg_${SERVICE_NAME}
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
       PGDATA: /data/postgres
     volumes:
-      - ../.docker/pg-data:/data/postgres
+      - ../.docker/${SERVICE_ENV}/pg-data:/data/postgres
     ports:
-      - "${DB_PORT}:5432"
+      - "127.0.0.1:${DB_PORT}:5432"
     networks:
       - localnet
     restart: unless-stopped
@@ -24,9 +24,9 @@ services:
 
   redis:
     image: redis:7.2.4-alpine
-    container_name: redis_${SERVICE_NAME}
+    container_name: ${SERVICE_ENV}_redis_${SERVICE_NAME}
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_PORT}:6379"
     networks:
       - localnet
     restart: unless-stopped
@@ -39,7 +39,7 @@ services:
 
   migrate:
     image: migrate/migrate
-    container_name: migrate_${SERVICE_NAME}
+    container_name: ${SERVICE_ENV}_migrate_${SERVICE_NAME}
     depends_on:
       db:
         condition: service_healthy

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/DucTran999/auth-service/config"
 	"github.com/DucTran999/auth-service/pkg/cache"
+	"github.com/DucTran999/auth-service/pkg/projectpath"
 	"github.com/DucTran999/auth-service/pkg/signer"
 	"github.com/DucTran999/cachekit"
 	"github.com/DucTran999/dbkit"
@@ -54,8 +57,11 @@ func newAuthDBConnection(config *config.EnvConfiguration) (dbkit.Connection, err
 }
 
 func newSigner(config *config.EnvConfiguration) (signer.TokenSigner, error) {
+	root := projectpath.MustRoot()
+
 	// Read the private key PEM file
-	privPem, err := os.ReadFile("./keys/" + config.PrivPem)
+	sanitizedPrivate := filepath.Base(config.PrivPem)
+	privPem, err := os.ReadFile(path.Join(root, "./keys/"+sanitizedPrivate)) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("failed to read private key: %w", err)
 	}
@@ -67,7 +73,8 @@ func newSigner(config *config.EnvConfiguration) (signer.TokenSigner, error) {
 	}
 
 	// Read the public key PEM file
-	pubPem, err := os.ReadFile("./keys/" + config.PubPem)
+	sanitizedPublic := filepath.Base(config.PubPem)
+	pubPem, err := os.ReadFile(path.Join(root, "./keys/"+sanitizedPublic)) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("failed to read public key: %w", err)
 	}

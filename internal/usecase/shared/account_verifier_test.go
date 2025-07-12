@@ -58,7 +58,7 @@ func TestVerify(t *testing.T) {
 				return NewAccountVerifierUT(t, builders)
 			},
 			loginInput:  loginInput,
-			expectedErr: errs.ErrInvalidCredentials,
+			expectedErr: errs.ErrAccountNotFound,
 			expected:    nil,
 		},
 		{
