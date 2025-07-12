@@ -48,6 +48,9 @@ jobs:
       - name: Setup testenv
         run: task testenv
 
+      - name: gen keys
+        run: task keys
+
       - name: Run integration test
         run: task integration_test
 
