@@ -17,8 +17,8 @@ type AccountRepo interface {
 	FindByID(ctx context.Context, accountID string) (*model.Account, error)
 
 	// Create inserts a new account record into the underlying data store.
-	// Returns the created account with its generated ID.
-	Create(ctx context.Context, account model.Account) (*model.Account, error)
+	// The account's ID and other generated fields will be populated in the input struct.
+	Create(ctx context.Context, account *model.Account) error
 
 	// UpdatePasswordHash updates the password hash of the given account.
 	// It does not validate the old password — that should be handled by the use case layer.
