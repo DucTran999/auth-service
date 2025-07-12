@@ -40,6 +40,7 @@ func TestVerify(t *testing.T) {
 		{
 			name: "find email in db failed",
 			setup: func(t *testing.T) shared.AccountVerifier {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailError()
 				return NewAccountVerifierUT(t, builders)
@@ -51,6 +52,7 @@ func TestVerify(t *testing.T) {
 		{
 			name: "email not existed",
 			setup: func(t *testing.T) shared.AccountVerifier {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailNoResult()
 				return NewAccountVerifierUT(t, builders)
@@ -62,6 +64,7 @@ func TestVerify(t *testing.T) {
 		{
 			name: "account inactive",
 			setup: func(t *testing.T) shared.AccountVerifier {
+				t.Helper()
 				builders := mockbuilder.NewBuilderContainer(t)
 				builders.AccountRepoBuilder.FindByEmailAccountInactive()
 				return NewAccountVerifierUT(t, builders)
@@ -74,6 +77,7 @@ func TestVerify(t *testing.T) {
 			name: "password not match",
 			setup: func(t *testing.T) shared.AccountVerifier {
 				builders := mockbuilder.NewBuilderContainer(t)
+				t.Helper()
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordNotMatch()
 				return NewAccountVerifierUT(t, builders)
@@ -86,6 +90,7 @@ func TestVerify(t *testing.T) {
 			name: "compare password unexpected error",
 			setup: func(t *testing.T) shared.AccountVerifier {
 				builders := mockbuilder.NewBuilderContainer(t)
+				t.Helper()
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.CompareHashPasswordGotError()
 				return NewAccountVerifierUT(t, builders)
@@ -98,6 +103,7 @@ func TestVerify(t *testing.T) {
 			name: "verify success",
 			setup: func(t *testing.T) shared.AccountVerifier {
 				builders := mockbuilder.NewBuilderContainer(t)
+				t.Helper()
 				builders.AccountRepoBuilder.FindByEmailHasResult()
 				builders.HasherBuilder.HashPasswordMatch()
 				return NewAccountVerifierUT(t, builders)
@@ -113,6 +119,8 @@ func TestVerify(t *testing.T) {
 
 	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx := t.Context()
 			sut := tc.setup(t)
 			account, err := sut.Verify(ctx, tc.loginInput.Email, tc.loginInput.Password)

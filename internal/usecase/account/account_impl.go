@@ -49,12 +49,11 @@ func (uc *accountUsecase) Register(ctx context.Context, input dto.RegisterInput)
 	}
 
 	// Persist the account
-	created, err := uc.accountRepo.Create(ctx, account)
-	if err != nil {
+	if err := uc.accountRepo.Create(ctx, &account); err != nil {
 		return nil, err
 	}
 
-	return created, nil
+	return &account, nil
 }
 
 func (uc *accountUsecase) ChangePassword(ctx context.Context, input dto.ChangePasswordInput) error {

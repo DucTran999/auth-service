@@ -39,31 +39,20 @@ func (_m *AccountRepo) EXPECT() *AccountRepo_Expecter {
 }
 
 // Create provides a mock function for the type AccountRepo
-func (_mock *AccountRepo) Create(ctx context.Context, account model.Account) (*model.Account, error) {
+func (_mock *AccountRepo) Create(ctx context.Context, account *model.Account) error {
 	ret := _mock.Called(ctx, account)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
-	var r0 *model.Account
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, model.Account) (*model.Account, error)); ok {
-		return returnFunc(ctx, account)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, model.Account) *model.Account); ok {
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Account) error); ok {
 		r0 = returnFunc(ctx, account)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Account)
-		}
+		r0 = ret.Error(0)
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, model.Account) error); ok {
-		r1 = returnFunc(ctx, account)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
+	return r0
 }
 
 // AccountRepo_Create_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Create'
@@ -73,20 +62,20 @@ type AccountRepo_Create_Call struct {
 
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
-//   - account model.Account
+//   - account *model.Account
 func (_e *AccountRepo_Expecter) Create(ctx interface{}, account interface{}) *AccountRepo_Create_Call {
 	return &AccountRepo_Create_Call{Call: _e.mock.On("Create", ctx, account)}
 }
 
-func (_c *AccountRepo_Create_Call) Run(run func(ctx context.Context, account model.Account)) *AccountRepo_Create_Call {
+func (_c *AccountRepo_Create_Call) Run(run func(ctx context.Context, account *model.Account)) *AccountRepo_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 model.Account
+		var arg1 *model.Account
 		if args[1] != nil {
-			arg1 = args[1].(model.Account)
+			arg1 = args[1].(*model.Account)
 		}
 		run(
 			arg0,
@@ -96,12 +85,12 @@ func (_c *AccountRepo_Create_Call) Run(run func(ctx context.Context, account mod
 	return _c
 }
 
-func (_c *AccountRepo_Create_Call) Return(account1 *model.Account, err error) *AccountRepo_Create_Call {
-	_c.Call.Return(account1, err)
+func (_c *AccountRepo_Create_Call) Return(err error) *AccountRepo_Create_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *AccountRepo_Create_Call) RunAndReturn(run func(ctx context.Context, account model.Account) (*model.Account, error)) *AccountRepo_Create_Call {
+func (_c *AccountRepo_Create_Call) RunAndReturn(run func(ctx context.Context, account *model.Account) error) *AccountRepo_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }

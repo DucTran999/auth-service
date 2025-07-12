@@ -1,6 +1,7 @@
 package mockbuilder
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -37,7 +38,7 @@ func (b *mockAccountRepoBuilder) GetInstance() *mocks.AccountRepo {
 func (b *mockAccountRepoBuilder) CreateAccountError() {
 	b.inst.EXPECT().
 		Create(mock.Anything, mock.Anything).
-		Return(nil, ErrCreateAccount)
+		Return(ErrCreateAccount)
 }
 
 func (b *mockAccountRepoBuilder) CreateAccountSuccess() {
@@ -47,8 +48,11 @@ func (b *mockAccountRepoBuilder) CreateAccountSuccess() {
 		IsActive: true,
 	}
 	b.inst.EXPECT().
-		Create(mock.Anything, mock.Anything).
-		Return(mockAccount, nil)
+		Create(mock.Anything, mock.Anything).Run(
+		func(ctx context.Context, account *model.Account) {
+			*account = *mockAccount
+		},
+	).Return(nil)
 }
 
 func (b *mockAccountRepoBuilder) FindByEmailError() {

@@ -19,12 +19,8 @@ func NewAccountRepo(db *gorm.DB) *accountRepoImpl {
 }
 
 // Create inserts a new account record into the database.
-func (r *accountRepoImpl) Create(ctx context.Context, account model.Account) (*model.Account, error) {
-	if err := r.db.WithContext(ctx).Create(&account).Error; err != nil {
-		return nil, err
-	}
-
-	return &account, nil
+func (r *accountRepoImpl) Create(ctx context.Context, account *model.Account) error {
+	return r.db.WithContext(ctx).Create(&account).Error
 }
 
 // FindByEmail looks up an account by its email address.
