@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/DucTran999/auth-service/internal/errs"
@@ -84,6 +85,9 @@ func (uc *accountUsecase) ChangePassword(ctx context.Context, input dto.ChangePa
 func (uc *accountUsecase) isEmailTaken(ctx context.Context, email string) (bool, error) {
 	account, err := uc.accountRepo.FindByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, errs.ErrAccountNotFound) {
+			return false, nil
+		}
 		return false, err
 	}
 

@@ -6,9 +6,13 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/DucTran999/auth-service/internal/model"
 	"github.com/DucTran999/auth-service/internal/repository"
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func TestSessionRepo_MarkSessionsExpired_DBError(t *testing.T) {
@@ -53,7 +57,7 @@ func TestSessionRepo_FindAllActiveSession_DBError(t *testing.T) {
 	db, mock, cleanup := mockbuilder.NewMockGormDB(t)
 	defer cleanup()
 
-	mock.ExpectQuery(`SELECT "id" FROM "sessions" WHERE expires_at IS NOT NULL`).
+	mock.ExpectQuery(`SELECT "id" FROM "sessions" WHERE expires_at IS NULL`).
 		WillReturnError(errors.New("simulated db error"))
 
 	repo := repository.NewSessionRepository(db)
@@ -122,5 +126,47 @@ func TestSessionRepo_FindByID_DBError(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, session)
 	require.Contains(t, err.Error(), "simulated db error")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSessionRepo_Create_DBError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	defer db.Close()
+
+	// GORM wrap connection
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: db,
+	}), &gorm.Config{})
+	require.NoError(t, err)
+
+	repo := repository.NewSessionRepository(gormDB)
+
+	now := time.Now().Add(24 * time.Hour)
+	session := &model.Session{
+		AccountID: uuid.New(),
+		ExpiresAt: &now,
+	}
+
+	// Setup mock to simulate DB error
+	mock.ExpectBegin()
+	mock.ExpectQuery(`INSERT INTO "sessions"`).
+		WithArgs(
+			session.AccountID.String(),
+			sqlmock.AnyArg(), // created_at
+			sqlmock.AnyArg(), // updated_at
+			session.ExpiresAt,
+		).
+		WillReturnError(errors.New("simulated db error"))
+	mock.ExpectRollback()
+
+	// Act
+	err = repo.Create(t.Context(), session)
+
+	// Assert
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "simulated db error")
+
+	// Check mock expectations
 	require.NoError(t, mock.ExpectationsWereMet())
 }

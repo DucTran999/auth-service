@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/DucTran999/auth-service/internal/errs"
 	"github.com/DucTran999/auth-service/internal/model"
 	"gorm.io/gorm"
 )
@@ -36,7 +37,7 @@ func (r *sessionRepoImpl) FindByID(ctx context.Context, sessionID string) (*mode
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return nil, errs.ErrSessionNotFound
 		}
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (r *sessionRepoImpl) FindAllActiveSession(ctx context.Context) ([]model.Ses
 
 	err := r.db.WithContext(ctx).
 		Select("id").
-		Where("expires_at IS NOT NULL").
+		Where("expires_at IS NULL").
 		Find(&activeSessions).Error
 
 	if err != nil {
