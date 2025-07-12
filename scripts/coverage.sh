@@ -3,6 +3,24 @@ set -euo pipefail
 
 mkdir -p test/coverage
 
+# Tooling checks
+command -v gocovmerge >/dev/null 2>&1 || {
+  echo "gocovmerge not found. Install with: go install github.com/wadey/gocovmerge@latest" >&2
+  exit 1
+}
+command -v bc >/dev/null 2>&1 || {
+  echo "bc not found. Install via your package manager (e.g., apt-get install bc)" >&2
+  exit 1
+}
+
+# Input file checks
+for f in test/coverage/unit.out test/coverage/integration.out; do
+  [[ -f $f ]] || {
+    echo "$f not found. Run the corresponding tests to generate this file." >&2
+    exit 1
+  }
+done
+
 gocovmerge test/coverage/unit.out test/coverage/integration.out >test/coverage/coverage.out
 
 # Optional: generate HTML report

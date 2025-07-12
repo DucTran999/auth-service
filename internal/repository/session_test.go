@@ -11,8 +11,6 @@ import (
 	mockbuilder "github.com/DucTran999/auth-service/test/mock-builder"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func TestSessionRepo_MarkSessionsExpired_DBError(t *testing.T) {
@@ -130,15 +128,8 @@ func TestSessionRepo_FindByID_DBError(t *testing.T) {
 }
 
 func TestSessionRepo_Create_DBError(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
-
-	// GORM wrap connection
-	gormDB, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: db,
-	}), &gorm.Config{})
-	require.NoError(t, err)
+	gormDB, mock, cleanup := mockbuilder.NewMockGormDB(t)
+	defer cleanup()
 
 	repo := repository.NewSessionRepository(gormDB)
 
@@ -161,7 +152,7 @@ func TestSessionRepo_Create_DBError(t *testing.T) {
 	mock.ExpectRollback()
 
 	// Act
-	err = repo.Create(t.Context(), session)
+	err := repo.Create(t.Context(), session)
 
 	// Assert
 	require.Error(t, err)

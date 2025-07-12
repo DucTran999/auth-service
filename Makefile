@@ -33,7 +33,7 @@ lint: ## Run linters
 testenv: ## Setup testenv and migrate db
 	${PKG_SCRIPTS}/testenv.sh
 
-localenv: ## Setup testenv and migrate db
+localenv: ## Setup localenv and migrate db
 	${PKG_SCRIPTS}/localenv.sh
 
 .PHONY: generate

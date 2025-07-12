@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 if [ -f .test.env ]; then
-    export $(grep -v '^#' .test.env | xargs)
+    set -a
+    source .test.env
+    set +a
 fi
 
 docker compose -f environment/docker-compose.yml up -d db
