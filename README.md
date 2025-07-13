@@ -40,39 +40,39 @@ auth-service/
 │   ├── config.go
 │   └── loader.go
 │
+├── gen/                          # OpenAPI generated types and server interface
+│   └── http/
+│       ├── server.gen.go
+│       └── types.gen.go
+│
+├── environment/                  # Development environment setup (migrations, compose)
+│   ├── migration/                # Database migration files
+│   └── docker-compose.yaml       # Compose file to start PostgreSQL and Redis
+│
 ├── internal/                     # Internal app modules (not exposed externally)
-│
-│   ├── gen/                      # OpenAPI generated types and server interface
-│   │   └── http/
-│   │       ├── server.gen.go
-│   │       └── types.gen.go
-│
+│   │
 │   ├── container/                # DI container: setup DB, Redis, repos, usecases
-│
+│   │
 │   ├── server/                   # HTTP server, router setup, validator registration
 │   │   ├── http_server.go
 │   │   ├── router.go
 │   │   └── validator.go
 │   │
-│   ├── environment/              # Development environment setup (migrations, compose)
-│   │   ├── migration/            # Database migration files
-│   │   └── docker-compose.yaml   # Compose file to start PostgreSQL and Redis
-│
 │   ├── worker/                   # Background tasks (e.g., cleanup jobs)
 │   │   └── session_cleaner.go
-│
+│   │
 │   ├── handler/                  # HTTP handlers (controllers)
 │   │   ├── rest/                 # Session-based + JWT handler logic
 │   │   └── auth_handler.go
-│
+│   │
 │   ├── usecase/                  # Business logic (interactors)
 │   │   ├── port/                 # Interfaces to handler & repository
 │   │   ├── dto/                  # Data transfer objects
 │   │   └── auth_usecase.go       # Auth logic implementation
-│
+│   │
 │   ├── domain/                   # Entities, enums, and domain-level interfaces
 │   │   └── account.go
-│
+│   │
 │   └── repository/               # Data persistence logic
 │       ├── account_repo.go
 │       └── session_repo.go
@@ -156,7 +156,7 @@ cp .env.example .env
 2. Start Redis, PostgreSQL, and run database migrations:
 
 ```bash
-task testenv
+task localenv
 ```
 
 3. Generate RSA keys:
