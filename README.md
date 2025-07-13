@@ -31,7 +31,6 @@ This project was created to deepen my understanding of authentication system des
 
 ## Project Structure
 
-
 ```bash
 auth-service/
 ├── cmd/                          # Application entry point (main.go)
@@ -157,7 +156,7 @@ cp .env.example .env
 2. Start Redis, PostgreSQL, and run database migrations:
 
 ```bash
-task testenv
+task localenv
 ```
 
 3. Generate RSA keys:
