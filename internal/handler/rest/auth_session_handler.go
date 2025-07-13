@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	sessionKey = "session_id"
+	SessionKey = "session_id"
 )
 
 type SessionAuthHandler interface {
@@ -44,7 +44,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 	}
 
 	// Set to empty when cookie not found
-	currentSessionID, err := ctx.Cookie(sessionKey)
+	currentSessionID, err := ctx.Cookie(SessionKey)
 	if err != nil {
 		currentSessionID = ""
 	}
@@ -76,7 +76,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 
 func (hdl *sessionAuthHandler) LogoutAccount(ctx *gin.Context) {
 	// Try to get session ID from cookie
-	sessionID, err := ctx.Cookie(sessionKey)
+	sessionID, err := ctx.Cookie(SessionKey)
 	if err == nil {
 		// Best-effort logout
 		if err := hdl.authUC.Logout(ctx.Request.Context(), sessionID); err != nil {
@@ -85,7 +85,7 @@ func (hdl *sessionAuthHandler) LogoutAccount(ctx *gin.Context) {
 	}
 
 	// Always clear the cookie
-	ctx.SetCookie(sessionKey, "", -1, "/", "", true, true)
+	ctx.SetCookie(SessionKey, "", -1, "/", "", true, true)
 
 	// Always respond with 204 No Content
 	hdl.NoContentResponse(ctx)
@@ -96,7 +96,7 @@ func (hdl *sessionAuthHandler) responseLoginSuccess(ctx *gin.Context, session *m
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 
 	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     sessionKey,
+		Name:     SessionKey,
 		Value:    session.ID.String(),
 		Path:     "/",
 		HttpOnly: true,
