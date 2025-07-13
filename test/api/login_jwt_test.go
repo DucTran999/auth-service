@@ -97,7 +97,7 @@ func TestJWTLogin(t *testing.T) {
 				// Also check refresh token set in cookie
 				found := false
 				for _, c := range w.Result().Cookies() {
-					if c.Name == "refresh_token" {
+					if c.Name == rest.RefreshTokenKey {
 						found = true
 						break
 					}
