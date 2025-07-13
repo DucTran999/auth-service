@@ -52,7 +52,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 	// Convert request to model
 	loginInput := dto.LoginInput{
 		CurrentSessionID: currentSessionID,
-		Email:            string(payload.Email),
+		Email:            payload.Email,
 		Password:         payload.Password,
 		IP:               ctx.ClientIP(),
 		UserAgent:        ctx.Request.UserAgent(),
@@ -61,7 +61,7 @@ func (hdl *sessionAuthHandler) LoginAccount(ctx *gin.Context) {
 	// Authenticate user and create session
 	session, err := hdl.authUC.Login(ctx.Request.Context(), loginInput)
 	if err != nil {
-		if errors.Is(err, errs.ErrInvalidCredentials) {
+		if errors.Is(err, errs.ErrInvalidCredentials) || errors.Is(err, errs.ErrAccountNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, err.Error())
 			return
 		}
