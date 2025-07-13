@@ -20,7 +20,7 @@ type mockAuthJWTUsecase struct {
 	inst *mocks.AuthJWTUsecase
 }
 
-func newMockAccountJWTUsecase(t *testing.T) *mockAuthJWTUsecase {
+func newMockAuthJWTUsecase(t *testing.T) *mockAuthJWTUsecase {
 	return &mockAuthJWTUsecase{
 		inst: mocks.NewAuthJWTUsecase(t),
 	}

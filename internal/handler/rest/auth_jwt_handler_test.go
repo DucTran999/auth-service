@@ -188,7 +188,7 @@ func TestLogoutJWT(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			if tc.mustSetCookie {
 				req.AddCookie(&http.Cookie{
-					Name:  "refresh_token",
+					Name:  rest.RefreshTokenKey,
 					Value: "mock-refresh-token",
 					Path:  "/",
 				})

@@ -33,7 +33,7 @@ func NewUsecaseBuilderContainer(t *testing.T) *UsecaseBuilderContainer {
 	return &UsecaseBuilderContainer{
 		AccountUC:     newMockAccountUsecase(t),
 		SessionUC:     newMockSessionUsecase(t),
-		AuthJwtUC:     newMockAccountJWTUsecase(t),
+		AuthJwtUC:     newMockAuthJWTUsecase(t),
 		AuthSessionUC: newMockAuthSessionUsecase(t),
 	}
 }
