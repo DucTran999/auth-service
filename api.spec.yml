@@ -320,7 +320,7 @@ components:
       properties:
         email:
           type: string
-          format: email
+          format: string
           x-oapi-codegen-extra-tags:
             binding: "required"
           example: admin@example.com
