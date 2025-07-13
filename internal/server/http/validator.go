@@ -8,7 +8,7 @@ import (
 
 // registerStrongPasswordValidators registers a custom 'password' validation rule
 // that enforces strong password requirements.
-func registerStrongPasswordValidators(v *validator.Validate) error {
+func RegisterStrongPasswordValidators(v *validator.Validate) error {
 	return v.RegisterValidation("password", func(fl validator.FieldLevel) bool {
 		password := fl.Field().String()
 

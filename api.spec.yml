@@ -258,7 +258,7 @@ components:
       properties:
         email:
           type: string
-          format: email
+          format: string
           example: "john.doe@example.com"
           x-oapi-codegen-extra-tags:
             binding: "required,email"

@@ -134,7 +134,7 @@ func TestRevokeRefreshToken(t *testing.T) {
 				builder.TokenSigner.ParseIntoFailed()
 				return NewAuthJWTUsecaseUT(t, builder)
 			},
-			expectedErr: mockbuilder.ErrParsingToken,
+			expectedErr: errs.ErrInvalidCredentials,
 		},
 		{
 			name:  "delete token cache failed",

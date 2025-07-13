@@ -13,6 +13,11 @@ func NewHTTPServer(cfg *config.EnvConfiguration, apiHandler gen.ServerInterface)
 		Port: cfg.Port,
 	}
 
+	err := SetupValidator()
+	if err != nil {
+		return nil, err
+	}
+
 	router, err := NewRouter(cfg.ServiceEnv, apiHandler)
 	if err != nil {
 		return nil, err

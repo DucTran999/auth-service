@@ -48,8 +48,8 @@ type ChangePasswordRequest struct {
 
 // CreateAccountRequest defines model for CreateAccountRequest.
 type CreateAccountRequest struct {
-	Email    openapi_types.Email `binding:"required,email" json:"email"`
-	Password string              `binding:"required,password" json:"password"`
+	Email    string `binding:"required,email" json:"email"`
+	Password string `binding:"required,password" json:"password"`
 }
 
 // ErrorDetail defines model for ErrorDetail.

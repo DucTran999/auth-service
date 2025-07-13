@@ -11,6 +11,7 @@ import (
 	"github.com/DucTran999/auth-service/internal/usecase/port"
 	"github.com/DucTran999/shared-pkg/logger"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AccountHandler interface {
@@ -47,9 +48,10 @@ func (hdl *accountHandler) CreateAccount(ctx *gin.Context) {
 	}
 
 	input := dto.RegisterInput{
-		Email:    string(payload.Email),
+		Email:    payload.Email,
 		Password: payload.Password,
 	}
+
 	account, err := hdl.accountUC.Register(ctx.Request.Context(), input)
 	if err != nil {
 		hdl.handleRegisterError(ctx, err)
@@ -60,14 +62,22 @@ func (hdl *accountHandler) CreateAccount(ctx *gin.Context) {
 }
 
 func (hdl *accountHandler) ChangePassword(ctx *gin.Context) {
-	payload, err := ParseAndValidateJSON[gen.ChangePasswordJSONRequestBody](ctx)
+	// Validate session from cookie
+	session, err := hdl.validateSessionFromCookie(ctx)
 	if err != nil {
-		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
+		if errors.Is(err, errs.ErrInvalidSessionID) || errors.Is(err, errs.ErrSessionNotFound) {
+			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
+		} else {
+			hdl.logger.Errorf("failed to validate session: %v", err)
+			hdl.ServerInternalErrResponse(ctx, ApiVersion1)
+		}
 		return
 	}
 
-	session, ok := hdl.validateSessionFromCookie(ctx)
-	if !ok {
+	// Parse & validate input JSON
+	payload, err := ParseAndValidateJSON[gen.ChangePasswordJSONRequestBody](ctx)
+	if err != nil {
+		hdl.BadRequestResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
 
@@ -89,6 +99,8 @@ func (hdl *accountHandler) handleRegisterError(ctx *gin.Context, err error) {
 		hdl.ResourceConflictResponse(ctx, ApiVersion1, err.Error())
 		return
 	}
+
+	hdl.logger.Error("failed to register account", zap.String("error", err.Error()))
 	hdl.ServerInternalErrResponse(ctx, ApiVersion1)
 }
 
@@ -107,25 +119,12 @@ func (hdl *accountHandler) sendRegisterSuccess(ctx *gin.Context, account *model.
 	ctx.JSON(http.StatusCreated, resp)
 }
 
-func (hdl *accountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.Session, bool) {
+func (hdl *accountHandler) validateSessionFromCookie(ctx *gin.Context) (*model.Session, error) {
 	sessionID, err := ctx.Cookie("session_id")
 	if err != nil {
-		hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
-		return nil, false
+		return nil, errs.ErrSessionNotFound
 	}
-
-	session, err := hdl.sessionUC.Validate(ctx.Request.Context(), sessionID)
-	if err != nil {
-		if errors.Is(err, errs.ErrInvalidSessionID) || errors.Is(err, errs.ErrSessionNotFound) {
-			hdl.UnauthorizeErrorResponse(ctx, ApiVersion1, http.StatusText(http.StatusUnauthorized))
-		} else {
-			hdl.logger.Errorf("failed to validate session: %v", err)
-			hdl.ServerInternalErrResponse(ctx, ApiVersion1)
-		}
-		return nil, false
-	}
-
-	return session, true
+	return hdl.sessionUC.Validate(ctx.Request.Context(), sessionID)
 }
 
 func (hdl *accountHandler) handleChangePasswordError(ctx *gin.Context, err error) {
