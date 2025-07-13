@@ -10,6 +10,7 @@ require (
 	github.com/DucTran999/shared-pkg v0.0.0-20250622130911-cbaa3194efd4
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0

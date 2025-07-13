@@ -21,3 +21,15 @@ func NewBuilderContainer(t *testing.T) *BuilderContainer {
 		TokenSigner:        NewMockSignerBuilder(t),
 	}
 }
+
+type UsecaseBuilderContainer struct {
+	AccountUC *mockAccountUsecase
+	SessionUC *mockSessionUsecase
+}
+
+func NewUsecaseBuilderContainer(t *testing.T) *UsecaseBuilderContainer {
+	return &UsecaseBuilderContainer{
+		AccountUC: newMockAccountUsecase(t),
+		SessionUC: newMockSessionUsecase(t),
+	}
+}
