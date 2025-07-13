@@ -1,0 +1,36 @@
+name: API Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  api-testing:
+    name: API Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install Task CLI
+        uses: arduino/setup-task@v2
+      - name: Install Dependencies
+        run: task deps
+      - name: Tidy Modules
+        run: task tidy
+
+      - name: Setup testenv
+        run: task testenv
+
+      - name: gen keys
+        run: task keys
+
+      - name: Run api tests
+        run: task api_test
