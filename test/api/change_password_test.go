@@ -36,14 +36,12 @@ func registerAndLogin(t *testing.T, app *setup.TestApp, email, password string) 
 			return c
 		}
 	}
+
+	require.Fail(t, "session cookie not found after login")
 	return nil
 }
 
 func TestChangePassword_Success(t *testing.T) {
-	app, err := setup.NewTestApp()
-	require.NoError(t, err)
-	app.TruncateTables(t)
-
 	t.Run("change password success", func(t *testing.T) {
 		app, err := setup.NewTestApp()
 		require.NoError(t, err)
