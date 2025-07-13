@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	refreshTokenKey = "refresh_token"
+	RefreshTokenKey = "refresh_token"
 )
 
 type JWTAuthHandler interface {
@@ -60,10 +60,10 @@ func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 	if err != nil {
 		if errors.Is(err, errs.ErrInvalidCredentials) {
 			hdl.UnauthorizeErrorResponse(ctx, APIVersion2, err.Error())
-			return
+		} else {
+			hdl.logger.Error("failed to login with jwt", zap.String("error", err.Error()))
+			hdl.ServerInternalErrResponse(ctx, APIVersion2)
 		}
-		hdl.logger.Error("failed to login with jwt", zap.String("error", err.Error()))
-		hdl.ServerInternalErrResponse(ctx, APIVersion2)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 }
 
 func (hdl *jwtAuthHandler) RefreshToken(ctx *gin.Context) {
-	refreshToken, err := ctx.Cookie(refreshTokenKey)
+	refreshToken, err := ctx.Cookie(RefreshTokenKey)
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))
 		return
@@ -87,7 +87,7 @@ func (hdl *jwtAuthHandler) RefreshToken(ctx *gin.Context) {
 }
 
 func (hdl *jwtAuthHandler) LogoutJWT(ctx *gin.Context) {
-	refreshToken, err := ctx.Cookie(refreshTokenKey)
+	refreshToken, err := ctx.Cookie(RefreshTokenKey)
 	if err != nil {
 		hdl.UnauthorizeErrorResponse(ctx, APIVersion2, http.StatusText(http.StatusUnauthorized))
 		return
@@ -99,7 +99,7 @@ func (hdl *jwtAuthHandler) LogoutJWT(ctx *gin.Context) {
 	}
 
 	// Always clear the cookie
-	ctx.SetCookie(refreshTokenKey, "", -1, "/", "", true, true)
+	ctx.SetCookie(RefreshTokenKey, "", -1, "/", "", true, true)
 
 	// Always respond with 204 No Content
 	hdl.NoContentResponse(ctx)
@@ -110,7 +110,7 @@ func (hdl *jwtAuthHandler) responseLoginJWTSuccess(ctx *gin.Context, tokens *dto
 	secure := ctx.Request.Header.Get("X-Forwarded-Proto") == "https" || ctx.Request.TLS != nil
 
 	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     refreshTokenKey,
+		Name:     RefreshTokenKey,
 		Value:    tokens.RefreshToken,
 		Path:     "/",
 		HttpOnly: true,

@@ -48,7 +48,7 @@ func (hdl *accountHandler) CreateAccount(ctx *gin.Context) {
 	}
 
 	input := dto.RegisterInput{
-		Email:    string(payload.Email),
+		Email:    payload.Email,
 		Password: payload.Password,
 	}
 

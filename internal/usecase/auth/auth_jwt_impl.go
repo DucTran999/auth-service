@@ -110,7 +110,7 @@ func (uc *authJWTUsecase) RevokeRefreshToken(ctx context.Context, refreshToken s
 
 	claims := new(model.TokenClaims)
 	if err := uc.signer.ParseInto(refreshToken, claims); err != nil {
-		return err
+		return errs.ErrInvalidCredentials
 	}
 
 	key := cache.KeyRefreshToken(claims.Subject, claims.ID)

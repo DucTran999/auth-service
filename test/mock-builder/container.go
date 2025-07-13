@@ -23,13 +23,17 @@ func NewBuilderContainer(t *testing.T) *BuilderContainer {
 }
 
 type UsecaseBuilderContainer struct {
-	AccountUC *mockAccountUsecase
-	SessionUC *mockSessionUsecase
+	AccountUC     *mockAccountUsecase
+	SessionUC     *mockSessionUsecase
+	AuthJwtUC     *mockAuthJWTUsecase
+	AuthSessionUC *mockAuthSessionUsecase
 }
 
 func NewUsecaseBuilderContainer(t *testing.T) *UsecaseBuilderContainer {
 	return &UsecaseBuilderContainer{
-		AccountUC: newMockAccountUsecase(t),
-		SessionUC: newMockSessionUsecase(t),
+		AccountUC:     newMockAccountUsecase(t),
+		SessionUC:     newMockSessionUsecase(t),
+		AuthJwtUC:     newMockAccountJWTUsecase(t),
+		AuthSessionUC: newMockAuthSessionUsecase(t),
 	}
 }

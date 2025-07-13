@@ -194,7 +194,8 @@ func TestCreateAccount(t *testing.T) {
 		},
 	}
 
-	httpServer.SetupValidator()
+	err := httpServer.SetupValidator()
+	require.NoError(t, err)
 	gin.SetMode(gin.TestMode)
 
 	for _, tc := range tests {
@@ -378,7 +379,8 @@ func TestChangePassword(t *testing.T) {
 		},
 	}
 
-	httpServer.SetupValidator()
+	err := httpServer.SetupValidator()
+	require.NoError(t, err)
 	gin.SetMode(gin.TestMode)
 
 	for _, tc := range tests {
@@ -404,7 +406,6 @@ func TestChangePassword(t *testing.T) {
 					Value: "mock-session-id",
 					Path:  "/",
 				})
-
 			}
 
 			// Setup response recorder
