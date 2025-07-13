@@ -94,8 +94,8 @@ type HealthResponseStatus string
 
 // LoginRequest defines model for LoginRequest.
 type LoginRequest struct {
-	Email    openapi_types.Email `binding:"required" json:"email"`
-	Password string              `binding:"required" json:"password"`
+	Email    string `binding:"required" json:"email"`
+	Password string `binding:"required" json:"password"`
 }
 
 // SuccessResponse defines model for SuccessResponse.

@@ -22,6 +22,10 @@ unit_test: ## run unit test
 integration_test: ## run integration test
 	${PKG_SCRIPTS}/integration.sh
 
+.PHONY: api_test
+api_test: ## run api tests
+	${PKG_SCRIPTS}/api-test.sh
+
 .PHONY: tidy
 tidy: ## Tidy up the go.mod
 	go mod tidy

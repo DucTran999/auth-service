@@ -21,61 +21,78 @@ This project was created to deepen my understanding of authentication system des
 
 ## 🚀 Features
 
-- 🔐 **Login / Logout** support with secure session cookies
-- 🍪 **Session-Based Auth** using Redis (cache) + PostgreSQL (durable)
-- 🧠 **Clean Architecture**: Handler → UseCase → Repository
-- 📦 Easy integration with microservices via shared session store
+- 🔐 Login / Logout support with both session cookies and JWT
+- 🍪 Session-Based Auth using Redis (fast cache) + PostgreSQL (durable storage)
+- 🔑 JWT-Based Auth with access/refresh tokens and RSA key signing
+- 🧠 Clean Architecture: Handler → UseCase → Repository separation
+- 📦 Microservice-Friendly: Shared session store & stateless JWT integration
 - ⏱️ Configurable session TTL, HTTP-only cookies, and IP/User-Agent tracking
-- 📜 Full audit trail via DB
+- 📜 Full audit trail via PostgreSQL for login and session activity
 
 ## Project Structure
 
-```sh
+```bash
 auth-service/
-├── cmd/                    # Entry point: DI container, HTTP server
-│   └── main.go
+├── cmd/                          # Application entry point (main.go)
+│   └── main.go                   # Starts the service with DI container
 │
-├── config/                 # Viper/env config loading
-│   └── config.go
+├── config/                       # Application configuration loading using Viper
+│   ├── config.go
 │   └── loader.go
 │
-├── internal/
-│   │
-│   ├── gen/                # OpenAPI generated code
-│   │   ├── server.gen.go
-│   │   └── types.gen.go
-│   │
-│   ├── server/             # HTTP server, router, validator
+├── internal/                     # Internal app modules (not exposed externally)
+│
+│   ├── gen/                      # OpenAPI generated types and server interface
+│   │   └── http/
+│   │       ├── server.gen.go
+│   │       └── types.gen.go
+│
+│   ├── container/                # DI container: setup DB, Redis, repos, usecases
+│
+│   ├── server/                   # HTTP server, router setup, validator registration
 │   │   ├── http_server.go
 │   │   ├── router.go
 │   │   └── validator.go
 │   │
-│   ├── worker/             # Background jobs
+│   ├── environment/              # Development environment setup (migrations, compose)
+│   │   ├── migration/            # Database migration files
+│   │   └── docker-compose.yaml   # Compose file to start PostgreSQL and Redis
+│
+│   ├── worker/                   # Background tasks (e.g., cleanup jobs)
 │   │   └── session_cleaner.go
-│   │
-│   ├── handler/            # HTTP handlers (controllers)
+│
+│   ├── handler/                  # HTTP handlers (controllers)
+│   │   ├── rest/                 # Session-based + JWT handler logic
 │   │   └── auth_handler.go
-│   │
-│   ├── usecase/            # Business logic (interactors)
-│   │   └── auth_usecase.go
-│   │
-│   ├── domain/             # Entities and interfaces
+│
+│   ├── usecase/                  # Business logic (interactors)
+│   │   ├── port/                 # Interfaces to handler & repository
+│   │   ├── dto/                  # Data transfer objects
+│   │   └── auth_usecase.go       # Auth logic implementation
+│
+│   ├── domain/                   # Entities, enums, and domain-level interfaces
 │   │   └── account.go
-│   │
-│   ├── repository/         # Data access (DB)
-│   │   ├── account_repo.go
-│   │   └── session_repo.go
 │
-├── pkg/                    # Shared utilities
-│   ├── cache.go
-│   └── hasher.go
+│   └── repository/               # Data persistence logic
+│       ├── account_repo.go
+│       └── session_repo.go
 │
-├── go.mod
-├── go.sum
-├── Dockerfile              # Optional: Containerization
-├── docker-compose.yml      # Optional: Dev environment
-├── README.md
-
+├── scripts/                      # Scripts for automation and testing
+│   ├── testenv.sh                # Setup test environment with Redis/Postgres
+│   ├── unittest.sh               # Run unit tests
+│   ├── integration.sh            # Run integration tests (real DB)
+│   ├── api-test.sh               # Run API tests (end-to-end flow)
+│   └── gen-keys.sh               # Generate RSA key pairs for JWT
+│
+├── pkg/                          # Shared packages (reusable across layers)
+│   ├── cache.go                  # Redis caching utilities
+│   ├── hasher.go                 # Password hashing using Argon2
+│   └── signer.go                 # JWT signing and parsing
+│
+├── go.mod                        # Go module file
+├── go.sum                        # Module checksums
+├── Dockerfile                    # Docker build definition
+└── README.md                     # Project documentation
 ```
 
 ---
@@ -163,14 +180,42 @@ This project uses Go's built-in testing framework with mocks and table-driven te
 ### ✅ Run All Unit Tests
 
 ```bash
-task coverage
+task unit_test
+```
+
+### ✅ Run All Integration Tests
+
+- setup db and redis for testenv
+
+```bash
+task testenv
+```
+
+- run scripts integration test
+
+```bash
+task integration_test
+```
+
+### ✅ Run All API Tests
+
+- Note: _if you already run it in integration tests, you can skip this step._
+
+```bash
+task testenv
+```
+
+- run scripts api test
+
+```bash
+task api_test
 ```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 

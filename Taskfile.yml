@@ -84,3 +84,10 @@ tasks:
       - ./scripts/integration.sh
     preconditions:
       - test -f ./scripts/integration.sh
+
+  api_test:
+    desc: run api test
+    cmds:
+      - ./scripts/api-test.sh
+    preconditions:
+      - test -f ./scripts/api-test.sh

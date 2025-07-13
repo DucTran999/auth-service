@@ -49,7 +49,7 @@ func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 
 	// Prepare input
 	input := dto.LoginJWTInput{
-		Email:     string(payload.Email),
+		Email:     payload.Email,
 		Password:  payload.Password,
 		IP:        ctx.ClientIP(),
 		UserAgent: ctx.Request.UserAgent(),
@@ -58,7 +58,7 @@ func (hdl *jwtAuthHandler) LoginWithJWT(ctx *gin.Context) {
 	// Authenticate
 	tokens, err := hdl.authUC.Login(ctx, input)
 	if err != nil {
-		if errors.Is(err, errs.ErrInvalidCredentials) {
+		if errors.Is(err, errs.ErrInvalidCredentials) || errors.Is(err, errs.ErrAccountNotFound) {
 			hdl.UnauthorizeErrorResponse(ctx, APIVersion2, err.Error())
 		} else {
 			hdl.logger.Error("failed to login with jwt", zap.String("error", err.Error()))
